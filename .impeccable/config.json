@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/app/globals.css"
+        ],
+        "createdAt": "2026-11-13T01:35:03.887Z",
+        "reason": "User asked for an exact replica of a reference mockup whose game title is textured stone/metal lettering; the gradient clip reproduces that texture"
+      }
+    ]
+  }
+}

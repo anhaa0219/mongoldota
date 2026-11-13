@@ -1,0 +1,77 @@
+import type { MapRegion } from "@/types/game";
+
+/** Region shapes for the location map. Coordinates use the map's 470 × 390 viewBox. */
+export const mapRegions: MapRegion[] = [
+  {
+    id: "M5",
+    path: "M120 -10 L300 -10 L310 30 L270 50 L210 45 L150 40 L110 20 Z",
+    labelX: 185,
+    labelY: 16,
+    markerX: 215,
+    markerY: 30,
+  },
+  {
+    id: "M3",
+    path: "M70 45 L120 40 L160 55 L175 90 L195 120 L190 170 L150 180 L110 165 L70 150 L50 110 L55 70 Z",
+    labelX: 133,
+    labelY: 145,
+    markerX: 95,
+    markerY: 93,
+  },
+  {
+    id: "M2",
+    path: "M160 55 L210 45 L270 50 L300 70 L310 115 L270 125 L220 120 L195 120 L175 90 Z",
+    labelX: 243,
+    labelY: 102,
+    markerX: 210,
+    markerY: 80,
+  },
+  {
+    id: "M8",
+    path: "M300 70 L310 30 L350 15 L420 40 L425 110 L380 120 L310 115 Z",
+    labelX: 376,
+    labelY: 82,
+    markerX: 340,
+    markerY: 60,
+  },
+  {
+    id: "M9",
+    path: "M195 120 L220 120 L270 125 L310 115 L340 150 L320 205 L260 220 L210 210 L190 170 Z",
+    labelX: 277,
+    labelY: 185,
+    markerX: 240,
+    markerY: 155,
+  },
+  {
+    id: "M4",
+    path: "M50 110 L70 150 L110 165 L150 180 L190 170 L210 210 L170 230 L100 235 L30 220 L15 160 Z",
+    labelX: 106,
+    labelY: 207,
+    markerX: 60,
+    markerY: 185,
+  },
+  {
+    id: "M10",
+    path: "M30 220 L100 235 L170 230 L210 210 L225 260 L200 300 L150 330 L80 315 L35 280 Z",
+    labelX: 117,
+    labelY: 272,
+    markerX: 80,
+    markerY: 255,
+  },
+  {
+    id: "M11",
+    path: "M210 210 L260 220 L320 205 L345 240 L335 300 L290 330 L225 320 L200 300 L225 260 Z",
+    labelX: 273,
+    labelY: 287,
+    markerX: 250,
+    markerY: 250,
+  },
+  {
+    id: "M12",
+    path: "M320 205 L340 150 L380 120 L425 110 L455 150 L460 260 L440 340 L380 350 L335 300 L345 240 Z",
+    labelX: 400,
+    labelY: 305,
+    markerX: 395,
+    markerY: 200,
+  },
+];
