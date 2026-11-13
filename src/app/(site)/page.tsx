@@ -5,7 +5,8 @@ export default function StatsPage() {
   return (
     <>
       <PageBackdrop showHero />
-      <div className="relative mx-auto w-full max-w-[103.125rem] flex-1 pb-12 md:px-8 lg:px-0 lg:pb-0">
+      {/* Desktop: stats sit in the left half, vertically centred; the hero owns the right half */}
+      <div className="relative w-full flex-1 pb-12 md:px-8 lg:flex lg:flex-col lg:justify-center lg:px-[5rem] lg:pb-[4rem]">
         <PlayerStats />
       </div>
     </>

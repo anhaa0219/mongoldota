@@ -1,21 +1,12 @@
 import Image from "next/image";
 import { cookies } from "next/headers";
+import { Unlink } from "lucide-react";
+import { SteamIcon } from "@/components/SteamIcon";
 import { getSteamProfile, readSession, SESSION_COOKIE } from "@/lib/steam-auth";
 
-function SteamIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
-      <circle cx="16" cy="16" r="15" fill="currentColor" />
-      <circle cx="21" cy="11.5" r="4.6" fill="none" stroke="#171a21" strokeWidth="2" />
-      <circle cx="21" cy="11.5" r="2" fill="#171a21" />
-      <circle cx="11.5" cy="20.5" r="3.4" fill="#171a21" />
-      <path d="M17.6 14.6 L12.6 19.2" stroke="#171a21" strokeWidth="2.6" strokeLinecap="round" />
-      <path d="M1.5 17 L9.3 20.2" stroke="#171a21" strokeWidth="2.2" strokeLinecap="round" />
-    </svg>
-  );
-}
+const pillClass = "glass-panel flex h-[3.8rem] items-center gap-[0.8rem] rounded-full pl-[0.45rem]";
 
-/** Top-right corner: "Sign in through Steam", or the linked account once signed in. */
+/** Top-right: a "Link Steam" button, or the linked Steam account once connected. */
 export async function SteamLogin() {
   const steamId = readSession((await cookies()).get(SESSION_COOKIE)?.value);
 
@@ -23,11 +14,14 @@ export async function SteamLogin() {
     return (
       <a
         href="/api/auth/steam"
-        className="glass-panel flex items-center gap-[0.7rem] rounded-full py-[0.5rem] pl-[0.6rem] pr-[1.2rem] text-[1.15rem] font-medium text-white transition-colors hover:border-white/30 hover:bg-[#171a21]/80"
+        className={`${pillClass} group pr-[1.4rem] transition-colors hover:border-[#66c0f4]/50 hover:bg-[#1b2838]/80`}
       >
-        <SteamIcon className="size-[2rem] text-white" />
-        <span>
-          <span className="hidden sm:inline">Sign in through </span>Steam
+        <span className="grid size-[2.9rem] place-items-center rounded-full bg-[linear-gradient(135deg,#1b2838,#2a475e)] ring-1 ring-white/15 transition-shadow group-hover:ring-[#66c0f4]/60">
+          <SteamIcon className="size-[1.7rem] text-white" />
+        </span>
+        <span className="flex flex-col text-left leading-tight">
+          <span className="text-[1.1rem] font-medium text-white">Link Steam</span>
+          <span className="hidden text-[0.85rem] text-white/55 sm:block">Sync your Dota stats</span>
         </span>
       </a>
     );
@@ -36,30 +30,42 @@ export async function SteamLogin() {
   const profile = await getSteamProfile(steamId);
 
   return (
-    <div className="glass-panel flex items-center gap-[0.8rem] rounded-full py-[0.4rem] pl-[0.4rem] pr-[0.6rem]">
+    <div className={`${pillClass} pr-[0.45rem]`}>
       <a
         href={profile.profileUrl}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-[0.7rem] text-[1.1rem] font-medium hover:text-accent"
         title="Open Steam profile"
+        className="group flex items-center gap-[0.8rem]"
       >
-        {profile.avatar ? (
-          <Image src={profile.avatar} alt="" width={64} height={64} className="size-[2.4rem] rounded-full" />
-        ) : (
-          <SteamIcon className="size-[2.4rem] text-white" />
-        )}
+        <span className="relative">
+          {profile.avatar ? (
+            <Image src={profile.avatar} alt="" width={64} height={64} className="size-[2.9rem] rounded-full ring-1 ring-white/20" />
+          ) : (
+            <span className="grid size-[2.9rem] place-items-center rounded-full bg-[#1b2838]">
+              <SteamIcon className="size-[1.7rem] text-white" />
+            </span>
+          )}
+          <span className="absolute -bottom-[0.15rem] -right-[0.15rem] grid size-[1.25rem] place-items-center rounded-full bg-[#1b2838] ring-2 ring-ink">
+            <SteamIcon className="size-[0.8rem] text-[#66c0f4]" />
+          </span>
+        </span>
         <span className="flex flex-col leading-tight">
-          <span className="max-w-[10rem] truncate">{profile.name}</span>
-          <span className="text-[0.85rem] text-radiant">Steam linked</span>
+          <span className="max-w-[10rem] truncate text-[1.1rem] font-medium text-white group-hover:text-accent">{profile.name}</span>
+          <span className="hidden items-center gap-[0.35rem] text-[0.85rem] text-radiant sm:flex">
+            <span className="size-[0.45rem] rounded-full bg-radiant" />
+            Steam linked
+          </span>
         </span>
       </a>
       <form action="/api/auth/steam/logout" method="post">
         <button
           type="submit"
-          className="rounded-full px-[0.8rem] py-[0.3rem] text-[0.95rem] text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          aria-label="Unlink Steam"
+          title="Unlink Steam"
+          className="grid size-[2.6rem] place-items-center rounded-full text-white/50 transition-colors hover:bg-white/10 hover:text-white"
         >
-          Sign out
+          <Unlink className="size-[1.2rem]" />
         </button>
       </form>
     </div>

@@ -1,3 +1,6 @@
+import type { StaticImageData } from "next/image";
+import ursaArt from "../../public/heroes/ursa.jpg";
+
 const CDN = "https://cdn.cloudflare.steamstatic.com/apps/dota2";
 
 /** Small landscape hero portrait (256×144). */
@@ -10,13 +13,24 @@ export function heroRender(slug: string) {
   return `${CDN}/videos/dota_react/heroes/renders/${slug}.png`;
 }
 
-/** File types checked, in order, for uploaded art in /public/heroes/<slug>.<ext>. */
-export const UPLOADED_HERO_ART_EXTS = ["jpg", "jpeg", "png", "webp"] as const;
+/**
+ * Official animated hero render (transparent background), same framing as heroRender.
+ * WebM (VP9 alpha) for Chrome/Firefox, QuickTime (HEVC alpha) for Safari.
+ */
+export function heroAnimation(slug: string) {
+  const base = `${CDN}/videos/dota_react/heroes/renders/${slug}`;
+  return { webm: `${base}.webm`, mov: `${base}.mov` };
+}
 
 /**
- * Per-hero framing for uploaded art. `flip` mirrors the image so the hero sits on
- * the right, away from the text; `focus` is the CSS object-position to keep in view.
+ * Uploaded background art, per hero slug. Imported (not looked up on disk) so Next
+ * fingerprints the file and a replaced image always shows up.
+ * `flip` mirrors the image so the hero sits on the right, away from the text;
+ * `focus` is the CSS object-position to keep in view.
+ * To add art: drop the file in /public/heroes and add an entry here.
  */
-export const heroArtFraming: Record<string, { flip?: boolean; focus?: string }> = {
-  ursa: { flip: true, focus: "0% 30%" },
+export type HeroArt = { image: StaticImageData; flip?: boolean; focus?: string };
+
+export const uploadedHeroArt: Record<string, HeroArt> = {
+  ursa: { image: ursaArt, flip: true, focus: "40% 30%" },
 };

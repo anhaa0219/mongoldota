@@ -1,3 +1,4 @@
+import { SignOutButton } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
@@ -15,16 +16,16 @@ export function Sidebar() {
       <div className="mt-auto flex w-full flex-col items-center gap-[3.75rem] border-t border-white/[0.08] pb-[5rem] pt-[5.1rem]">
         <ThemeToggle className={iconClass} />
         <LanguageSwitcher className={iconClass} />
-        <form action="/api/auth/steam/logout" method="post">
+        <SignOutButton>
           <button
-            type="submit"
+            type="button"
             aria-label="Log out"
             title="Log out"
             className="text-white/55 transition-colors hover:text-accent"
           >
             <LogOut className={iconClass} />
           </button>
-        </form>
+        </SignOutButton>
       </div>
     </aside>
   );

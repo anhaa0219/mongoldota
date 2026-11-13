@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { HeroHeadline } from "@/components/HeroHeadline";
 import { heroPortrait } from "@/lib/hero-images";
 import { player } from "@/lib/player-stats";
 
@@ -83,24 +84,9 @@ function Averages() {
 }
 
 export function PlayerStats() {
-  const { bestHero, role } = player;
   return (
-    <div className="relative z-20 px-[1.3rem] lg:ml-[5.3rem] lg:max-w-[62rem] lg:px-0">
-      <p className="mt-10 font-display text-[1.8rem] uppercase tracking-[0.08em] text-accent lg:mt-[4rem] lg:text-[2.4rem]">
-        Your best hero is
-      </p>
-      <h1 className="title-metal font-display text-[6rem] uppercase leading-[0.9] tracking-[0.02em] lg:text-[12rem]">
-        {bestHero.name}
-      </h1>
-
-      <div className="mt-[1.2rem] flex flex-wrap items-center gap-[0.8rem] text-[1.2rem]">
-        <span className="rounded-full bg-accent px-[1rem] py-[0.35rem] font-display text-[1.4rem] uppercase text-ink">
-          Your role is Pos {role.position} · {role.name}
-        </span>
-        <span className="text-white/80">
-          {bestHero.matches} matches · {bestHero.winRate}% win rate · {role.share}% of games as Pos {role.position}
-        </span>
-      </div>
+    <div className="relative z-20 px-[1.3rem] lg:max-w-[62rem] lg:px-0">
+      <HeroHeadline />
 
       <div className="mt-[2.2rem] grid gap-[1.2rem] md:grid-cols-3">
         <Last100 />
