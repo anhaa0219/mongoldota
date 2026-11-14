@@ -36,6 +36,7 @@ export interface RawChat {
 }
 
 export interface RawFullPlayer extends RawDetailPlayer {
+  deaths?: number | null;
   personaname?: string | null;
   lane_role?: number | null;
   position_est?: number | null;
