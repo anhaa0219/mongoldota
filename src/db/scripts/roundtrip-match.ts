@@ -17,7 +17,9 @@ async function main() {
   out(`database: ${db ? "configured" : "NOT configured (OpenDota only)"}`);
 
   for (const id of ids) {
-    const loaded = await loadMatch(id);
+    const saves: Promise<void>[] = [];
+    const loaded = await loadMatch(id, (task) => saves.push(task()));
+    await Promise.all(saves); // scripts wait for the save; pages run it after the response
     out(`match ${id}: loadMatch -> ${loaded ? `${loaded.players.length} players, ${(JSON.stringify(loaded).length / 1024).toFixed(0)} KB` : "null"}`);
     if (!db) continue;
     const stored = await getMatch(id);

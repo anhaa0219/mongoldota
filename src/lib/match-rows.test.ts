@@ -58,7 +58,12 @@ describe("toMatchRows", () => {
 describe("pickMatchesToSync", () => {
   const now = new Date("2026-11-14T12:00:00Z");
   const hoursAgo = (hours: number) => new Date(now.getTime() - hours * 3_600_000);
-  const stored = (matchId: number, parsed: boolean, fetchedAt = hoursAgo(5)): StoredMatchInfo => ({ matchId, parsed, fetchedAt });
+  const stored = (matchId: number, parsed: boolean, fetchedAt = hoursAgo(5), startTime = hoursAgo(24)): StoredMatchInfo => ({
+    matchId,
+    parsed,
+    fetchedAt,
+    startTime,
+  });
 
   it("picks matches that are not stored yet, in order", () => {
     expect(pickMatchesToSync([1, 2, 3], [stored(2, true)], now, 5)).toEqual([1, 3]);
@@ -66,6 +71,12 @@ describe("pickMatchesToSync", () => {
 
   it("re-fetches unparsed matches only after an hour", () => {
     expect(pickMatchesToSync([1, 2], [stored(1, false, hoursAgo(2)), stored(2, false, hoursAgo(10 / 60))], now, 5)).toEqual([1]);
+  });
+
+  it("stops re-fetching unparsed matches older than 7 days (their replays can no longer be parsed)", () => {
+    const lastWeek = stored(1, false, hoursAgo(2), hoursAgo(8 * 24));
+    const yesterday = stored(2, false, hoursAgo(2), hoursAgo(24));
+    expect(pickMatchesToSync([1, 2], [lastWeek, yesterday], now, 5)).toEqual([2]);
   });
 
   it("puts missing matches before stale ones", () => {

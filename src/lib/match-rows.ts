@@ -3,6 +3,8 @@
 import type { RawFullMatch } from "@/types/opendota-match";
 
 const ONE_HOUR_MS = 3_600_000;
+/** Unparsed matches older than this are not re-fetched: their replays can no longer be parsed. */
+const REPLAY_WINDOW_MS = 7 * 24 * ONE_HOUR_MS;
 
 export interface MatchRow {
   matchId: number;
@@ -25,6 +27,7 @@ export interface StoredMatchInfo {
   matchId: number;
   parsed: boolean;
   fetchedAt: Date;
+  startTime: Date;
 }
 
 export function isParsed(raw: RawFullMatch): boolean {
@@ -56,13 +59,15 @@ export function toMatchRows(raw: RawFullMatch): { match: MatchRow; players: Play
   return { match, players };
 }
 
-/** Missing matches first (in recentIds order), then unparsed ones fetched over an hour ago; at most `limit`. */
+/** Missing matches first (in recentIds order), then unparsed ones from the last 7 days fetched over an hour ago; at most `limit`. */
 export function pickMatchesToSync(recentIds: number[], stored: StoredMatchInfo[], now: Date, limit: number): number[] {
   const byId = new Map(stored.map((info) => [info.matchId, info]));
   const missing = recentIds.filter((id) => !byId.has(id));
   const stale = recentIds.filter((id) => {
     const info = byId.get(id);
-    return info !== undefined && !info.parsed && now.getTime() - info.fetchedAt.getTime() > ONE_HOUR_MS;
+    if (info === undefined || info.parsed) return false;
+    const recentEnough = now.getTime() - info.startTime.getTime() < REPLAY_WINDOW_MS;
+    return recentEnough && now.getTime() - info.fetchedAt.getTime() > ONE_HOUR_MS;
   });
   return [...missing, ...stale].slice(0, limit);
 }
