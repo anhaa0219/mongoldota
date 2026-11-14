@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { GraphsTab } from "@/components/match/GraphsTab";
+import { LaningTab } from "@/components/match/LaningTab";
 import { MatchBanner } from "@/components/match/MatchBanner";
 import { NotParsedCard } from "@/components/match/NotParsedCard";
 import { Scoreboard } from "@/components/match/Scoreboard";
@@ -23,9 +25,19 @@ export type MatchTab = (typeof MATCH_TABS)[number]["id"];
 const TIMELINE_TABS: readonly MatchTab[] = ["story", "graphs", "map"];
 const START_SECONDS = 600; // open at the end of the laning stage
 
-function TabContent({ tab, view, followed, time }: { tab: MatchTab; view: MatchView; followed: number; time: number }) {
+interface TabContentProps {
+  tab: MatchTab;
+  view: MatchView;
+  followed: number;
+  time: number;
+  onTime: (seconds: number) => void;
+}
+
+function TabContent({ tab, view, followed, time, onTime }: TabContentProps) {
   if (!view.parsed) return <NotParsedCard matchId={view.matchId} />;
   if (tab === "story") return <StoryTab view={view} followed={followed} time={time} />;
+  if (tab === "laning") return <LaningTab view={view} followed={followed} />;
+  if (tab === "graphs") return <GraphsTab view={view} followed={followed} time={time} onTime={onTime} />;
   return <p className="glass-panel rounded-[1.6rem] p-[1.4rem] text-white/60">This tab is being built.</p>;
 }
 
@@ -44,6 +56,10 @@ export function MatchExplorer({ view, initialTab, ago }: { view: MatchView; init
   function chooseTab(next: MatchTab) {
     setTab(next);
     window.history.replaceState(null, "", `?tab=${next}`);
+  }
+
+  function moveTo(seconds: number) {
+    setTime(clampTime(seconds, duration));
   }
 
   function togglePlay() {
@@ -80,7 +96,7 @@ export function MatchExplorer({ view, initialTab, ago }: { view: MatchView; init
         <TimeScrubber
           duration={duration}
           time={time}
-          onTime={(next) => setTime(clampTime(next, duration))}
+          onTime={moveTo}
           markers={markers}
           playing={playing}
           onTogglePlay={togglePlay}
@@ -91,7 +107,7 @@ export function MatchExplorer({ view, initialTab, ago }: { view: MatchView; init
       )}
 
       <div role="tabpanel" aria-label={MATCH_TABS.find((option) => option.id === tab)?.label}>
-        <TabContent tab={tab} view={view} followed={followed} time={time} />
+        <TabContent tab={tab} view={view} followed={followed} time={time} onTime={moveTo} />
       </div>
     </div>
   );
