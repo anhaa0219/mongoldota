@@ -1,7 +1,6 @@
 import Image from "next/image";
-import { cookies } from "next/headers";
+import { getLinkedAccountId } from "@/lib/linked-account";
 import { getPlayerRank, type PlayerRank } from "@/lib/opendota";
-import { dotaAccountId, readSession, SESSION_COOKIE } from "@/lib/steam-auth";
 
 const RANK_ICONS = "https://www.opendota.com/assets/images/dota2/rank_icons";
 
@@ -12,10 +11,10 @@ function medalLabel(rank: PlayerRank) {
 
 /** Top-right: the linked player's medal and OpenDota's MMR estimate. Hidden until Steam is linked and calibrated. */
 export async function MedalBadge() {
-  const steamId = readSession((await cookies()).get(SESSION_COOKIE)?.value);
-  if (!steamId) return null;
+  const accountId = await getLinkedAccountId();
+  if (!accountId) return null;
 
-  const rank = await getPlayerRank(dotaAccountId(steamId));
+  const rank = await getPlayerRank(accountId);
   if (!rank) return null;
 
   const label = medalLabel(rank);

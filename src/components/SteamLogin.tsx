@@ -1,14 +1,14 @@
 import Image from "next/image";
-import { cookies } from "next/headers";
 import { Unlink } from "lucide-react";
 import { SteamIcon } from "@/components/SteamIcon";
-import { getSteamProfile, readSession, SESSION_COOKIE } from "@/lib/steam-auth";
+import { getLinkedSteamId } from "@/lib/linked-account";
+import { getSteamProfile } from "@/lib/steam-auth";
 
 const pillClass = "glass-panel flex h-[3.8rem] items-center gap-[0.8rem] rounded-full pl-[0.45rem]";
 
 /** Top-right: a "Link Steam" button, or the linked Steam account once connected. */
 export async function SteamLogin() {
-  const steamId = readSession((await cookies()).get(SESSION_COOKIE)?.value);
+  const steamId = await getLinkedSteamId();
 
   if (!steamId) {
     return (
