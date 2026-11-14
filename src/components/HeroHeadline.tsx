@@ -1,13 +1,11 @@
-import { Crosshair, HeartHandshake, Shield, Sparkles, Sword, type LucideIcon } from "lucide-react";
-import { player } from "@/lib/player-stats";
+import { Crosshair, Shield, Sword, Trees, type LucideIcon } from "lucide-react";
+import type { LaneRole, PlayerSummary } from "@/types/opendota";
 
-/** Icon for each Dota position (1 Carry … 5 Hard Support). */
-const positionIcons: Record<number, LucideIcon> = {
-  1: Sword,
-  2: Crosshair,
-  3: Shield,
-  4: Sparkles,
-  5: HeartHandshake,
+const lanes: Record<LaneRole, { name: string; icon: LucideIcon }> = {
+  1: { name: "Safe lane", icon: Sword },
+  2: { name: "Mid lane", icon: Crosshair },
+  3: { name: "Off lane", icon: Shield },
+  4: { name: "Jungle", icon: Trees },
 };
 
 function Stat({ value, label, tone = "text-white" }: { value: string; label: string; tone?: string }) {
@@ -19,41 +17,42 @@ function Stat({ value, label, tone = "text-white" }: { value: string; label: str
   );
 }
 
-/** "Your best hero is URSA", then the player's position emblem and hero stats. */
-export function HeroHeadline() {
-  const { bestHero, role } = player;
-  const PositionIcon = positionIcons[role.position] ?? Sword;
+function LaneEmblem({ lane }: { lane: LaneRole }) {
+  const { name, icon: LaneIcon } = lanes[lane];
+  return (
+    <div className="glass-panel flex items-center gap-[1rem] rounded-full py-[0.5rem] pl-[0.5rem] pr-[1.6rem]">
+      <span className="grid size-[3.8rem] place-items-center rounded-full bg-[radial-gradient(circle_at_30%_30%,#ffd9b8,#feba87_45%,#c9783f)] shadow-[0_0_1.4rem_rgb(254_186_135/0.45)]">
+        <LaneIcon className="size-[1.7rem] text-ink" aria-hidden="true" />
+      </span>
+      <span className="flex flex-col leading-tight">
+        <span className="text-[0.95rem] uppercase tracking-[0.14em] text-white/55">Main lane</span>
+        <span className="font-display text-[1.9rem] uppercase leading-none tracking-[0.04em] text-white">{name}</span>
+      </span>
+    </div>
+  );
+}
+
+/** "Your most played hero" + name, then the player's main lane and stats on that hero. */
+export function HeroHeadline({ summary }: { summary: PlayerSummary }) {
+  const { mostPlayed, mainLane } = summary;
 
   return (
     <header>
       <p className="mt-10 flex items-center gap-[0.8rem] font-display text-[1.8rem] uppercase tracking-[0.12em] text-accent lg:mt-0 lg:text-[2.2rem]">
         <span className="h-px w-[2.4rem] bg-accent/70" aria-hidden="true" />
-        Your best hero is
+        Your most played hero
       </p>
       <h1 className="title-metal font-display text-[6rem] uppercase leading-[0.9] tracking-[0.02em] lg:text-[12rem]">
-        {bestHero.name}
+        {mostPlayed.hero.name}
       </h1>
 
       <div className="mt-[1.6rem] flex flex-wrap items-center gap-[1.2rem]">
-        {/* Position emblem */}
-        <div className="glass-panel flex items-center gap-[1rem] rounded-full py-[0.5rem] pl-[0.5rem] pr-[1.6rem]">
-          <span className="relative grid size-[3.8rem] place-items-center rounded-full bg-[radial-gradient(circle_at_30%_30%,#ffd9b8,#feba87_45%,#c9783f)] shadow-[0_0_1.4rem_rgb(254_186_135/0.45)]">
-            <span className="font-display text-[2rem] leading-none text-ink">{role.position}</span>
-            <span className="absolute -bottom-[0.2rem] -right-[0.2rem] grid size-[1.6rem] place-items-center rounded-full bg-ink ring-2 ring-accent/70">
-              <PositionIcon className="size-[0.95rem] text-accent" aria-hidden="true" />
-            </span>
-          </span>
-          <span className="flex flex-col leading-tight">
-            <span className="text-[0.95rem] uppercase tracking-[0.14em] text-white/55">Position {role.position}</span>
-            <span className="font-display text-[1.9rem] uppercase leading-none tracking-[0.04em] text-white">{role.name}</span>
-          </span>
-        </div>
+        {mainLane && <LaneEmblem lane={mainLane.lane} />}
 
-        {/* Hero stats */}
         <div className="glass-panel flex items-center divide-x divide-white/10 rounded-[1.4rem] px-[1.6rem] py-[0.9rem]">
-          <Stat value={String(bestHero.matches)} label="Matches" />
-          <Stat value={`${bestHero.winRate}%`} label="Win rate" tone="text-radiant" />
-          <Stat value={`${role.share}%`} label={`Games as Pos ${role.position}`} />
+          <Stat value={String(mostPlayed.matches)} label="Matches" />
+          <Stat value={`${Math.round(mostPlayed.winRate)}%`} label="Win rate" tone="text-radiant" />
+          {mainLane && <Stat value={`${mainLane.share}%`} label="Main lane share" />}
         </div>
       </div>
     </header>
