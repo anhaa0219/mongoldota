@@ -32,3 +32,24 @@ export interface ScoreboardPlayer {
   scepter: boolean;
   shard: boolean;
 }
+
+/** Per-minute curves. Keyed by player slot. */
+export interface MatchSeries {
+  radiantGoldAdv: number[];
+  radiantXpAdv: number[];
+  netWorth: Record<number, number[]>;
+  lastHits: Record<number, number[]>;
+  xp: Record<number, number[]>;
+}
+
+export type MatchEventKind = "kill" | "death" | "item" | "roshan" | "aegis" | "tower" | "teamfight";
+
+export interface MatchEvent {
+  /** Seconds; may be negative (before the horn). */
+  time: number;
+  kind: MatchEventKind;
+  slot: number | null;
+  team: Team | null;
+  label: string;
+  image: string | null;
+}
