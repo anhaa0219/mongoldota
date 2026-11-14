@@ -53,3 +53,54 @@ export interface MatchEvent {
   label: string;
   image: string | null;
 }
+
+/** A position on the 0-100 minimap square; y grows downward (SVG). */
+export interface MapPoint {
+  x: number;
+  y: number;
+}
+
+export interface WardMark extends MapPoint {
+  kind: "observer" | "sentry";
+  team: Team;
+  placedAt: number;
+  /** Null when the match has no record of it being removed (alive until the end). */
+  removedAt: number | null;
+}
+
+/** Where a hero died during a teamfight; `team` is the dead hero's team. */
+export interface DeathMark extends MapPoint {
+  time: number;
+  team: Team;
+}
+
+/** Approximate tower position (OpenDota does not provide building coordinates). */
+export interface TowerMark extends MapPoint {
+  key: string;
+  team: Team;
+  destroyedAt: number | null;
+}
+
+export interface HeatCell extends MapPoint {
+  /** 0-1, relative to the player's busiest cell. */
+  weight: number;
+}
+
+export interface MatchMap {
+  wards: WardMark[];
+  deaths: DeathMark[];
+  towers: TowerMark[];
+  /** Keyed by player slot: where they stood during the laning stage. */
+  laneHeat: Record<number, HeatCell[]>;
+}
+
+export interface MatchCombat {
+  /** attacker slot -> enemy slot -> hero damage. */
+  damage: Record<number, Record<number, number>>;
+  teamfights: { start: number; end: number; deaths: number; radiantGoldSwing: number }[];
+}
+
+export interface MatchLog {
+  chat: { time: number; slot: number | null; text: string }[];
+  purchases: Record<number, { time: number; item: ItemInfo }[]>;
+}
