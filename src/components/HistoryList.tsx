@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { MatchRow, type MatchRowData } from "@/components/MatchRow";
 import { PlayerDataNotice } from "@/components/PlayerDataNotice";
 import { timeAgo } from "@/lib/format";
@@ -14,7 +15,10 @@ export async function HistoryList() {
   if (matches === null) return <PlayerDataNotice reason="error" />;
   if (matches.length === 0) return <PlayerDataNotice reason="no-matches" />;
 
-  // Server Component: renders once per request (dynamic after the cookie read), so "now" is the request time.
+  // Cache Components: reading the current time needs an explicit request-time marker first,
+  // otherwise Next reports "unstable value Date.now() while prerendering" (a cookie read is not enough).
+  await connection();
+  // Server Component: renders once per request, so "now" is the request time.
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
   const rows: MatchRowData[] = matches.map((match) => {
