@@ -15,6 +15,7 @@ function match(overrides: Partial<MatchSummary> = {}): MatchSummary {
     id: nextId++,
     heroId: 1,
     won: true,
+    radiant: true,
     ranked: true,
     kills: 5,
     deaths: 3,
@@ -77,6 +78,11 @@ describe("toMatchSummary", () => {
     expect(unparsed.laneRole).toBeNull();
     expect(toMatchSummary(raw({ lane_role: 7 })).laneRole).toBeNull();
     expect(toMatchSummary(raw({ lane_role: 2 })).laneRole).toBe(2);
+  });
+
+  it("records the side the player was on", () => {
+    expect(toMatchSummary(raw({ player_slot: 1 })).radiant).toBe(true);
+    expect(toMatchSummary(raw({ player_slot: 129 })).radiant).toBe(false);
   });
 
   it("uses 0 for missing numbers", () => {
@@ -161,5 +167,55 @@ describe("summarize", () => {
 
   it("has no main lane when no match is parsed", () => {
     expect(summarize([match(), match()], heroes)?.mainLane).toBeNull();
+  });
+});
+
+describe("summarize breakdowns", () => {
+  const many = new Map(Array.from({ length: 6 }, (_, i) => [i + 1, { id: i + 1, name: `Hero ${i + 1}`, slug: `h${i + 1}` }]));
+
+  it("lists up to 5 top heroes, most played first, with mostPlayed as the first", () => {
+    const matches = [1, 2, 2, 3, 3, 3, 4, 5, 6].map((heroId) => match({ heroId }));
+    const summary = summarize(matches, many);
+    expect(summary?.topHeroes.map((entry) => entry.hero.id)).toEqual([3, 2, 1, 4, 5]);
+    expect(summary?.topHeroes[0]).toEqual(summary?.mostPlayed);
+  });
+
+  it("gives win rates per lane from parsed matches only", () => {
+    const matches = [
+      match({ parsed: true, laneRole: 2, won: true }),
+      match({ parsed: true, laneRole: 1, won: true }),
+      match({ parsed: true, laneRole: 1, won: false }),
+      match({ won: false }),
+    ];
+    expect(summarize(matches, heroes)?.lanes).toEqual([
+      { lane: 1, matches: 2, winRate: 50 },
+      { lane: 2, matches: 1, winRate: 100 },
+    ]);
+  });
+
+  it("gives win rates per side, null for a side never played", () => {
+    const matches = [match({ radiant: true, won: true }), match({ radiant: true, won: false })];
+    expect(summarize(matches, heroes)?.sides).toEqual({ radiant: { matches: 2, winRate: 50 }, dire: null });
+  });
+
+  it("finds the current streak and the longest win streak", () => {
+    const results = [true, true, false, true, true, true, false];
+    const summary = summarize(results.map((won) => match({ won })), heroes);
+    expect(summary?.streaks).toEqual({ current: { result: "W", length: 2 }, longestWin: 3 });
+  });
+
+  it("has a zero longest win streak when every match is lost", () => {
+    const summary = summarize([match({ won: false }), match({ won: false })], heroes);
+    expect(summary?.streaks).toEqual({ current: { result: "L", length: 2 }, longestWin: 0 });
+  });
+
+  it("splits win rate by ranked and unranked", () => {
+    const matches = [match({ ranked: true, won: true }), match({ ranked: true, won: false })];
+    expect(summarize(matches, heroes)?.queues).toEqual({ ranked: { matches: 2, winRate: 50 }, unranked: null });
+  });
+
+  it("averages the match length", () => {
+    const matches = [match({ durationSeconds: 2400 }), match({ durationSeconds: 3000 })];
+    expect(summarize(matches, heroes)?.averageDurationSeconds).toBe(2700);
   });
 });

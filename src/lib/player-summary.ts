@@ -1,5 +1,13 @@
 /** Turns OpenDota match rows into the numbers on the Stats page. Pure: no fetching. */
 
+import {
+  heroOf,
+  laneWinRates,
+  queueWinRates,
+  rankHeroes,
+  sideWinRates,
+  streaks,
+} from "@/lib/player-breakdowns";
 import type { HeroInfo, LaneRole, MatchSummary, PlayerSummary, RawMatch, RecordLabel } from "@/types/opendota";
 
 const RANKED_LOBBY = 7;
@@ -16,6 +24,7 @@ export function toMatchSummary(raw: RawMatch): MatchSummary {
     id: raw.match_id,
     heroId: raw.hero_id,
     won: (raw.player_slot < 128) === raw.radiant_win, // slots 0-127 are Radiant
+    radiant: raw.player_slot < 128,
     ranked: raw.lobby_type === RANKED_LOBBY,
     kills: raw.kills,
     deaths: raw.deaths,
@@ -30,31 +39,6 @@ export function toMatchSummary(raw: RawMatch): MatchSummary {
     durationSeconds: raw.duration,
     playedAt: raw.start_time * 1000,
   };
-}
-
-function heroOf(id: number, heroes: Map<number, HeroInfo>): HeroInfo {
-  return heroes.get(id) ?? { id, name: "Unknown hero", slug: "" };
-}
-
-/** Most games; ties go to the higher win rate, then the most recently played (matches are newest first). */
-function mostPlayed(matches: MatchSummary[], heroes: Map<number, HeroInfo>): PlayerSummary["mostPlayed"] {
-  const tally = new Map<number, { games: number; wins: number }>(); // insertion order = most recent first
-  for (const match of matches) {
-    const entry = tally.get(match.heroId) ?? { games: 0, wins: 0 };
-    tally.set(match.heroId, { games: entry.games + 1, wins: entry.wins + (match.won ? 1 : 0) });
-  }
-
-  let bestId = matches[0].heroId;
-  let best = { games: 0, wins: 0 };
-  for (const [heroId, entry] of tally) {
-    const moreGames = entry.games > best.games;
-    const betterRate = entry.games === best.games && entry.wins / entry.games > best.wins / best.games;
-    if (moreGames || betterRate) {
-      bestId = heroId;
-      best = entry;
-    }
-  }
-  return { hero: heroOf(bestId, heroes), matches: best.games, winRate: (best.wins / best.games) * 100 };
 }
 
 const RECORD_FIELDS: { label: RecordLabel; field: "kills" | "deaths" | "assists" | "heroDamage" }[] = [
@@ -91,8 +75,15 @@ export function summarize(matches: MatchSummary[], heroes: Map<number, HeroInfo>
   if (matches.length === 0) return null;
 
   const wins = matches.filter((match) => match.won).length;
+  const ranked = rankHeroes(matches, heroes);
   return {
-    mostPlayed: mostPlayed(matches, heroes),
+    mostPlayed: ranked[0],
+    topHeroes: ranked.slice(0, 5),
+    lanes: laneWinRates(matches),
+    sides: sideWinRates(matches),
+    streaks: streaks(matches),
+    queues: queueWinRates(matches),
+    averageDurationSeconds: average(matches, (match) => match.durationSeconds),
     wins,
     losses: matches.length - wins,
     last10: matches.slice(0, 10).map((match) => (match.won ? "W" : "L")),

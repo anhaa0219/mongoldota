@@ -48,6 +48,8 @@ export interface MatchSummary {
   id: number;
   heroId: number;
   won: boolean;
+  /** Played on Radiant (player_slot < 128). */
+  radiant: boolean;
   ranked: boolean;
   kills: number;
   deaths: number;
@@ -66,6 +68,12 @@ export interface MatchSummary {
   playedAt: number;
 }
 
+/** Games played and win rate (0-100, unrounded). */
+export interface WinRecord {
+  matches: number;
+  winRate: number;
+}
+
 export type RecordLabel = "Most kills" | "Most deaths" | "Most assists" | "Most hero damage";
 
 export interface PlayerSummary {
@@ -81,6 +89,28 @@ export interface PlayerSummary {
   averages: { kills: number; deaths: number; assists: number; gpm: number; xpm: number; lastHits: number };
   /** share is 0-100 (rounded) of parsed matches. Null when no match is parsed. */
   mainLane: { lane: LaneRole; share: number } | null;
+  /** Up to 5, same order as mostPlayed (which is topHeroes[0]). */
+  topHeroes: ({ hero: HeroInfo } & WinRecord)[];
+  /** Lanes with at least one parsed match, in lane order. */
+  lanes: ({ lane: LaneRole } & WinRecord)[];
+  sides: { radiant: WinRecord | null; dire: WinRecord | null };
+  streaks: { current: { result: "W" | "L"; length: number }; longestWin: number };
+  queues: { ranked: WinRecord | null; unranked: WinRecord | null };
+  averageDurationSeconds: number;
+}
+
+/** One row of /players/{id}/totals. n = matches that have this field. */
+export interface RawTotal {
+  field: string;
+  n: number;
+  sum: number;
+}
+
+export interface PlaystyleStat {
+  label: string;
+  /** Per match, unrounded. */
+  average: number;
+  matches: number;
 }
 
 // ---------- One match (/matches/{id}) ----------
