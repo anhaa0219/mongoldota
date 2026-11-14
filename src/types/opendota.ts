@@ -104,7 +104,8 @@ export interface RawDetailPlayer {
 }
 
 export interface RawMatchDetail {
-  version: number | null;
+  /** OpenDota omits this field (not null) for unparsed matches. */
+  version?: number | null;
   radiant_score: number;
   dire_score: number;
   players: RawDetailPlayer[];
@@ -129,5 +130,6 @@ export type MatchDetail =
       killParticipation: number | null;
       observers: number;
       sentries: number;
-      deathMinutes: number[];
+      /** Null when the hero is unknown, so deaths cannot be matched. */
+      deathMinutes: number[] | null;
     };

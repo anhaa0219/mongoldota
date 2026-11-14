@@ -31,7 +31,7 @@ export function GoldChart({ values }: { values: number[] }) {
           preserveAspectRatio="none"
           role="img"
           aria-label={`Gold earned: ${values[lastMinute].toLocaleString("en-US")} by minute ${lastMinute}`}
-          className="h-[6rem] w-full touch-none overflow-visible"
+          className="h-[6rem] w-full touch-pan-y overflow-visible"
           onPointerMove={onPointerMove}
           onPointerLeave={() => setHovered(null)}
         >

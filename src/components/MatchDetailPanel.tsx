@@ -29,8 +29,9 @@ export function MatchDetailPanel({ detail }: { detail: MatchDetail }) {
     return <p className="text-[1.1rem] text-white/60">OpenDota hasn&apos;t parsed this match yet.</p>;
   }
 
-  const deaths = detail.deathMinutes.length
-    ? `Deaths to heroes: ${detail.deathMinutes.map((minute) => `${minute}'`).join(", ")}`
+  const { deathMinutes } = detail;
+  const deaths = deathMinutes?.length
+    ? `Deaths to heroes: ${deathMinutes.map((minute) => `${minute}'`).join(", ")}`
     : "No deaths to heroes";
 
   return (
@@ -46,7 +47,7 @@ export function MatchDetailPanel({ detail }: { detail: MatchDetail }) {
         <p>
           Wards: {detail.observers} observer · {detail.sentries} sentry
         </p>
-        <p>{deaths}</p>
+        {deathMinutes && <p>{deaths}</p>}
       </div>
     </div>
   );

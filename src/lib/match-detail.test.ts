@@ -73,6 +73,12 @@ describe("toMatchDetail", () => {
     expect(toMatchDetail(matchDetail({ version: null }), 42, items, heroes)).toEqual({ parsed: false });
   });
 
+  it("reports unparsed matches when OpenDota omits the version field", () => {
+    const withoutVersion = matchDetail();
+    delete withoutVersion.version;
+    expect(toMatchDetail(withoutVersion, 42, items, heroes)).toEqual({ parsed: false });
+  });
+
   it("lists first purchases of big items in order and skips unknown items", () => {
     const { itemTimings } = parsedDetail(matchDetail());
     expect(itemTimings.map((timing) => timing.key)).toEqual(["blink", "black_king_bar"]);
@@ -89,6 +95,11 @@ describe("toMatchDetail", () => {
 
   it("lists minutes the player was killed by enemy heroes", () => {
     expect(parsedDetail(matchDetail()).deathMinutes).toEqual([3, 12]);
+  });
+
+  it("does not claim zero deaths when the hero is unknown", () => {
+    const detail = toMatchDetail(matchDetail(), 42, items, new Map());
+    expect(detail?.parsed && detail.deathMinutes).toBeNull();
   });
 
   it("counts wards, treating missing values as 0", () => {

@@ -25,9 +25,9 @@ function itemTimings(player: RawDetailPlayer, items: Map<string, ItemInfo>): Ite
 }
 
 /** Minutes when an enemy hero's kill log names this player's hero. Deaths to creeps/towers are not in the data. */
-function deathMinutes(raw: RawMatchDetail, player: RawDetailPlayer, heroes: Map<number, HeroInfo>): number[] {
+function deathMinutes(raw: RawMatchDetail, player: RawDetailPlayer, heroes: Map<number, HeroInfo>): number[] | null {
   const slug = heroes.get(player.hero_id)?.slug;
-  if (!slug) return [];
+  if (!slug) return null;
 
   const heroKey = `npc_dota_hero_${slug}`;
   return raw.players
@@ -47,7 +47,7 @@ export function toMatchDetail(
 ): MatchDetail | null {
   const player = raw.players.find((candidate) => candidate.account_id === accountId);
   if (!player) return null;
-  if (raw.version === null) return { parsed: false };
+  if (raw.version === null || raw.version === undefined) return { parsed: false };
 
   const teamKills = isRadiant(player) ? raw.radiant_score : raw.dire_score;
   return {
