@@ -82,3 +82,52 @@ export interface PlayerSummary {
   /** share is 0-100 (rounded) of parsed matches. Null when no match is parsed. */
   mainLane: { lane: LaneRole; share: number } | null;
 }
+
+// ---------- One match (/matches/{id}) ----------
+
+export interface RawLogEntry {
+  time: number;
+  key: string;
+}
+
+export interface RawDetailPlayer {
+  account_id: number | null;
+  player_slot: number;
+  hero_id: number;
+  kills: number;
+  assists: number;
+  gold_t?: number[] | null;
+  purchase_log?: RawLogEntry[] | null;
+  kills_log?: RawLogEntry[] | null;
+  obs_placed?: number | null;
+  sen_placed?: number | null;
+}
+
+export interface RawMatchDetail {
+  version: number | null;
+  radiant_score: number;
+  dire_score: number;
+  players: RawDetailPlayer[];
+}
+
+export interface ItemTiming {
+  key: string;
+  name: string;
+  image: string;
+  seconds: number;
+  isBkb: boolean;
+}
+
+export type MatchDetail =
+  | { parsed: false }
+  | {
+      parsed: true;
+      /** Cumulative gold earned per minute (OpenDota gold_t), not net worth. */
+      goldEarned: number[];
+      itemTimings: ItemTiming[];
+      /** 0-100, null when the team has no kills. */
+      killParticipation: number | null;
+      observers: number;
+      sentries: number;
+      deathMinutes: number[];
+    };
