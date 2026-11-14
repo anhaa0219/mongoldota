@@ -1,5 +1,5 @@
 import { UserButton } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUserOrNull } from "@/lib/current-user";
 
 const avatarAppearance = {
   elements: {
@@ -9,7 +9,7 @@ const avatarAppearance = {
 
 /** Top-right: the signed-in Clerk account. The avatar opens Clerk's account menu. */
 export async function AccountBadge() {
-  const user = await currentUser();
+  const user = await currentUserOrNull();
   if (!user) return null;
 
   const email = user.primaryEmailAddress?.emailAddress ?? "";
