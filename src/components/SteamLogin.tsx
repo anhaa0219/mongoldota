@@ -40,7 +40,7 @@ export async function SteamLogin() {
       >
         <span className="relative">
           {profile.avatar ? (
-            <Image src={profile.avatar} alt="" width={64} height={64} className="size-[2.9rem] rounded-full ring-1 ring-white/20" />
+            <Image unoptimized src={profile.avatar} alt="" width={64} height={64} className="size-[2.9rem] rounded-full ring-1 ring-white/20" />
           ) : (
             <span className="grid size-[2.9rem] place-items-center rounded-full bg-[#1b2838]">
               <SteamIcon className="size-[1.7rem] text-white" />

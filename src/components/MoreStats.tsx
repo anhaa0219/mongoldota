@@ -14,7 +14,7 @@ function TopHeroes({ summary }: { summary: PlayerSummary }) {
         {summary.topHeroes.map(({ hero, ...record }) => (
           <WinRateRow key={hero.id} label={hero.name} record={record}>
             <span className="relative block h-[2rem] w-[3.5rem] shrink-0 overflow-hidden rounded-[0.35rem] bg-white/10">
-              {hero.slug && <Image src={heroPortrait(hero.slug)} alt="" fill sizes="3.5rem" className="object-cover" />}
+              {hero.slug && <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="3.5rem" className="object-cover" />}
             </span>
           </WinRateRow>
         ))}

@@ -70,7 +70,7 @@ export function MatchRow({ match }: { match: MatchRowData }) {
         className="flex w-full flex-wrap items-center gap-x-[1.2rem] gap-y-[0.6rem] px-[1rem] py-[0.8rem] text-left transition-colors hover:bg-white/5"
       >
         <span className="relative block h-[2.5rem] w-[4.4rem] shrink-0 overflow-hidden rounded-[0.4rem] bg-white/10">
-          {match.heroSlug && <Image src={heroPortrait(match.heroSlug)} alt="" fill sizes="4.5rem" className="object-cover" />}
+          {match.heroSlug && <Image unoptimized src={heroPortrait(match.heroSlug)} alt="" fill sizes="4.5rem" className="object-cover" />}
         </span>
         <span className="flex min-w-[9rem] flex-1 flex-col leading-tight">
           <span className="text-[1.15rem] font-medium text-white">{match.heroName}</span>
@@ -89,7 +89,7 @@ export function MatchRow({ match }: { match: MatchRowData }) {
         <span className="flex gap-[0.25rem]" aria-hidden="true">
           {match.itemImages.map((image, slot) => (
             <span key={slot} className="relative block h-[1.6rem] w-[2.2rem] overflow-hidden rounded-[0.25rem] bg-white/5">
-              {image && <Image src={image} alt="" fill sizes="2.5rem" className="object-cover" />}
+              {image && <Image unoptimized src={image} alt="" fill sizes="2.5rem" className="object-cover" />}
             </span>
           ))}
         </span>

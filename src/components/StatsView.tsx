@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { PageBackdrop } from "@/components/PageBackdrop";
 import { PlayerDataNotice, type NoticeReason } from "@/components/PlayerDataNotice";
 import { PlayerStats } from "@/components/PlayerStats";
+import { PlaystyleSection } from "@/components/PlaystyleSection";
 import { getLinkedAccountId } from "@/lib/linked-account";
 import { getHeroIndex } from "@/lib/opendota-heroes";
-import { getPlaystyle, getRecentMatches } from "@/lib/opendota-matches";
+import { getRecentMatches } from "@/lib/opendota-matches";
 import { summarize } from "@/lib/player-summary";
 
 function Notice({ reason }: { reason: NoticeReason }) {
@@ -20,11 +22,7 @@ export async function StatsView() {
   const accountId = await getLinkedAccountId();
   if (!accountId) return <Notice reason="not-linked" />;
 
-  const [matches, heroes, playstyle] = await Promise.all([
-    getRecentMatches(accountId),
-    getHeroIndex(),
-    getPlaystyle(accountId),
-  ]);
+  const [matches, heroes] = await Promise.all([getRecentMatches(accountId), getHeroIndex()]);
   if (matches === null) return <Notice reason="error" />;
 
   const summary = summarize(matches, heroes);
@@ -35,7 +33,11 @@ export async function StatsView() {
       <PageBackdrop heroSlug={summary.mostPlayed.hero.slug} />
       {/* Desktop: stats on the left over the hero art, scrolling inside the fixed-height frame */}
       <div className="relative w-full flex-1 pb-12 md:px-8 lg:min-h-0 lg:overflow-y-auto lg:px-[5rem] lg:pb-[4rem]">
-        <PlayerStats summary={summary} playstyle={playstyle} />
+        <PlayerStats summary={summary}>
+          <Suspense fallback={<div className="glass-panel h-[11rem] animate-pulse rounded-[1.6rem]" />}>
+            <PlaystyleSection accountId={accountId} />
+          </Suspense>
+        </PlayerStats>
       </div>
     </>
   );

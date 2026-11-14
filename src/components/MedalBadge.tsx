@@ -25,9 +25,9 @@ export async function MedalBadge() {
       className="glass-panel flex h-[3.8rem] items-center gap-[0.8rem] rounded-full px-[0.45rem] sm:pr-[1.4rem]"
     >
       <span className="relative size-[2.9rem] shrink-0">
-        <Image src={`${RANK_ICONS}/rank_icon_${rank.medalTier}.png`} alt={label} fill sizes="3rem" className="object-contain" />
+        <Image unoptimized src={`${RANK_ICONS}/rank_icon_${rank.medalTier}.png`} alt={label} fill sizes="3rem" className="object-contain" />
         {rank.stars > 0 && (
-          <Image src={`${RANK_ICONS}/rank_star_${rank.stars}.png`} alt="" fill sizes="3rem" className="object-contain" />
+          <Image unoptimized src={`${RANK_ICONS}/rank_star_${rank.stars}.png`} alt="" fill sizes="3rem" className="object-contain" />
         )}
       </span>
       <span className="hidden flex-col leading-tight sm:flex">

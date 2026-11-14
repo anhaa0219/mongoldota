@@ -12,7 +12,7 @@ export function CharacterPortrait({ character, sizes }: CharacterPortraitProps) 
   const gradientId = useId();
 
   if (character.portrait) {
-    return <Image src={character.portrait} alt={character.fullName} fill sizes={sizes} className="object-cover" />;
+    return <Image unoptimized src={character.portrait} alt={character.fullName} fill sizes={sizes} className="object-cover" />;
   }
 
   return (

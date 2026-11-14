@@ -1,10 +1,9 @@
 import Image from "next/image";
 import { HeroHeadline } from "@/components/HeroHeadline";
 import { MoreStats } from "@/components/MoreStats";
-import { PlaystylePanel } from "@/components/PlaystylePanel";
 import { StatPanel as Panel } from "@/components/StatPanel";
 import { heroPortrait } from "@/lib/hero-images";
-import type { HeroInfo, PlayerSummary, PlaystyleStat } from "@/types/opendota";
+import type { HeroInfo, PlayerSummary } from "@/types/opendota";
 
 function Last100({ summary }: { summary: PlayerSummary }) {
   const { wins, losses, last10 } = summary;
@@ -47,7 +46,7 @@ function Last100({ summary }: { summary: PlayerSummary }) {
 function HeroThumb({ hero }: { hero: HeroInfo }) {
   return (
     <span className="relative block h-[2.2rem] w-[3.9rem] shrink-0 overflow-hidden rounded-[0.4rem] bg-white/10">
-      {hero.slug && <Image src={heroPortrait(hero.slug)} alt={hero.name} fill sizes="4rem" className="object-cover" />}
+      {hero.slug && <Image unoptimized src={heroPortrait(hero.slug)} alt={hero.name} fill sizes="4rem" className="object-cover" />}
     </span>
   );
 }
@@ -92,7 +91,8 @@ function Averages({ summary }: { summary: PlayerSummary }) {
   );
 }
 
-export function PlayerStats({ summary, playstyle }: { summary: PlayerSummary; playstyle: PlaystyleStat[] | null }) {
+/** `children` render below the panels (the Stats page streams Playstyle in there). */
+export function PlayerStats({ summary, children }: { summary: PlayerSummary; children?: React.ReactNode }) {
   return (
     <div className="relative z-20 px-[1.3rem] lg:max-w-[62rem] lg:px-0">
       <HeroHeadline summary={summary} />
@@ -104,7 +104,7 @@ export function PlayerStats({ summary, playstyle }: { summary: PlayerSummary; pl
       </div>
       <div className="mt-[1.2rem] flex flex-col gap-[1.2rem]">
         <MoreStats summary={summary} />
-        {playstyle && <PlaystylePanel stats={playstyle} />}
+        {children}
       </div>
     </div>
   );

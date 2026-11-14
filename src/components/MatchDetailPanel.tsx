@@ -14,7 +14,7 @@ function ItemTimings({ timings }: { timings: ItemTiming[] }) {
               item.isBkb ? "ring-2 ring-accent" : "ring-1 ring-white/10"
             }`}
           >
-            <Image src={item.image} alt={item.name} fill sizes="3rem" className="object-cover" />
+            <Image unoptimized src={item.image} alt={item.name} fill sizes="3rem" className="object-cover" />
           </span>
           <span className="text-[0.85rem] tabular-nums text-white/70">{formatDuration(item.seconds)}</span>
         </li>
