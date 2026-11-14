@@ -51,9 +51,18 @@ describe("toLog", () => {
     ]);
   });
 
-  it("lists each player's known purchases in time order", () => {
+  it("lists each player's known purchases in time order, by item key", () => {
     const purchases = toLog(combatMatch(), fixtureItems)?.purchases[0] ?? [];
-    expect(purchases.map((purchase) => `${purchase.time} ${purchase.item.key}`)).toEqual(["300 power_treads", "1122 black_king_bar"]);
+    expect(purchases).toEqual([
+      { time: 300, key: "power_treads" },
+      { time: 1122, key: "black_king_bar" },
+    ]);
+  });
+
+  it("carries each purchased item's details once", () => {
+    const log = toLog(combatMatch(), fixtureItems);
+    expect(Object.keys(log?.items ?? {}).sort()).toEqual(["black_king_bar", "power_treads"]);
+    expect(log?.items.black_king_bar?.name).toBe("black_king_bar");
   });
 });
 

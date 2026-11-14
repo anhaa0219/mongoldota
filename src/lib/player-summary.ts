@@ -52,7 +52,7 @@ function records(matches: MatchSummary[], heroes: Map<number, HeroInfo>): Player
   return RECORD_FIELDS.map(({ label, field }) => {
     // Strictly greater keeps the first (most recent) match on ties.
     const top = matches.reduce((best, match) => (match[field] > best[field] ? match : best));
-    return { label, value: top[field], hero: heroOf(top.heroId, heroes) };
+    return { label, value: top[field], hero: heroOf(top.heroId, heroes), matchId: top.id };
   });
 }
 

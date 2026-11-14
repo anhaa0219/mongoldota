@@ -72,3 +72,15 @@ body {
     inset 0 1px 0 rgb(255 255 255 / 0.14),
     0 2rem 4rem rgb(0 0 0 / 0.45);
 }
+
+/* Match page: new items ease in (disabled by motion-reduce:animate-none where used). */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.3rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

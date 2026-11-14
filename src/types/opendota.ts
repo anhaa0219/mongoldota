@@ -84,7 +84,7 @@ export interface PlayerSummary {
   /** Most recent first. */
   last10: ("W" | "L")[];
   /** In RecordLabel order. */
-  records: { label: RecordLabel; value: number; hero: HeroInfo }[];
+  records: { label: RecordLabel; value: number; hero: HeroInfo; matchId: number }[];
   /** Unrounded. */
   averages: { kills: number; deaths: number; assists: number; gpm: number; xpm: number; lastHits: number };
   /** share is 0-100 (rounded) of parsed matches. Null when no match is parsed. */

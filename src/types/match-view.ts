@@ -102,5 +102,32 @@ export interface MatchCombat {
 
 export interface MatchLog {
   chat: { time: number; slot: number | null; text: string }[];
-  purchases: Record<number, { time: number; item: ItemInfo }[]>;
+  /** slot -> purchases by item key (details in `items`, sent once). */
+  purchases: Record<number, { time: number; key: string }[]>;
+  /** Every purchased item, by key. */
+  items: Record<string, ItemInfo>;
+}
+
+export interface MatchView {
+  matchId: number;
+  parsed: boolean;
+  header: {
+    radiantWin: boolean;
+    radiantScore: number;
+    direScore: number;
+    durationSeconds: number;
+    /** Milliseconds since epoch. */
+    startTime: number;
+    ranked: boolean;
+  };
+  /** Radiant first, each team by slot. */
+  players: ScoreboardPlayer[];
+  defaultFollowedSlot: number;
+  /** slot -> lane opponent's slot. */
+  laneOpponent: Record<number, number | null>;
+  series: MatchSeries | null;
+  events: MatchEvent[];
+  map: MatchMap | null;
+  combat: MatchCombat | null;
+  log: MatchLog | null;
 }

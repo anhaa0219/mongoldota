@@ -75,10 +75,20 @@ function towers(raw: RawFullMatch): TowerMark[] {
   }));
 }
 
+const HEAT_GRID = 2; // minimap units per heat cell: plenty for a 0-100 map, keeps the payload small
+
+/** Laning positions bucketed to a 2-unit grid (cells on the same spot are summed), weights 0-1. */
 function laneHeat(player: RawFullPlayer): HeatCell[] {
-  const cells = cellEntries(player.lane_pos);
-  const busiest = Math.max(1, ...cells.map((cell) => cell.count));
-  return cells.map((cell) => ({ ...toMapPoint(cell.x, cell.y), weight: cell.count / busiest }));
+  const buckets = new Map<string, { x: number; y: number; count: number }>();
+  for (const cell of cellEntries(player.lane_pos)) {
+    const point = toMapPoint(cell.x, cell.y);
+    const x = Math.floor(point.x / HEAT_GRID) * HEAT_GRID;
+    const y = Math.floor(point.y / HEAT_GRID) * HEAT_GRID;
+    const bucket = buckets.get(`${x},${y}`) ?? { x, y, count: 0 };
+    buckets.set(`${x},${y}`, { ...bucket, count: bucket.count + cell.count });
+  }
+  const busiest = Math.max(1, ...[...buckets.values()].map((bucket) => bucket.count));
+  return [...buckets.values()].map((bucket) => ({ x: bucket.x, y: bucket.y, weight: Math.round((bucket.count / busiest) * 100) / 100 }));
 }
 
 /** Null when the match is unparsed. `players` is accepted for symmetry with the other view builders. */

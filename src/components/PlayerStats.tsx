@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { HeroHeadline } from "@/components/HeroHeadline";
 import { MoreStats } from "@/components/MoreStats";
 import { StatPanel as Panel } from "@/components/StatPanel";
@@ -56,10 +57,16 @@ function Records({ summary }: { summary: PlayerSummary }) {
     <Panel title="Records">
       <ul className="flex flex-col gap-[0.7rem]">
         {summary.records.map((record) => (
-          <li key={record.label} className="flex items-center gap-[0.8rem]">
-            <HeroThumb hero={record.hero} />
-            <span className="min-w-0 flex-1 text-[1.1rem] text-white/75">{record.label}</span>
-            <span className="font-display text-[1.6rem] leading-none">{record.value.toLocaleString("en-US")}</span>
+          <li key={record.label}>
+            <Link
+              href={`/matches/${record.matchId}`}
+              title={`Open the match: ${record.label.toLowerCase()} on ${record.hero.name}`}
+              className="group -mx-[0.4rem] flex items-center gap-[0.8rem] rounded-[0.6rem] px-[0.4rem] py-[0.15rem] transition-colors hover:bg-white/5"
+            >
+              <HeroThumb hero={record.hero} />
+              <span className="min-w-0 flex-1 text-[1.1rem] text-white/75 group-hover:text-white">{record.label}</span>
+              <span className="font-display text-[1.6rem] leading-none">{record.value.toLocaleString("en-US")}</span>
+            </Link>
           </li>
         ))}
       </ul>

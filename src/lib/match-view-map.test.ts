@@ -77,6 +77,15 @@ describe("deaths and lane heat", () => {
     const heat = build()?.laneHeat[0] ?? [];
     expect(heat.map((cell) => cell.weight).sort()).toEqual([0.2, 1]);
   });
+
+  it("merges heatmap cells that land on the same 2-unit spot and keeps whole-number coordinates", () => {
+    const raw = mapMatch();
+    raw.players[0].lane_pos = { "64": { "64": 3 }, "65": { "64": 1 }, "100": { "100": 2 } };
+    const heat = build(raw)?.laneHeat[0] ?? [];
+    expect(heat).toHaveLength(2);
+    expect(heat.find((cell) => cell.x === 0)).toEqual({ x: 0, y: 100, weight: 1 });
+    expect(heat.every((cell) => Number.isInteger(cell.x) && Number.isInteger(cell.y))).toBe(true);
+  });
 });
 
 describe("unparsed match", () => {

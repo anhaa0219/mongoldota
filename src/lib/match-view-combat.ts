@@ -43,6 +43,7 @@ export function toLog(raw: RawFullMatch, items: ItemIndex): MatchLog | null {
   const chat = [...(raw.chat ?? [])]
     .sort((a, b) => a.time - b.time)
     .map((line) => ({ time: line.time, slot: line.player_slot ?? null, text: line.type === "chat" ? line.key : "(chat wheel)" }));
+  const used: MatchLog["items"] = {};
   const purchases = Object.fromEntries(
     raw.players.map((player) => [
       player.player_slot,
@@ -50,9 +51,11 @@ export function toLog(raw: RawFullMatch, items: ItemIndex): MatchLog | null {
         .sort((a, b) => a.time - b.time)
         .flatMap((purchase) => {
           const item = items.byKey.get(purchase.key);
-          return item ? [{ time: purchase.time, item }] : [];
+          if (!item) return [];
+          used[item.key] = item;
+          return [{ time: purchase.time, key: item.key }];
         }),
     ]),
   );
-  return { chat, purchases };
+  return { chat, purchases, items: used };
 }

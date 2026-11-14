@@ -140,7 +140,13 @@ describe("summarize", () => {
     const matches = [match({ kills: 3, heroId: 1 }), match({ kills: 16, heroId: 2 }), match({ kills: 16, heroId: 1 })];
     const records = summarize(matches, heroes)?.records ?? [];
     expect(records.map((record) => record.label)).toEqual(["Most kills", "Most deaths", "Most assists", "Most hero damage"]);
-    expect(records[0]).toEqual({ label: "Most kills", value: 16, hero: axe });
+    expect(records[0]).toEqual({ label: "Most kills", value: 16, hero: axe, matchId: matches[1].id });
+  });
+
+  it("links each record to the match it came from", () => {
+    const record = match({ kills: 30 });
+    const records = summarize([match({ kills: 3 }), record], heroes)?.records ?? [];
+    expect(records[0].matchId).toBe(record.id);
   });
 
   it("averages the stats", () => {

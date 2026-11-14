@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { MatchDetailPanel } from "@/components/MatchDetailPanel";
@@ -67,11 +68,12 @@ export function MatchRow({ match }: { match: MatchRowData }) {
 
   return (
     <li className="glass-panel overflow-hidden rounded-[1.2rem]">
+      <div className="flex items-stretch">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="flex w-full flex-wrap items-center gap-x-[1.2rem] gap-y-[0.6rem] px-[1rem] py-[0.8rem] text-left transition-colors hover:bg-white/5"
+        className="flex min-w-0 flex-1 flex-wrap items-center gap-x-[1.2rem] gap-y-[0.6rem] px-[1rem] py-[0.8rem] text-left transition-colors hover:bg-white/5"
       >
         <span className="relative block h-[2.5rem] w-[4.4rem] shrink-0 overflow-hidden rounded-[0.4rem] bg-white/10">
           {match.heroSlug && <Image unoptimized src={heroPortrait(match.heroSlug)} alt="" fill sizes="4.5rem" className="object-cover" />}
@@ -102,6 +104,14 @@ export function MatchRow({ match }: { match: MatchRowData }) {
           className={`ml-auto size-[1.3rem] text-white/50 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
+      <Link
+        href={`/matches/${match.id}`}
+        aria-label={`Full match: ${match.heroName}, ${match.won ? "win" : "loss"}, ${match.ago}`}
+        className="grid shrink-0 place-items-center border-l border-white/10 px-[1rem] text-[0.95rem] font-medium text-accent transition-colors hover:bg-accent/10"
+      >
+        Full match
+      </Link>
+      </div>
       {open && (
         <div className="border-t border-white/10 px-[1rem] py-[1.2rem]">
           <DetailBody state={detail} matchId={match.id} onCheckAgain={load} />
