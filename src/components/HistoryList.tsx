@@ -4,11 +4,13 @@ import { PlayerDataNotice } from "@/components/PlayerDataNotice";
 import { timeAgo } from "@/lib/format";
 import { getLinkedAccountId } from "@/lib/linked-account";
 import { syncRecentMatches } from "@/lib/match-store";
+import { requireUserId } from "@/lib/require-user";
 import { getHeroIndex, getItemIndex } from "@/lib/opendota-heroes";
 import { getRecentMatches } from "@/lib/opendota-matches";
 
 /** The linked player's last 100 matches, newest first. Reads cookies. */
 export async function HistoryList() {
+  await requireUserId(); // the layout's check does not stop this component from running
   const accountId = await getLinkedAccountId();
   if (!accountId) return <PlayerDataNotice reason="not-linked" />;
 

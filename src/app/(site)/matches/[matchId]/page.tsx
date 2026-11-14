@@ -9,6 +9,7 @@ import { timeAgo } from "@/lib/format";
 import { getLinkedAccountId } from "@/lib/linked-account";
 import { parseMatchId } from "@/lib/match-id";
 import { loadMatch } from "@/lib/match-store";
+import { requireUserId } from "@/lib/require-user";
 import { toMatchView } from "@/lib/match-view";
 import { getHeroIndex, getItemIndex } from "@/lib/opendota-heroes";
 import { site } from "@/lib/site-content";
@@ -33,6 +34,8 @@ function MatchSkeleton() {
 }
 
 async function MatchLoader({ params, searchParams }: PageProps<"/matches/[matchId]">) {
+  // Before any OpenDota call or database write: the layout's sign-in check does not cover this.
+  await requireUserId();
   const matchId = parseMatchId((await params).matchId);
   if (matchId === null) notFound();
 

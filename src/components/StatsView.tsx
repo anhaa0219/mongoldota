@@ -8,6 +8,7 @@ import { getLinkedAccountId } from "@/lib/linked-account";
 import { getHeroIndex } from "@/lib/opendota-heroes";
 import { getRecentMatches } from "@/lib/opendota-matches";
 import { syncRecentMatches } from "@/lib/match-store";
+import { requireUserId } from "@/lib/require-user";
 import { summarize } from "@/lib/player-summary";
 
 function Notice({ reason }: { reason: NoticeReason }) {
@@ -21,6 +22,7 @@ function Notice({ reason }: { reason: NoticeReason }) {
 
 /** Stats page body: the linked player's last 100 matches, over their most played hero's art. Reads cookies. */
 export async function StatsView() {
+  await requireUserId(); // the layout's check does not stop this component from running
   const accountId = await getLinkedAccountId();
   if (!accountId) return <Notice reason="not-linked" />;
 
