@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { CombatTab } from "@/components/match/CombatTab";
 import { GraphsTab } from "@/components/match/GraphsTab";
 import { LaningTab } from "@/components/match/LaningTab";
+import { LogTab } from "@/components/match/LogTab";
+import { MapTab } from "@/components/match/MapTab";
 import { MatchBanner } from "@/components/match/MatchBanner";
 import { NotParsedCard } from "@/components/match/NotParsedCard";
 import { Scoreboard } from "@/components/match/Scoreboard";
@@ -38,7 +41,9 @@ function TabContent({ tab, view, followed, time, onTime }: TabContentProps) {
   if (tab === "story") return <StoryTab view={view} followed={followed} time={time} />;
   if (tab === "laning") return <LaningTab view={view} followed={followed} />;
   if (tab === "graphs") return <GraphsTab view={view} followed={followed} time={time} onTime={onTime} />;
-  return <p className="glass-panel rounded-[1.6rem] p-[1.4rem] text-white/60">This tab is being built.</p>;
+  if (tab === "combat") return <CombatTab view={view} followed={followed} />;
+  if (tab === "map") return <MapTab view={view} followed={followed} time={time} />;
+  return <LogTab view={view} followed={followed} />;
 }
 
 /** The interactive match page: scoreboard, tabs and one time cursor shared by Story, Graphs and Map. */
