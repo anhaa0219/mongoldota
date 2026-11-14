@@ -46,3 +46,6 @@ next-env.d.ts
 
 # graphify code graph (local)
 graphify-out/
+
+# superpowers scratch (mockups, plan ledgers)
+.superpowers/
