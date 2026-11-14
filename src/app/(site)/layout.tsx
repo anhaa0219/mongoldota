@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { AccountBadge } from "@/components/AccountBadge";
+import { MedalBadge } from "@/components/MedalBadge";
 import { RequireSignIn } from "@/components/RequireSignIn";
 import { Sidebar } from "@/components/Sidebar";
 import { SteamLogin } from "@/components/SteamLogin";
@@ -17,6 +18,9 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
           <Sidebar />
           <div className="relative flex min-w-0 flex-1 flex-col">
             <div className="absolute right-4 top-5 z-30 flex items-center gap-[0.8rem] lg:right-[3rem] lg:top-[3.2rem]">
+              <Suspense fallback={null}>
+                <MedalBadge />
+              </Suspense>
               <Suspense fallback={null}>
                 <SteamLogin />
               </Suspense>

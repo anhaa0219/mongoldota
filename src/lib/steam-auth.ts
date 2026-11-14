@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { getOpenDotaPlayer } from "@/lib/opendota";
 
 const STEAM_OPENID = "https://steamcommunity.com/openid/login";
 const OPENID_NS = "http://specs.openid.net/auth/2.0";
@@ -100,30 +101,15 @@ export interface SteamProfile {
   profileUrl: string;
 }
 
-/** Player name and avatar from OpenDota (no API key needed). */
+/** Player name and avatar from OpenDota (cached, shared with the medal pill). */
 export async function getSteamProfile(steamId: string): Promise<SteamProfile> {
   const accountId = dotaAccountId(steamId);
-  const fallback: SteamProfile = {
+  const player = await getOpenDotaPlayer(accountId);
+  return {
     steamId,
     accountId,
-    name: `Player ${accountId}`,
-    avatar: null,
-    profileUrl: `https://steamcommunity.com/profiles/${steamId}`,
+    name: player?.name ?? `Player ${accountId}`,
+    avatar: player?.avatar ?? null,
+    profileUrl: player?.profileUrl ?? `https://steamcommunity.com/profiles/${steamId}`,
   };
-  try {
-    const response = await fetch(`https://api.opendota.com/api/players/${accountId}`, {
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(5_000),
-    });
-    if (!response.ok) return fallback;
-    const data = (await response.json()) as { profile?: { personaname?: string; avatarmedium?: string; profileurl?: string } };
-    return {
-      ...fallback,
-      name: data.profile?.personaname || fallback.name,
-      avatar: data.profile?.avatarmedium || null,
-      profileUrl: data.profile?.profileurl || fallback.profileUrl,
-    };
-  } catch {
-    return fallback;
-  }
 }

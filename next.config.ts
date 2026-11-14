@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
         hostname: "**.steamstatic.com",
         pathname: "/**",
       },
+      {
+        // Dota medal + star icons (MedalBadge)
+        protocol: "https",
+        hostname: "www.opendota.com",
+        pathname: "/assets/images/dota2/rank_icons/**",
+      },
     ],
   },
   experimental: {
