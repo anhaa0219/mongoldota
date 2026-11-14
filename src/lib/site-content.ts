@@ -14,8 +14,8 @@ export const navItems: NavItem[] = [
   { label: "Stats", href: "/" },
   { label: "Hero Pick", href: "/characters" },
   { label: "Location", href: "/location" },
-  { label: "Reviews", href: "/reviews" },
-  { label: "Let’s play", href: "/play" },
+  { label: "Trending Heroes", href: "/heroes" },
+  { label: "History", href: "/history" },
 ];
 
 export const locations: GameLocation[] = [

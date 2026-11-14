@@ -3,9 +3,9 @@ import { SectionPlaceholder } from "@/components/SectionPlaceholder";
 import { site } from "@/lib/site-content";
 
 export const metadata: Metadata = {
-  title: `Reviews · ${site.gameTitle}`,
+  title: `Trending Heroes · ${site.gameTitle}`,
 };
 
-export default function ReviewsPage() {
-  return <SectionPlaceholder title="Reviews" />;
+export default function TrendingHeroesPage() {
+  return <SectionPlaceholder title="Trending Heroes" />;
 }

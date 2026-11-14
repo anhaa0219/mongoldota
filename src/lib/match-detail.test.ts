@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { goldChartPath, toMatchDetail } from "@/lib/match-detail";
+import { goldChartPath, goldLinePath, toMatchDetail } from "@/lib/match-detail";
 import type { HeroInfo, ItemInfo, RawDetailPlayer, RawMatchDetail } from "@/types/opendota";
 
 function item(id: number, key: string, cost: number): ItemInfo {
@@ -115,5 +115,16 @@ describe("goldChartPath", () => {
     expect(path).toContain("L100,0");
     expect(path.endsWith("Z")).toBe(true);
     expect(path).not.toContain("NaN");
+  });
+});
+
+describe("goldLinePath", () => {
+  it("is empty when there is nothing to draw", () => {
+    expect(goldLinePath([], 100, 50)).toBe("");
+    expect(goldLinePath([0, 0], 100, 50)).toBe("");
+  });
+
+  it("draws the open top edge of the area", () => {
+    expect(goldLinePath([0, 50, 100], 100, 50)).toBe("M0,50 L50,25 L100,0");
   });
 });

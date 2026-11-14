@@ -31,7 +31,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
             <Suspense fallback={<div className="h-[7.5rem]" />}>
               <TopNav />
             </Suspense>
-            <main className="flex flex-1 flex-col">{children}</main>
+            <main className="flex min-h-0 flex-1 flex-col">{children}</main>
           </div>
         </div>
       </RequireSignIn>

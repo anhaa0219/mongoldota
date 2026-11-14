@@ -65,15 +65,28 @@ function round(value: number) {
   return Math.round(value * 10) / 10;
 }
 
-/** Closed SVG area path for the gold curve, x spread evenly, y scaled to the max. "" when there is nothing to draw. */
-export function goldChartPath(values: number[], width: number, height: number): string {
+/** Chart coordinates: x spread evenly, y scaled to the max. Empty when there is nothing to draw. */
+function chartPoints(values: number[], width: number, height: number): string[] {
   const max = Math.max(0, ...values);
-  if (values.length < 2 || max === 0) return "";
+  if (values.length < 2 || max === 0) return [];
 
-  const points = values.map((value, index) => {
+  return values.map((value, index) => {
     const x = round((index / (values.length - 1)) * width);
     const y = round(height - (value / max) * height);
-    return `L${x},${y}`;
+    return `${x},${y}`;
   });
-  return `M0,${height} ${points.join(" ")} L${width},${height} Z`;
+}
+
+/** Closed SVG area path for the gold curve. "" when there is nothing to draw. */
+export function goldChartPath(values: number[], width: number, height: number): string {
+  const points = chartPoints(values, width, height);
+  if (points.length === 0) return "";
+  return `M0,${height} ${points.map((point) => `L${point}`).join(" ")} L${width},${height} Z`;
+}
+
+/** Open SVG line along the top of the gold area. "" when there is nothing to draw. */
+export function goldLinePath(values: number[], width: number, height: number): string {
+  const [first, ...rest] = chartPoints(values, width, height);
+  if (!first) return "";
+  return [`M${first}`, ...rest.map((point) => `L${point}`)].join(" ");
 }
