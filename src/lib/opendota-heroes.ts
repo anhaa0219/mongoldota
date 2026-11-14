@@ -1,7 +1,7 @@
 /** Hero and item data from OpenDota: trending heroes, hero index, item index. */
 
 import { getJson } from "@/lib/opendota";
-import type { HeroInfo, ItemInfo } from "@/types/opendota";
+import type { HeroInfo, ItemIndex } from "@/types/opendota";
 
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
 const HERO_PREFIX = "npc_dota_hero_";
@@ -85,7 +85,7 @@ interface RawItem {
 }
 
 /** Items by id (final inventory) and by key (purchase log). Empty when OpenDota is unavailable. */
-export async function getItemIndex(): Promise<{ byId: Map<number, ItemInfo>; byKey: Map<string, ItemInfo> }> {
+export async function getItemIndex(): Promise<ItemIndex> {
   const raw = (await getJson<Record<string, RawItem>>("/constants/items", ONE_DAY)) ?? {};
   const items = Object.entries(raw).map(([key, item]) => ({
     id: item.id,

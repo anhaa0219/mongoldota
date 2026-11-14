@@ -1,5 +1,7 @@
 import Image from "next/image";
+import { AnalyseMatch } from "@/components/AnalyseMatch";
 import { GoldChart } from "@/components/GoldChart";
+import { MatchBasicsGrid } from "@/components/MatchBasicsGrid";
 import { formatDuration } from "@/lib/format";
 import type { ItemTiming, MatchDetail } from "@/types/opendota";
 
@@ -23,10 +25,22 @@ function ItemTimings({ timings }: { timings: ItemTiming[] }) {
   );
 }
 
-/** One match's details under its History row. */
-export function MatchDetailPanel({ detail }: { detail: MatchDetail }) {
+interface PanelProps {
+  detail: MatchDetail;
+  matchId: number;
+  /** Reloads the details (after "Analyse with OpenDota"). */
+  onCheckAgain: () => void;
+}
+
+/** One match's details under its History row: basic stats always, the replay timeline once parsed. */
+export function MatchDetailPanel({ detail, matchId, onCheckAgain }: PanelProps) {
   if (!detail.parsed) {
-    return <p className="text-[1.1rem] text-white/60">OpenDota hasn&apos;t parsed this match yet.</p>;
+    return (
+      <div className="flex flex-col gap-[1.4rem]">
+        <MatchBasicsGrid basics={detail.basics} />
+        <AnalyseMatch matchId={matchId} onCheckAgain={onCheckAgain} />
+      </div>
+    );
   }
 
   const { deathMinutes } = detail;
@@ -35,19 +49,17 @@ export function MatchDetailPanel({ detail }: { detail: MatchDetail }) {
     : "No deaths to heroes";
 
   return (
-    <div className="grid gap-[1.6rem] md:grid-cols-2">
-      <GoldChart values={detail.goldEarned} />
-      <div className="flex flex-col gap-[1rem] text-[1.05rem] text-white/75">
-        <ItemTimings timings={detail.itemTimings} />
-        {detail.killParticipation !== null && (
+    <div className="flex flex-col gap-[1.6rem]">
+      <MatchBasicsGrid basics={detail.basics} />
+      <div className="grid gap-[1.6rem] md:grid-cols-2">
+        <GoldChart values={detail.goldEarned} />
+        <div className="flex flex-col gap-[1rem] text-[1.05rem] text-white/75">
+          <ItemTimings timings={detail.itemTimings} />
           <p>
-            Kill participation <span className="font-semibold text-white">{detail.killParticipation}%</span>
+            Wards: {detail.observers} observer · {detail.sentries} sentry
           </p>
-        )}
-        <p>
-          Wards: {detail.observers} observer · {detail.sentries} sentry
-        </p>
-        {deathMinutes && <p>{deaths}</p>}
+          {deathMinutes && <p>{deaths}</p>}
+        </div>
       </div>
     </div>
   );

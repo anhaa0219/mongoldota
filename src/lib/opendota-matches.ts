@@ -2,14 +2,14 @@
 
 import { cacheLife } from "next/cache";
 import { toMatchDetail } from "@/lib/match-detail";
-import { fetchJson, getJson } from "@/lib/opendota";
+import { fetchJson, getJson, postOpenDota } from "@/lib/opendota";
 import { getHeroIndex, getItemIndex } from "@/lib/opendota-heroes";
 import { toMatchSummary } from "@/lib/player-summary";
 import { toPlaystyle } from "@/lib/playstyle";
 import type { MatchDetail, MatchSummary, PlaystyleStat, RawMatch, RawMatchDetail, RawTotal } from "@/types/opendota";
 
 const FIVE_MINUTES = 300;
-const ONE_HOUR = 3600;
+const ONE_MINUTE = 60;
 const ONE_WEEK = 7 * 24 * 3600;
 
 const MATCH_FIELDS = [
@@ -28,7 +28,8 @@ export type MatchDetailResult = { kind: "ok"; detail: MatchDetail } | { kind: "n
 
 /**
  * Caches only the player's trimmed slice, never the large raw match.
- * Finished, parsed matches never change (1 week); unparsed ones may be parsed soon (1 hour).
+ * Finished, parsed matches never change (1 week); unparsed ones may be parsed any minute after
+ * "Analyse with OpenDota", so they refresh after 1 minute and are dropped after 5 idle minutes.
  */
 async function cachedMatchDetail(matchId: number, accountId: string): Promise<MatchDetail | null> {
   "use cache";
@@ -37,8 +38,8 @@ async function cachedMatchDetail(matchId: number, accountId: string): Promise<Ma
   // Without the indexes the slice would silently lose items and deaths: fail so nothing is cached.
   if (items.byKey.size === 0 || heroes.size === 0) throw new Error("OpenDota hero/item data unavailable");
 
-  const detail = toMatchDetail(raw, Number(accountId), items.byKey, heroes);
-  cacheLife({ revalidate: detail?.parsed ? ONE_WEEK : ONE_HOUR });
+  const detail = toMatchDetail(raw, Number(accountId), items, heroes);
+  cacheLife(detail?.parsed ? { revalidate: ONE_WEEK } : { revalidate: ONE_MINUTE, expire: 5 * ONE_MINUTE });
   return detail;
 }
 
@@ -55,4 +56,9 @@ export async function getMatchDetail(matchId: number, accountId: string): Promis
 export async function getPlaystyle(accountId: string): Promise<PlaystyleStat[] | null> {
   const totals = await getJson<RawTotal[]>(`/players/${accountId}/totals?limit=100`, FIVE_MINUTES);
   return totals ? toPlaystyle(totals) : null;
+}
+
+/** Asks OpenDota to analyse a match's replay; the result appears a few minutes later. */
+export function requestParse(matchId: number): Promise<boolean> {
+  return postOpenDota(`/request/${matchId}`);
 }

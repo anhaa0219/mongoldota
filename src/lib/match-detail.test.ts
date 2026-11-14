@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { goldChartPath, goldLinePath, toMatchDetail } from "@/lib/match-detail";
-import type { HeroInfo, ItemInfo, RawDetailPlayer, RawMatchDetail } from "@/types/opendota";
+import type { HeroInfo, ItemIndex, ItemInfo, RawDetailPlayer, RawMatchDetail } from "@/types/opendota";
 
 function item(id: number, key: string, cost: number): ItemInfo {
   return { id, key, name: key, image: `/items/${key}.png`, cost };
 }
 
-const items = new Map([
-  ["black_king_bar", item(116, "black_king_bar", 4050)],
-  ["power_treads", item(63, "power_treads", 1400)],
-  ["blink", item(1, "blink", 2250)],
-]);
+const itemList = [
+  item(116, "black_king_bar", 4050),
+  item(63, "power_treads", 1400),
+  item(1, "blink", 2250),
+  item(574, "mysterious_hat", 0),
+];
+const items: ItemIndex = {
+  byId: new Map(itemList.map((entry) => [entry.id, entry])),
+  byKey: new Map(itemList.map((entry) => [entry.key, entry])),
+};
 const heroes = new Map<number, HeroInfo>([
   [1, { id: 1, name: "Anti-Mage", slug: "antimage" }],
   [2, { id: 2, name: "Axe", slug: "axe" }],
@@ -22,6 +27,19 @@ const me: RawDetailPlayer = {
   hero_id: 1,
   kills: 5,
   assists: 10,
+  last_hits: 149,
+  denies: 5,
+  gold_per_min: 459,
+  xp_per_min: 546,
+  net_worth: 13888,
+  level: 17,
+  hero_damage: 11970,
+  tower_damage: 1987,
+  hero_healing: 0,
+  item_neutral: 574,
+  aghanims_scepter: 0,
+  aghanims_shard: 1,
+  benchmarks: { gold_per_min: { pct: 0.8404 }, xp_per_min: { pct: 0.3581 } },
   gold_t: [0, 300, 700],
   purchase_log: [
     { time: 600, key: "blink" },
@@ -70,13 +88,42 @@ describe("toMatchDetail", () => {
   });
 
   it("reports unparsed matches", () => {
-    expect(toMatchDetail(matchDetail({ version: null }), 42, items, heroes)).toEqual({ parsed: false });
+    expect(toMatchDetail(matchDetail({ version: null }), 42, items, heroes)?.parsed).toBe(false);
+  });
+
+  it("gives basic stats for unparsed matches", () => {
+    const detail = toMatchDetail(matchDetail({ version: null }), 42, items, heroes);
+    expect(detail?.basics).toEqual({
+      killParticipation: 50,
+      netWorth: 13888,
+      level: 17,
+      lastHits: 149,
+      denies: 5,
+      gpm: 459,
+      xpm: 546,
+      gpmPercentile: 84,
+      xpmPercentile: 36,
+      heroDamage: 11970,
+      towerDamage: 1987,
+      healing: 0,
+      neutralItem: items.byId.get(574),
+      scepter: false,
+      shard: true,
+    });
+  });
+
+  it("leaves percentiles and the neutral item empty when OpenDota has none", () => {
+    const bare: RawDetailPlayer = { account_id: 42, player_slot: 1, hero_id: 1, kills: 0, assists: 0 };
+    const basics = toMatchDetail(matchDetail({ players: [bare, enemy] }), 42, items, heroes)?.basics;
+    expect(basics?.gpmPercentile).toBeNull();
+    expect(basics?.neutralItem).toBeNull();
+    expect(basics?.netWorth).toBe(0);
   });
 
   it("reports unparsed matches when OpenDota omits the version field", () => {
     const withoutVersion = matchDetail();
     delete withoutVersion.version;
-    expect(toMatchDetail(withoutVersion, 42, items, heroes)).toEqual({ parsed: false });
+    expect(toMatchDetail(withoutVersion, 42, items, heroes)?.parsed).toBe(false);
   });
 
   it("lists first purchases of big items in order and skips unknown items", () => {
@@ -87,10 +134,10 @@ describe("toMatchDetail", () => {
   });
 
   it("computes kill participation from the player's team score", () => {
-    expect(parsedDetail(matchDetail()).killParticipation).toBe(50);
-    expect(parsedDetail(matchDetail({ radiant_score: 0 })).killParticipation).toBeNull();
+    expect(parsedDetail(matchDetail()).basics.killParticipation).toBe(50);
+    expect(parsedDetail(matchDetail({ radiant_score: 0 })).basics.killParticipation).toBeNull();
     // Enemy is dire: (9 + 3) / 20 = 60%
-    expect(parsedDetail(matchDetail(), 7).killParticipation).toBe(60);
+    expect(parsedDetail(matchDetail(), 7).basics.killParticipation).toBe(60);
   });
 
   it("lists minutes the player was killed by enemy heroes", () => {

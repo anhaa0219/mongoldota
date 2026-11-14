@@ -43,8 +43,8 @@ async function loadDetail(matchId: number): Promise<DetailState> {
   }
 }
 
-function DetailBody({ state }: { state: DetailState }) {
-  if (state.status === "ready") return <MatchDetailPanel detail={state.detail} />;
+function DetailBody({ state, matchId, onCheckAgain }: { state: DetailState; matchId: number; onCheckAgain: () => void }) {
+  if (state.status === "ready") return <MatchDetailPanel detail={state.detail} matchId={matchId} onCheckAgain={onCheckAgain} />;
   if (state.status === "failed") return <p className="text-[1.1rem] text-dire">{state.message}</p>;
   return <div className="h-[7rem] animate-pulse rounded-[0.8rem] bg-white/5" />;
 }
@@ -54,11 +54,15 @@ export function MatchRow({ match }: { match: MatchRowData }) {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<DetailState>({ status: "idle" });
 
+  async function load() {
+    setDetail({ status: "loading" });
+    setDetail(await loadDetail(match.id));
+  }
+
   async function toggle() {
     setOpen(!open);
     if (open || detail.status === "loading" || detail.status === "ready") return;
-    setDetail({ status: "loading" });
-    setDetail(await loadDetail(match.id));
+    await load();
   }
 
   return (
@@ -100,7 +104,7 @@ export function MatchRow({ match }: { match: MatchRowData }) {
       </button>
       {open && (
         <div className="border-t border-white/10 px-[1rem] py-[1.2rem]">
-          <DetailBody state={detail} />
+          <DetailBody state={detail} matchId={match.id} onCheckAgain={load} />
         </div>
       )}
     </li>

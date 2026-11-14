@@ -1,6 +1,15 @@
 /** Cuts one player's details out of a full OpenDota match. Pure: no fetching. */
 
-import type { HeroInfo, ItemInfo, ItemTiming, MatchDetail, RawDetailPlayer, RawMatchDetail } from "@/types/opendota";
+import type {
+  HeroInfo,
+  ItemIndex,
+  ItemInfo,
+  ItemTiming,
+  MatchBasics,
+  MatchDetail,
+  RawDetailPlayer,
+  RawMatchDetail,
+} from "@/types/opendota";
 
 const BIG_ITEM_COST = 2000;
 const BKB = "black_king_bar";
@@ -38,23 +47,50 @@ function deathMinutes(raw: RawMatchDetail, player: RawDetailPlayer, heroes: Map<
     .sort((a, b) => a - b);
 }
 
+function percentile(benchmark: { pct: number } | undefined): number | null {
+  return benchmark ? Math.round(benchmark.pct * 100) : null;
+}
+
+/** End-of-game stats every match has, parsed or not. */
+function basics(raw: RawMatchDetail, player: RawDetailPlayer, items: ItemIndex): MatchBasics {
+  const teamKills = isRadiant(player) ? raw.radiant_score : raw.dire_score;
+  return {
+    killParticipation: teamKills > 0 ? Math.round(((player.kills + player.assists) / teamKills) * 100) : null,
+    netWorth: player.net_worth ?? 0,
+    level: player.level ?? 0,
+    lastHits: player.last_hits ?? 0,
+    denies: player.denies ?? 0,
+    gpm: player.gold_per_min ?? 0,
+    xpm: player.xp_per_min ?? 0,
+    gpmPercentile: percentile(player.benchmarks?.gold_per_min),
+    xpmPercentile: percentile(player.benchmarks?.xp_per_min),
+    heroDamage: player.hero_damage ?? 0,
+    towerDamage: player.tower_damage ?? 0,
+    healing: player.hero_healing ?? 0,
+    neutralItem: items.byId.get(player.item_neutral ?? 0) ?? null,
+    scepter: (player.aghanims_scepter ?? 0) > 0,
+    shard: (player.aghanims_shard ?? 0) > 0,
+  };
+}
+
 /** Null when the account is not in the match. */
 export function toMatchDetail(
   raw: RawMatchDetail,
   accountId: number,
-  items: Map<string, ItemInfo>,
+  items: ItemIndex,
   heroes: Map<number, HeroInfo>,
 ): MatchDetail | null {
   const player = raw.players.find((candidate) => candidate.account_id === accountId);
   if (!player) return null;
-  if (raw.version === null || raw.version === undefined) return { parsed: false };
 
-  const teamKills = isRadiant(player) ? raw.radiant_score : raw.dire_score;
+  const matchBasics = basics(raw, player, items);
+  if (raw.version === null || raw.version === undefined) return { parsed: false, basics: matchBasics };
+
   return {
     parsed: true,
+    basics: matchBasics,
     goldEarned: player.gold_t ?? [],
-    itemTimings: itemTimings(player, items),
-    killParticipation: teamKills > 0 ? Math.round(((player.kills + player.assists) / teamKills) * 100) : null,
+    itemTimings: itemTimings(player, items.byKey),
     observers: player.obs_placed ?? 0,
     sentries: player.sen_placed ?? 0,
     deathMinutes: deathMinutes(raw, player, heroes),

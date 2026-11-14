@@ -12,6 +12,16 @@ export async function fetchJson<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
+/** Uncached POST (e.g. asking OpenDota to parse a match). False when OpenDota refused, failed or timed out. */
+export async function postOpenDota(path: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${API}${path}`, { method: "POST", signal: AbortSignal.timeout(8_000) });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Cached with Cache Components ('use cache'); fetch's `next.revalidate` does nothing in this app.
  * Throws on failure so a failed request is not stored in the cache as an empty result.
