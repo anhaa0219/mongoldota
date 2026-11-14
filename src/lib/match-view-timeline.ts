@@ -96,3 +96,21 @@ export function eventsNear(events: MatchEvent[], time: number, windowSeconds: nu
 export function clampTime(time: number, durationSeconds: number): number {
   return Math.min(durationSeconds, Math.max(0, time));
 }
+
+/** Up to `limit` events within the window, closest to `time` first chosen, returned in time order. */
+export function nearestEvents(events: MatchEvent[], time: number, windowSeconds: number, limit: number): MatchEvent[] {
+  return eventsNear(events, time, windowSeconds)
+    .map((event) => ({ event, distance: Math.abs(Math.max(0, event.time) - time) }))
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, limit)
+    .map(({ event }) => event)
+    .sort((a, b) => a.time - b.time);
+}
+
+/** Longest real-time gap one playback frame may cover (a hidden browser tab pauses frames). */
+const MAX_FRAME_MS = 100;
+
+/** Next cursor time for one playback frame: `speed` game-seconds per real second, capped at the match end. */
+export function playbackStep(time: number, realMs: number, speed: number, duration: number): number {
+  return Math.min(duration, time + (Math.min(realMs, MAX_FRAME_MS) / 1000) * speed);
+}

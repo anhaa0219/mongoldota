@@ -21,7 +21,7 @@ export interface LaneSummary {
   lane: MapLane;
   radiant: LanePlayerStats[];
   dire: LanePlayerStats[];
-  /** Higher combined net worth at 10 minutes; null when a side is empty or data is missing. */
+  /** Higher combined net worth at 10 minutes; null when a side is empty, the sides are uneven, or data is missing. */
   winner: Team | null;
 }
 
@@ -58,7 +58,9 @@ export function toLaneSummaries(players: ScoreboardPlayer[], series: MatchSeries
     const radiantWorth = netWorthAt10(radiant);
     const direWorth = netWorthAt10(dire);
     let winner: Team | null = null;
-    if (radiantWorth !== null && direWorth !== null && radiantWorth !== direWorth) {
+    // Uneven lanes (2 vs 1) are not judged: the bigger side would win by default.
+    const even = radiant.length === dire.length;
+    if (even && radiantWorth !== null && direWorth !== null && radiantWorth !== direWorth) {
       winner = radiantWorth > direWorth ? "radiant" : "dire";
     }
     return { lane, radiant, dire, winner };

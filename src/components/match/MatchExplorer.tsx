@@ -59,6 +59,8 @@ export function MatchExplorer({ view, initialTab, ago }: { view: MatchView; init
   useMatchPlayback(playing && !reducedMotion, time, speed, duration, setTime, () => setPlaying(false));
 
   function chooseTab(next: MatchTab) {
+    // The play button lives on the timeline tabs only: leaving them pauses playback.
+    if (!TIMELINE_TABS.includes(next)) setPlaying(false);
     setTab(next);
     window.history.replaceState(null, "", `?tab=${next}`);
   }

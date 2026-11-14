@@ -37,7 +37,10 @@ describe("toLaneSummaries", () => {
 
   it("names the lane winner by net worth at 10 minutes", () => {
     expect(lanes.find((lane) => lane.lane === "mid")?.winner).toBe("radiant");
-    expect(lanes.find((lane) => lane.lane === "bot")?.winner).toBe("radiant");
+  });
+
+  it("names no winner in an uneven lane (1 vs 2): the bigger side would win by default", () => {
+    expect(lanes.find((lane) => lane.lane === "bot")?.winner).toBeNull();
   });
 
   it("has no winner when one side is empty", () => {

@@ -43,6 +43,10 @@ describe("wards", () => {
     expect(wards.find((ward) => ward.kind === "observer")).toMatchObject({ team: "radiant", placedAt: 333, removedAt: 600 });
   });
 
+  it("gives every ward a stable id (owner slot, kind, placement time)", () => {
+    expect(wards.map((ward) => ward.id).sort()).toEqual(["0-observer-333", "0-sentry-100"]);
+  });
+
   it("keeps a ward without a removal log alive until the end", () => {
     expect(wardsAliveAt(wards, 99999).map((ward) => ward.kind)).toEqual(["sentry"]);
   });

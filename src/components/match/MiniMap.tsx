@@ -50,8 +50,8 @@ export function MiniMap({ layers, time }: { layers: MiniMapLayers; time: number 
         );
       })}
 
-      {layers.wards.map((ward, index) => (
-        <g key={`w${index}-${ward.placedAt}`} className="animate-[fadeIn_300ms_ease-out] motion-reduce:animate-none">
+      {layers.wards.map((ward) => (
+        <g key={ward.id} className="animate-[fadeIn_300ms_ease-out] motion-reduce:animate-none">
           {ward.kind === "observer" && <circle cx={ward.x} cy={ward.y} r="7" fill="#ffd34d" fillOpacity="0.06" />}
           <circle cx={ward.x} cy={ward.y} r={ward.kind === "observer" ? 1.5 : 1.2} fill={ward.kind === "observer" ? "#ffd34d" : "#5ec8ff"} stroke={TEAM_FILL[ward.team]} strokeWidth="0.5" />
         </g>

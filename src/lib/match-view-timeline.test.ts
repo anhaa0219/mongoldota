@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { fixtureHeroes, fixtureItems, fixtureMatch } from "@/lib/match-test-fixture";
-import { clampTime, eventsNear, toEvents, toSeries } from "@/lib/match-view-timeline";
+import { clampTime, eventsNear, nearestEvents, playbackStep, toEvents, toSeries } from "@/lib/match-view-timeline";
 import { toScoreboard } from "@/lib/match-view-players";
 import type { MatchEvent } from "@/types/match-view";
 
@@ -79,5 +79,28 @@ describe("time helpers", () => {
     expect(clampTime(-5, 100)).toBe(0);
     expect(clampTime(150, 100)).toBe(100);
     expect(clampTime(42, 100)).toBe(42);
+  });
+});
+
+describe("nearestEvents", () => {
+  const at = (time: number): MatchEvent => ({ time, kind: "item", slot: 0, team: "radiant", label: String(time), image: null });
+
+  it("keeps the moments closest to the cursor, shown in time order", () => {
+    const events = [100, 130, 140, 150, 160, 170, 200].map(at);
+    expect(nearestEvents(events, 150, 45, 3).map((event) => event.time)).toEqual([140, 150, 160]);
+  });
+});
+
+describe("playbackStep", () => {
+  it("advances by real time x speed", () => {
+    expect(playbackStep(100, 50, 60, 2000)).toBe(103);
+  });
+
+  it("caps a long gap (a hidden browser tab) instead of jumping ahead", () => {
+    expect(playbackStep(100, 60_000, 60, 2000)).toBe(106);
+  });
+
+  it("stops at the end of the match", () => {
+    expect(playbackStep(1999, 100, 60, 2000)).toBe(2000);
   });
 });

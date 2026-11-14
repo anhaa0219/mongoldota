@@ -40,22 +40,22 @@ function cellEntries(cells: RawCellCounts | null | undefined): { x: number; y: n
   );
 }
 
-function pairWards(placed: RawPositionLog[], removed: RawPositionLog[], kind: WardMark["kind"], team: Team): WardMark[] {
+function pairWards(placed: RawPositionLog[], removed: RawPositionLog[], kind: WardMark["kind"], slot: number): WardMark[] {
+  const team = teamOfSlot(slot);
   const unused = [...removed];
   return placed.map((ward) => {
     const index = unused.findIndex(
       (left) => left.time >= ward.time && (ward.ehandle ? left.ehandle === ward.ehandle : left.x === ward.x && left.y === ward.y),
     );
     const [match] = index === -1 ? [] : unused.splice(index, 1);
-    return { ...toMapPoint(ward.x, ward.y), kind, team, placedAt: ward.time, removedAt: match?.time ?? null };
+    return { ...toMapPoint(ward.x, ward.y), id: `${slot}-${kind}-${ward.time}`, kind, team, placedAt: ward.time, removedAt: match?.time ?? null };
   });
 }
 
 function playerWards(player: RawFullPlayer): WardMark[] {
-  const team = teamOfSlot(player.player_slot);
   return [
-    ...pairWards(player.obs_log ?? [], player.obs_left_log ?? [], "observer", team),
-    ...pairWards(player.sen_log ?? [], player.sen_left_log ?? [], "sentry", team),
+    ...pairWards(player.obs_log ?? [], player.obs_left_log ?? [], "observer", player.player_slot),
+    ...pairWards(player.sen_log ?? [], player.sen_left_log ?? [], "sentry", player.player_slot),
   ];
 }
 

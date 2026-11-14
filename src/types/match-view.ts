@@ -61,6 +61,8 @@ export interface MapPoint {
 }
 
 export interface WardMark extends MapPoint {
+  /** Stable across renders: owner slot, kind, placement time. */
+  id: string;
   kind: "observer" | "sentry";
   team: Team;
   placedAt: number;

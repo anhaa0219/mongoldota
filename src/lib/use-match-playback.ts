@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
+import { playbackStep } from "@/lib/match-view-timeline";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
@@ -37,7 +38,7 @@ export function useMatchPlayback(
     const frame = requestAnimationFrame((now) => {
       const realMs = lastFrame.current === null ? 16 : now - lastFrame.current;
       lastFrame.current = now;
-      const next = Math.min(duration, time + (realMs / 1000) * speed);
+      const next = playbackStep(time, realMs, speed, duration);
       setTime(next);
       if (next >= duration) onEnd();
     });

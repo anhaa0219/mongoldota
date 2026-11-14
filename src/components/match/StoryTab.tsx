@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { linePath, valueRange } from "@/lib/chart-paths";
 import { formatDuration } from "@/lib/format";
-import { eventsNear } from "@/lib/match-view-timeline";
+import { nearestEvents } from "@/lib/match-view-timeline";
 import type { MatchView, ScoreboardPlayer } from "@/types/match-view";
 
 const WIDTH = 600;
@@ -65,9 +65,8 @@ export function StoryTab({ view, followed, time }: { view: MatchView; followed: 
   const you = view.players.find((player) => player.slot === followed) ?? view.players[0];
   const rivalSlot = view.laneOpponent[you.slot];
   const rival = view.players.find((player) => player.slot === rivalSlot) ?? null;
-  const moments = eventsNear(view.events, time, MOMENT_WINDOW_SECONDS)
-    .filter((event) => event.slot === you.slot || event.slot === null)
-    .slice(0, 5);
+  const relevant = view.events.filter((event) => event.slot === you.slot || event.slot === null);
+  const moments = nearestEvents(relevant, time, MOMENT_WINDOW_SECONDS, 5);
 
   return (
     <div className="grid gap-[1.2rem] lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
@@ -78,10 +77,11 @@ export function StoryTab({ view, followed, time }: { view: MatchView; followed: 
         {rival && <LaneCard view={view} you={you} rival={rival} />}
         <NetWorthDuel view={view} you={you} rival={rival} time={time} />
       </section>
-      <section className="glass-panel flex flex-col gap-[0.8rem] rounded-[1.6rem] p-[1.4rem]" aria-live="polite">
+      <section className="glass-panel flex flex-col gap-[0.8rem] rounded-[1.6rem] p-[1.4rem]">
         <h2 className="font-display text-[1.4rem] uppercase tracking-[0.06em] text-white/70">Around {formatDuration(Math.round(time))}</h2>
         {moments.length === 0 && <p className="text-white/50">Quiet moment. Drag the timeline or press play.</p>}
-        <ul className="flex flex-col gap-[0.6rem]">
+        {/* Only the moments are announced; the heading's clock changes every second during playback. */}
+        <ul className="flex flex-col gap-[0.6rem]" aria-live="polite">
           {moments.map((moment, index) => (
             <li key={`${moment.kind}-${moment.time}-${index}`} className="flex items-center gap-[0.7rem] animate-[fadeIn_300ms_ease-out] motion-reduce:animate-none">
               <span className="w-[3.6rem] shrink-0 text-right text-[0.9rem] tabular-nums text-white/45">{formatDuration(Math.max(0, moment.time))}</span>
