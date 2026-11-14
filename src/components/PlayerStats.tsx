@@ -1,16 +1,10 @@
 import Image from "next/image";
 import { HeroHeadline } from "@/components/HeroHeadline";
+import { MoreStats } from "@/components/MoreStats";
+import { PlaystylePanel } from "@/components/PlaystylePanel";
+import { StatPanel as Panel } from "@/components/StatPanel";
 import { heroPortrait } from "@/lib/hero-images";
-import type { HeroInfo, PlayerSummary } from "@/types/opendota";
-
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="glass-panel rounded-[1.6rem] p-[1.4rem]">
-      <h2 className="font-display text-[1.4rem] uppercase tracking-[0.06em] text-white/70">{title}</h2>
-      <div className="mt-[0.9rem]">{children}</div>
-    </section>
-  );
-}
+import type { HeroInfo, PlayerSummary, PlaystyleStat } from "@/types/opendota";
 
 function Last100({ summary }: { summary: PlayerSummary }) {
   const { wins, losses, last10 } = summary;
@@ -98,7 +92,7 @@ function Averages({ summary }: { summary: PlayerSummary }) {
   );
 }
 
-export function PlayerStats({ summary }: { summary: PlayerSummary }) {
+export function PlayerStats({ summary, playstyle }: { summary: PlayerSummary; playstyle: PlaystyleStat[] | null }) {
   return (
     <div className="relative z-20 px-[1.3rem] lg:max-w-[62rem] lg:px-0">
       <HeroHeadline summary={summary} />
@@ -107,6 +101,10 @@ export function PlayerStats({ summary }: { summary: PlayerSummary }) {
         <Last100 summary={summary} />
         <Records summary={summary} />
         <Averages summary={summary} />
+      </div>
+      <div className="mt-[1.2rem] flex flex-col gap-[1.2rem]">
+        <MoreStats summary={summary} />
+        {playstyle && <PlaystylePanel stats={playstyle} />}
       </div>
     </div>
   );

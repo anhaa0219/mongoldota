@@ -1,28 +1,31 @@
 import Image from "next/image";
-import { heroRender } from "@/lib/hero-images";
-
-/**
- * Where the hero stands. Phones: across the bottom. Desktop: the right half of the
- * frame, below the top nav (7rem), so it never sits behind the nav or the stat cards.
- */
-const heroStageClass =
-  "absolute bottom-0 right-0 h-[65%] w-full object-contain object-bottom opacity-85 lg:h-[calc(100%-7rem)] lg:w-[50%] lg:object-right-bottom";
+import { heroArt } from "@/lib/hero-images";
 
 /**
  * Fills the whole app frame (behind the glass sidebar and nav too).
- * Plain by default; with `heroSlug` (Stats page) the player's most played hero stands on the right.
+ * Plain by default; with `heroSlug` (Stats page) the hero's painted art fills the frame
+ * when the project has art for that hero (see heroArt), otherwise it stays plain.
  */
 export function PageBackdrop({ heroSlug }: { heroSlug?: string }) {
-  if (!heroSlug) {
+  const art = heroSlug ? heroArt[heroSlug] : undefined;
+  if (!art) {
     return <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-ink" />;
   }
 
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-ink">
-      <Image src={heroRender(heroSlug)} alt="" width={1440} height={1440} priority className={heroStageClass} />
-
+      <Image
+        src={art.image}
+        alt=""
+        fill
+        priority
+        placeholder="blur"
+        sizes="100vw"
+        style={{ objectPosition: art.focus ?? "center" }}
+        className={`object-cover opacity-70 ${art.flip ? "-scale-x-100" : ""}`}
+      />
       {/* Darken the left side so text stays readable */}
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(6_14_24/0.88)_0%,rgb(6_14_24/0.55)_40%,rgb(6_14_24/0.05)_75%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(6_14_24/0.92)_0%,rgb(6_14_24/0.65)_45%,rgb(6_14_24/0.1)_80%)]" />
     </div>
   );
 }

@@ -5,7 +5,8 @@ import { toMatchDetail } from "@/lib/match-detail";
 import { fetchJson, getJson } from "@/lib/opendota";
 import { getHeroIndex, getItemIndex } from "@/lib/opendota-heroes";
 import { toMatchSummary } from "@/lib/player-summary";
-import type { MatchDetail, MatchSummary, RawMatch, RawMatchDetail } from "@/types/opendota";
+import { toPlaystyle } from "@/lib/playstyle";
+import type { MatchDetail, MatchSummary, PlaystyleStat, RawMatch, RawMatchDetail, RawTotal } from "@/types/opendota";
 
 const FIVE_MINUTES = 300;
 const ONE_HOUR = 3600;
@@ -48,4 +49,10 @@ export async function getMatchDetail(matchId: number, accountId: string): Promis
   } catch {
     return { kind: "error" };
   }
+}
+
+/** Playstyle averages over the last 100 matches. Null when OpenDota failed. */
+export async function getPlaystyle(accountId: string): Promise<PlaystyleStat[] | null> {
+  const totals = await getJson<RawTotal[]>(`/players/${accountId}/totals?limit=100`, FIVE_MINUTES);
+  return totals ? toPlaystyle(totals) : null;
 }

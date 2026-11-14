@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { ChartColumn, Map, Swords } from "lucide-react";
-import { AuthHeroArt } from "@/components/AuthHeroArt";
 import { site } from "@/lib/site-content";
 
 /** Official dota2.com homepage montage, streamed from Valve's CDN (no extension). */
@@ -14,7 +13,7 @@ const features = [
 
 /**
  * Full-width sign-in / sign-up screen: welcome copy on the left, Clerk card on the right,
- * and the visitor's most played hero in the gap between them (desktop). On phones it stacks.
+ * over the live Dota wallpaper (desktop). On phones it stacks.
  */
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
@@ -32,10 +31,6 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         <source src={`${LIVE_WALLPAPER}.webm`} type="video/webm" />
         <source src={`${LIVE_WALLPAPER}.mp4`} type="video/mp4" />
       </video>
-      {/* Most played hero (Steam cookie from an earlier visit), over the wallpaper */}
-      <Suspense fallback={null}>
-        <AuthHeroArt />
-      </Suspense>
       {/* Dark on both sides so copy and card read; lighter in the middle */}
       <div className="absolute inset-0 -z-10 bg-ink/75 lg:bg-transparent lg:bg-[linear-gradient(90deg,rgb(6_14_24/0.94)_0%,rgb(6_14_24/0.72)_30%,rgb(6_14_24/0.3)_50%,rgb(6_14_24/0.72)_70%,rgb(6_14_24/0.94)_100%)]" />
 

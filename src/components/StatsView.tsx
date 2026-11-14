@@ -3,7 +3,7 @@ import { PlayerDataNotice, type NoticeReason } from "@/components/PlayerDataNoti
 import { PlayerStats } from "@/components/PlayerStats";
 import { getLinkedAccountId } from "@/lib/linked-account";
 import { getHeroIndex } from "@/lib/opendota-heroes";
-import { getRecentMatches } from "@/lib/opendota-matches";
+import { getPlaystyle, getRecentMatches } from "@/lib/opendota-matches";
 import { summarize } from "@/lib/player-summary";
 
 function Notice({ reason }: { reason: NoticeReason }) {
@@ -15,12 +15,16 @@ function Notice({ reason }: { reason: NoticeReason }) {
   );
 }
 
-/** Stats page body: the linked player's last 100 matches, with their most played hero behind. Reads cookies. */
+/** Stats page body: the linked player's last 100 matches, over their most played hero's art. Reads cookies. */
 export async function StatsView() {
   const accountId = await getLinkedAccountId();
   if (!accountId) return <Notice reason="not-linked" />;
 
-  const [matches, heroes] = await Promise.all([getRecentMatches(accountId), getHeroIndex()]);
+  const [matches, heroes, playstyle] = await Promise.all([
+    getRecentMatches(accountId),
+    getHeroIndex(),
+    getPlaystyle(accountId),
+  ]);
   if (matches === null) return <Notice reason="error" />;
 
   const summary = summarize(matches, heroes);
@@ -29,9 +33,9 @@ export async function StatsView() {
   return (
     <>
       <PageBackdrop heroSlug={summary.mostPlayed.hero.slug} />
-      {/* Desktop: stats sit in the left half, vertically centred; the hero owns the right half */}
-      <div className="relative w-full flex-1 pb-12 md:px-8 lg:flex lg:flex-col lg:justify-center lg:px-[5rem] lg:pb-[4rem]">
-        <PlayerStats summary={summary} />
+      {/* Desktop: stats on the left over the hero art, scrolling inside the fixed-height frame */}
+      <div className="relative w-full flex-1 pb-12 md:px-8 lg:min-h-0 lg:overflow-y-auto lg:px-[5rem] lg:pb-[4rem]">
+        <PlayerStats summary={summary} playstyle={playstyle} />
       </div>
     </>
   );
