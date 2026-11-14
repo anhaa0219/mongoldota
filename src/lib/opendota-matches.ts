@@ -1,16 +1,14 @@
-/** A player's recent matches and single-match details from OpenDota. */
+/** A player's recent matches (OpenDota) and single-match details (database first, see match-store). */
 
-import { cacheLife } from "next/cache";
 import { toMatchDetail } from "@/lib/match-detail";
-import { fetchJson, getJson, postOpenDota } from "@/lib/opendota";
+import { loadMatch } from "@/lib/match-store";
+import { getJson, postOpenDota } from "@/lib/opendota";
 import { getHeroIndex, getItemIndex } from "@/lib/opendota-heroes";
 import { toMatchSummary } from "@/lib/player-summary";
 import { toPlaystyle } from "@/lib/playstyle";
-import type { MatchDetail, MatchSummary, PlaystyleStat, RawMatch, RawMatchDetail, RawTotal } from "@/types/opendota";
+import type { MatchDetail, MatchSummary, PlaystyleStat, RawMatch, RawTotal } from "@/types/opendota";
 
 const FIVE_MINUTES = 300;
-const ONE_MINUTE = 60;
-const ONE_WEEK = 7 * 24 * 3600;
 
 const MATCH_FIELDS = [
   "hero_id", "kills", "deaths", "assists", "gold_per_min", "xp_per_min", "last_hits", "hero_damage",
@@ -26,30 +24,14 @@ export async function getRecentMatches(accountId: string): Promise<MatchSummary[
 
 export type MatchDetailResult = { kind: "ok"; detail: MatchDetail } | { kind: "not-in-match" } | { kind: "error" };
 
-/**
- * Caches only the player's trimmed slice, never the large raw match.
- * Finished, parsed matches never change (1 week); unparsed ones may be parsed any minute after
- * "Analyse with OpenDota", so they refresh after 1 minute and are dropped after 5 idle minutes.
- */
-async function cachedMatchDetail(matchId: number, accountId: string): Promise<MatchDetail | null> {
-  "use cache";
-  const raw = await fetchJson<RawMatchDetail>(`/matches/${matchId}`);
-  const [items, heroes] = await Promise.all([getItemIndex(), getHeroIndex()]);
-  // Without the indexes the slice would silently lose items and deaths: fail so nothing is cached.
-  if (items.byKey.size === 0 || heroes.size === 0) throw new Error("OpenDota hero/item data unavailable");
+/** The linked player's slice of one match (History detail panel). */
+export async function getMatchDetail(matchId: number, accountId: string): Promise<MatchDetailResult> {
+  const [raw, items, heroes] = await Promise.all([loadMatch(matchId), getItemIndex(), getHeroIndex()]);
+  // Without the indexes the slice would silently lose items and deaths.
+  if (!raw || items.byKey.size === 0 || heroes.size === 0) return { kind: "error" };
 
   const detail = toMatchDetail(raw, Number(accountId), items, heroes);
-  cacheLife(detail?.parsed ? { revalidate: ONE_WEEK } : { revalidate: ONE_MINUTE, expire: 5 * ONE_MINUTE });
-  return detail;
-}
-
-export async function getMatchDetail(matchId: number, accountId: string): Promise<MatchDetailResult> {
-  try {
-    const detail = await cachedMatchDetail(matchId, accountId);
-    return detail ? { kind: "ok", detail } : { kind: "not-in-match" };
-  } catch {
-    return { kind: "error" };
-  }
+  return detail ? { kind: "ok", detail } : { kind: "not-in-match" };
 }
 
 /** Playstyle averages over the last 100 matches. Null when OpenDota failed. */

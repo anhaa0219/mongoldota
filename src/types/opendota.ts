@@ -121,7 +121,8 @@ export interface RawLogEntry {
 }
 
 export interface RawDetailPlayer {
-  account_id: number | null;
+  /** Missing (not only null) for anonymous players in some responses. */
+  account_id?: number | null;
   player_slot: number;
   hero_id: number;
   kills: number;

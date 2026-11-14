@@ -41,6 +41,12 @@ describe("toMatchRows", () => {
     expect(toMatchRows(raw).match.parsed).toBe(false);
   });
 
+  it("skips anonymous players whose account_id is missing entirely (not just null)", () => {
+    const anonymous: RawFullPlayer = { player_slot: 3, hero_id: 2, kills: 0, assists: 0 };
+    const rows = toMatchRows(match({ players: [player(42, 1, 5), anonymous] })).players;
+    expect(rows.map((row) => row.accountId)).toEqual([42]);
+  });
+
   it("indexes every named player and who won", () => {
     expect(toMatchRows(match()).players).toEqual([
       { accountId: 42, matchId: 9, heroId: 5, playerSlot: 1, won: true },

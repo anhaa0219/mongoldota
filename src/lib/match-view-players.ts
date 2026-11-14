@@ -17,8 +17,8 @@ function toPlayer(raw: RawFullPlayer, heroes: Map<number, HeroInfo>, items: Item
   const itemIds = [raw.item_0, raw.item_1, raw.item_2, raw.item_3, raw.item_4, raw.item_5];
   return {
     slot: raw.player_slot,
-    accountId: raw.account_id,
-    isLinked: raw.account_id !== null && raw.account_id === linkedAccountId,
+    accountId: raw.account_id ?? null,
+    isLinked: raw.account_id !== null && raw.account_id !== undefined && raw.account_id === linkedAccountId,
     team: raw.player_slot < 128 ? "radiant" : "dire",
     name: raw.personaname || "Anonymous",
     hero: heroOf(raw.hero_id, heroes),

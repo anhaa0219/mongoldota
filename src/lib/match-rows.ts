@@ -41,7 +41,7 @@ export function toMatchRows(raw: RawFullMatch): { match: MatchRow; players: Play
     data: raw,
   };
   const players = raw.players.flatMap((player) =>
-    player.account_id === null
+    player.account_id === null || player.account_id === undefined
       ? []
       : [
           {

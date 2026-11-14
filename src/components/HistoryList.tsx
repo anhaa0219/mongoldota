@@ -1,8 +1,9 @@
-import { connection } from "next/server";
+import { after, connection } from "next/server";
 import { MatchRow, type MatchRowData } from "@/components/MatchRow";
 import { PlayerDataNotice } from "@/components/PlayerDataNotice";
 import { timeAgo } from "@/lib/format";
 import { getLinkedAccountId } from "@/lib/linked-account";
+import { syncRecentMatches } from "@/lib/match-store";
 import { getHeroIndex, getItemIndex } from "@/lib/opendota-heroes";
 import { getRecentMatches } from "@/lib/opendota-matches";
 
@@ -14,6 +15,8 @@ export async function HistoryList() {
   const [matches, heroes, items] = await Promise.all([getRecentMatches(accountId), getHeroIndex(), getItemIndex()]);
   if (matches === null) return <PlayerDataNotice reason="error" />;
   if (matches.length === 0) return <PlayerDataNotice reason="no-matches" />;
+  // Save these matches to the database after the response is sent (never slows the page).
+  after(() => syncRecentMatches(matches.map((match) => match.id)));
 
   // Cache Components: reading the current time needs an explicit request-time marker first,
   // otherwise Next reports "unstable value Date.now() while prerendering" (a cookie read is not enough).

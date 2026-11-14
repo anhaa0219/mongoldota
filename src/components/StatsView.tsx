@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { Suspense } from "react";
 import { PageBackdrop } from "@/components/PageBackdrop";
 import { PlayerDataNotice, type NoticeReason } from "@/components/PlayerDataNotice";
@@ -6,6 +7,7 @@ import { PlaystyleSection } from "@/components/PlaystyleSection";
 import { getLinkedAccountId } from "@/lib/linked-account";
 import { getHeroIndex } from "@/lib/opendota-heroes";
 import { getRecentMatches } from "@/lib/opendota-matches";
+import { syncRecentMatches } from "@/lib/match-store";
 import { summarize } from "@/lib/player-summary";
 
 function Notice({ reason }: { reason: NoticeReason }) {
@@ -26,6 +28,8 @@ export async function StatsView() {
   if (matches === null) return <Notice reason="error" />;
 
   const summary = summarize(matches, heroes);
+  // Save these matches to the database after the response is sent (never slows the page).
+  after(() => syncRecentMatches(matches.map((match) => match.id)));
   if (!summary) return <Notice reason="no-matches" />;
 
   return (
