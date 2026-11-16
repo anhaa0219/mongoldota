@@ -102,7 +102,12 @@ export function readSession(value: string | undefined) {
   if (!value) return null;
   const [steamId, signature] = value.split(".");
   if (!steamId || !signature || !/^\d{17}$/.test(steamId)) return null;
-  const expected = Buffer.from(sign(steamId));
+  let expected: Buffer;
+  try {
+    expected = Buffer.from(sign(steamId));
+  } catch {
+    return null; // AUTH_SECRET missing in production: treat as signed out instead of crashing every page.
+  }
   const given = Buffer.from(signature);
   return expected.length === given.length && timingSafeEqual(expected, given) ? steamId : null;
 }

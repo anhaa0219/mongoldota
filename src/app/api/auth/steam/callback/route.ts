@@ -16,7 +16,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/?login=failed`);
   }
 
+  let session: string;
+  try {
+    session = createSession(steamId);
+  } catch {
+    // AUTH_SECRET missing in production: send the user back with "login failed", never a raw 500.
+    return NextResponse.redirect(`${origin}/?login=failed`);
+  }
+
   const response = NextResponse.redirect(`${origin}/`);
-  response.cookies.set(SESSION_COOKIE, createSession(steamId), SESSION_COOKIE_OPTIONS);
+  response.cookies.set(SESSION_COOKIE, session, SESSION_COOKIE_OPTIONS);
   return response;
 }
