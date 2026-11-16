@@ -13,6 +13,8 @@ const FIVE_MINUTES = 300;
 const MATCH_FIELDS = [
   "hero_id", "kills", "deaths", "assists", "gold_per_min", "xp_per_min", "last_hits", "hero_damage",
   "item_0", "item_1", "item_2", "item_3", "item_4", "item_5", "lane_role", "version",
+  // With project= OpenDota drops start_time from its defaults; History's "3 d ago" needs it.
+  "start_time",
 ];
 
 /** Last 100 matches, newest first. Null when OpenDota failed; [] when the player has no public matches. */

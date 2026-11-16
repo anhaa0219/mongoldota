@@ -15,7 +15,7 @@ export function TopNav() {
       </div>
       <nav
         aria-label="Sections"
-        className="flex flex-1 gap-8 overflow-x-auto md:justify-center lg:gap-[4.9rem] lg:overflow-visible lg:pr-[9.5rem]"
+        className="flex min-w-0 flex-1 gap-8 overflow-x-auto md:justify-center lg:gap-[4.9rem] lg:overflow-visible lg:pr-[9.5rem]"
       >
         {navItems.map((item) => {
           const isActive = item.href === pathname;

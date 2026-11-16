@@ -8,10 +8,17 @@ const tones: Record<SuggestionTone, { icon: LucideIcon; label: string; color: st
   tip: { icon: Lightbulb, label: "Tip", color: "text-accent bg-accent/15" },
 };
 
-/** Coach suggestions, most important first. */
-export function SuggestionList({ suggestions }: { suggestions: Suggestion[] }) {
+const TITLES = {
+  rules: "Suggestions",
+  loading: "Suggestions · AI coach is thinking…",
+  ai: "AI coach · suggestions",
+} as const;
+
+/** Coach suggestions, most important first. `source` says whether the AI coach wrote them (or is still writing). */
+export function SuggestionList({ suggestions, source = "rules", timer }: { suggestions: Suggestion[]; source?: keyof typeof TITLES; timer?: React.ReactNode }) {
   return (
-    <StatPanel title="Suggestions" className="flex min-h-0 flex-1 flex-col [&>div]:min-h-0 [&>div]:overflow-y-auto">
+    <StatPanel title={TITLES[source]} className="flex min-h-0 flex-1 flex-col [&>div]:min-h-0 [&>div]:overflow-y-auto">
+      {timer && <div className="-mt-[0.3rem] mb-[0.6rem]">{timer}</div>}
       <ol className="flex flex-col gap-[0.7rem]">
         {suggestions.map((suggestion) => {
           const { icon: Icon, label, color } = tones[suggestion.tone];

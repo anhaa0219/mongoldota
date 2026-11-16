@@ -24,7 +24,7 @@
 
 /*
  * The whole design is sized in rem. On desktop, 1rem scales with the window
- * so the layout keeps the exact proportions of the mockup (16px at 2000×1500).
+ * so the layout keeps its proportions; the frame sits 2.25rem from the window edge.
  */
 html {
   font-size: 12px;
@@ -32,7 +32,7 @@ html {
 
 @media (min-width: 1024px) {
   html {
-    font-size: clamp(9px, min(0.8vw, 1.0667vh), 18px);
+    font-size: clamp(10px, min(0.85vw, 1.4vh), 20px);
   }
 }
 
@@ -83,4 +83,29 @@ body {
     opacity: 1;
     transform: none;
   }
+}
+
+/* Stats page sliders: the knob slides in from the left (disabled by motion-reduce:animate-none). */
+@keyframes knobIn {
+  from {
+    left: 0%;
+    opacity: 0;
+  }
+}
+
+/* Browser surfaces in the palette: keyboard focus, text selection, scrollbars. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 0.4rem;
+}
+
+::selection {
+  background: rgb(254 186 135 / 0.35);
+  color: var(--white);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.22) transparent;
 }

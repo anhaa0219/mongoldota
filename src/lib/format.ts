@@ -14,8 +14,9 @@ export function formatDuration(seconds: number): string {
   return `${sign}${minutes}:${rest}`;
 }
 
-/** "just now", "5 min ago", "2 h ago", "3 d ago", "2 mo ago". */
+/** "just now", "5 min ago", "2 h ago", "3 d ago", "2 mo ago"; "" when the time is unknown. */
 export function timeAgo(playedAt: number, now: number): string {
+  if (!Number.isFinite(playedAt)) return "";
   const elapsed = now - playedAt;
   if (elapsed < MINUTE) return "just now";
   if (elapsed < HOUR) return `${Math.floor(elapsed / MINUTE)} min ago`;

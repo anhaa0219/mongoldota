@@ -12,7 +12,7 @@ export const site = {
 
 export const navItems: NavItem[] = [
   { label: "Stats", href: "/" },
-  { label: "Hero Pick", href: "/characters" },
+  { label: "Draft", href: "/draft" },
   { label: "Location", href: "/location" },
   { label: "Trending Heroes", href: "/heroes" },
   { label: "History", href: "/history" },

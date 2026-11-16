@@ -29,12 +29,12 @@ function LaneCard({ lane, players, followed }: { lane: LaneSummary; players: Map
       <header className="flex items-baseline justify-between">
         <h2 className="font-display text-[1.3rem] uppercase tracking-[0.06em] text-white/75">{laneTitles[lane.lane]}</h2>
         {lane.winner && (
-          <span className={`rounded-full px-[0.7rem] py-[0.1rem] text-[0.8rem] font-semibold ${lane.winner === "radiant" ? "bg-radiant/20 text-radiant" : "bg-dire/20 text-dire"}`}>
+          <span className={`rounded-full px-[0.7rem] py-[0.1rem] text-[0.85rem] font-semibold ${lane.winner === "radiant" ? "bg-radiant/20 text-radiant" : "bg-dire/20 text-dire"}`}>
             {lane.winner === "radiant" ? "Radiant" : "Dire"} won the lane
           </span>
         )}
       </header>
-      <div className={`${columns} px-[0.4rem] text-[0.7rem] uppercase tracking-[0.1em] text-white/40`}>
+      <div className={`${columns} px-[0.4rem] text-[0.85rem] uppercase tracking-[0.1em] text-white/40`}>
         <span />
         <span>Hero</span>
         <span className="text-right">LH 5′</span>

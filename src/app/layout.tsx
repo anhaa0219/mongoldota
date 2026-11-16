@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${jost.variable} ${displayFace.variable} antialiased`}>
-      <body className="min-h-dvh lg:flex lg:items-center lg:justify-center lg:px-[6.25rem] lg:py-[6.875rem]">
+      <body className="min-h-dvh lg:flex lg:items-center lg:justify-center lg:px-[2.5rem] lg:py-[2.25rem]">
         <ClerkProvider appearance={clerkAppearance} signInUrl="/sign-in" signUpUrl="/sign-up" afterSignOutUrl="/sign-in">
           {children}
         </ClerkProvider>

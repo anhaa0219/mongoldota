@@ -1,5 +1,6 @@
 import { after, connection } from "next/server";
-import { MatchRow, type MatchRowData } from "@/components/MatchRow";
+import { type MatchRowData } from "@/components/MatchRow";
+import { PagedMatchList } from "@/components/PagedMatchList";
 import { PlayerDataNotice } from "@/components/PlayerDataNotice";
 import { timeAgo } from "@/lib/format";
 import { getLinkedAccountId } from "@/lib/linked-account";
@@ -8,7 +9,7 @@ import { requireUserId } from "@/lib/require-user";
 import { getHeroIndex, getItemIndex } from "@/lib/opendota-heroes";
 import { getRecentMatches } from "@/lib/opendota-matches";
 
-/** The linked player's last 100 matches, newest first. Reads cookies. */
+/** The linked player's last 100 matches, newest first, 10 per page. Reads cookies. */
 export async function HistoryList() {
   await requireUserId(); // the layout's check does not stop this component from running
   const accountId = await getLinkedAccountId();
@@ -44,11 +45,5 @@ export async function HistoryList() {
     };
   });
 
-  return (
-    <ul className="flex flex-col gap-[0.6rem]">
-      {rows.map((row) => (
-        <MatchRow key={row.id} match={row} />
-      ))}
-    </ul>
-  );
+  return <PagedMatchList rows={rows} />;
 }

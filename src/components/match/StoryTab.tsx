@@ -24,8 +24,8 @@ function LaneCard({ view, you, rival }: { view: MatchView; you: ScoreboardPlayer
   return (
     <dl className="grid grid-cols-[1fr_auto_auto] items-baseline gap-x-[1.2rem] gap-y-[0.4rem] text-[1.05rem]">
       <span />
-      <span className="text-[0.8rem] uppercase tracking-wider text-accent">{you.hero.name}</span>
-      <span className="text-[0.8rem] uppercase tracking-wider text-white/50">{rival.hero.name}</span>
+      <span className="text-[0.85rem] uppercase tracking-wider text-accent">{you.hero.name}</span>
+      <span className="text-[0.85rem] uppercase tracking-wider text-white/50">{rival.hero.name}</span>
       {rows.map((row) => {
         const ahead = row.mine !== undefined && row.theirs !== undefined && row.mine > row.theirs;
         return [
@@ -47,7 +47,7 @@ function NetWorthDuel({ view, you, rival, time }: { view: MatchView; you: Scoreb
   if (points < 2) return null;
   return (
     <figure className="flex flex-col gap-[0.4rem]">
-      <figcaption className="text-[0.8rem] uppercase tracking-[0.14em] text-white/50">
+      <figcaption className="text-[0.85rem] uppercase tracking-[0.14em] text-white/50">
         Net worth · <span className="text-accent">{you.hero.name}</span>
         {rival && <> vs <span className="text-white/70">{rival.hero.name}</span></>}
       </figcaption>

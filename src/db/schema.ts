@@ -1,6 +1,6 @@
-/** Drizzle tables. Both have Row Level Security on with no policies: only the server (DATABASE_URL) can read them. */
+/** Drizzle tables. All have Row Level Security on with no policies: only the server (DATABASE_URL) can read them. */
 
-import { bigint, boolean, index, integer, jsonb, pgTable, primaryKey, timestamp } from "drizzle-orm/pg-core";
+import { bigint, boolean, index, integer, jsonb, pgTable, primaryKey, text, timestamp } from "drizzle-orm/pg-core";
 // Relative import: drizzle-kit loads this file without the "@/" alias.
 import type { RawFullMatch } from "../types/opendota-match";
 
@@ -32,4 +32,16 @@ export const playerMatches = pgTable(
     won: boolean("won").notNull(),
   },
   (table) => [primaryKey({ columns: [table.accountId, table.matchId] }), index("player_matches_account_idx").on(table.accountId)],
+).enableRLS();
+
+/** The latest AI coach answer per player and kind ("stats-coach", "hero-picks"), so it refreshes at most every 12 hours. */
+export const aiAdvice = pgTable(
+  "ai_advice",
+  {
+    accountId: bigint("account_id", { mode: "number" }).notNull(),
+    kind: text("kind").notNull(),
+    payload: jsonb("payload").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.accountId, table.kind] })],
 ).enableRLS();

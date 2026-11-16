@@ -26,7 +26,7 @@ function Row({ player, followed, onFollow }: { player: ScoreboardPlayer; followe
       </span>
       <span className="min-w-0 leading-tight">
         <span className="block truncate text-[1.05rem] text-white">
-          {player.isLinked && <span className="mr-[0.4rem] rounded-full bg-accent px-[0.45rem] text-[0.75rem] font-semibold text-ink">YOU</span>}
+          {player.isLinked && <span className="mr-[0.4rem] rounded-full bg-accent px-[0.45rem] text-[0.85rem] font-semibold text-ink">YOU</span>}
           {player.hero.name}
         </span>
         <span className="block truncate text-[0.85rem] text-white/50">{player.name}</span>
@@ -56,7 +56,7 @@ function Row({ player, followed, onFollow }: { player: ScoreboardPlayer; followe
 function TeamRows({ team, players, followed, onFollow }: { team: Team; players: ScoreboardPlayer[]; followed: number; onFollow: (slot: number) => void }) {
   return (
     <div className="flex flex-col gap-[0.15rem]">
-      <p className={`px-[0.6rem] pb-[0.2rem] text-[0.8rem] uppercase tracking-[0.16em] ${team === "radiant" ? "text-radiant" : "text-dire"}`}>
+      <p className={`px-[0.6rem] pb-[0.2rem] text-[0.85rem] uppercase tracking-[0.16em] ${team === "radiant" ? "text-radiant" : "text-dire"}`}>
         {team === "radiant" ? "Radiant" : "Dire"}
       </p>
       {players
@@ -73,7 +73,7 @@ export function Scoreboard({ players, followed, onFollow }: { players: Scoreboar
   return (
     <section className="glass-panel overflow-x-auto rounded-[1.6rem] p-[0.9rem]" aria-label="Scoreboard">
       <div className="min-w-[30rem]">
-        <div className={`${columns} px-[0.6rem] pb-[0.4rem] text-[0.75rem] uppercase tracking-[0.12em] text-white/40`}>
+        <div className={`${columns} px-[0.6rem] pb-[0.4rem] text-[0.85rem] uppercase tracking-[0.12em] text-white/40`}>
           <span />
           <span>Hero</span>
           <span>Lane</span>

@@ -50,7 +50,7 @@ export async function StatsView() {
         </PlayerStats>
         <aside className="relative z-20 mt-[1.1rem] flex flex-col gap-[1.1rem] px-[1.3rem] lg:mt-0 lg:min-h-0 lg:px-0" aria-label="Coach">
           <Suspense fallback={<CoachSkeleton />}>
-            <CoachSection summary={summary} heroMatches={heroMatches} form={form} />
+            <CoachSection accountId={accountId} summary={summary} heroMatches={heroMatches} form={form} />
           </Suspense>
         </aside>
       </div>

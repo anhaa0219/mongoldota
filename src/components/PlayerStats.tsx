@@ -35,7 +35,7 @@ function Last100({ summary }: { summary: PlayerSummary }) {
         {last10.map((result, i) => (
           <span
             key={i}
-            className={`grid size-[1.45rem] place-items-center rounded-[0.3rem] text-[0.8rem] font-semibold ${
+            className={`grid size-[1.45rem] place-items-center rounded-[0.3rem] text-[0.85rem] font-semibold ${
               result === "W" ? "bg-radiant/25 text-radiant" : "bg-dire/25 text-dire"
             }`}
           >

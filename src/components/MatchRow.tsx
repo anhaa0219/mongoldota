@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ExternalLink } from "lucide-react";
 import { MatchDetailPanel } from "@/components/MatchDetailPanel";
 import { heroPortrait } from "@/lib/hero-images";
 import type { MatchDetail } from "@/types/opendota";
@@ -66,32 +66,41 @@ export function MatchRow({ match }: { match: MatchRowData }) {
     await load();
   }
 
+  const tint = match.won
+    ? "bg-[linear-gradient(90deg,rgb(146_200_74/0.13),transparent_32%)]"
+    : "bg-[linear-gradient(90deg,rgb(226_73_47/0.13),transparent_32%)]";
+
   return (
-    <li className="glass-panel overflow-hidden rounded-[1.2rem]">
+    <li className={`glass-panel overflow-hidden rounded-[1.2rem] ${tint}`}>
       <div className="flex items-stretch">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="flex min-w-0 flex-1 flex-wrap items-center gap-x-[1.2rem] gap-y-[0.6rem] px-[1rem] py-[0.8rem] text-left transition-colors hover:bg-white/5"
+        className="flex min-w-0 flex-1 flex-wrap items-center gap-x-[1.2rem] gap-y-[0.6rem] px-[1rem] py-[0.7rem] text-left transition-colors hover:bg-white/5 md:grid md:grid-cols-[minmax(11rem,1fr)_6.5rem_5.2rem_4.2rem_5.6rem_auto_1.3rem]"
       >
-        <span className="relative block h-[2.5rem] w-[4.4rem] shrink-0 overflow-hidden rounded-[0.4rem] bg-white/10">
-          {match.heroSlug && <Image unoptimized src={heroPortrait(match.heroSlug)} alt="" fill sizes="4.5rem" className="object-cover" />}
-        </span>
-        <span className="flex min-w-[9rem] flex-1 flex-col leading-tight">
-          <span className="text-[1.15rem] font-medium text-white">{match.heroName}</span>
-          <span className="flex items-center gap-[0.5rem] text-[0.9rem]">
-            <span className={match.won ? "text-radiant" : "text-dire"}>{match.won ? "Win" : "Loss"}</span>
-            {match.ranked && <span className="rounded-full bg-white/10 px-[0.5rem] text-white/70">Ranked</span>}
+        <span className="flex min-w-[11rem] flex-1 items-center gap-[0.9rem]">
+          <span className="relative block h-[2.5rem] w-[4.4rem] shrink-0 overflow-hidden rounded-[0.4rem] bg-white/10">
+            {match.heroSlug && <Image unoptimized src={heroPortrait(match.heroSlug)} alt="" fill sizes="4.5rem" className="object-cover" />}
+          </span>
+          <span className="flex min-w-0 flex-col gap-[0.25rem] leading-tight">
+            <span className="truncate text-[1.15rem] font-medium text-white">{match.heroName}</span>
+            <span className="flex items-center gap-[0.4rem] text-[0.85rem] font-semibold uppercase tracking-wider">
+              <span className={`rounded-full px-[0.55rem] py-[0.05rem] ${match.won ? "bg-radiant/20 text-radiant" : "bg-dire/20 text-dire"}`}>
+                {match.won ? "Win" : "Loss"}
+              </span>
+              {match.ranked && <span className="rounded-full bg-white/10 px-[0.55rem] py-[0.05rem] text-white/70">Ranked</span>}
+            </span>
           </span>
         </span>
-        <span className="w-[6.5rem] font-display text-[1.4rem] tabular-nums text-white">
-          {match.kills}/{match.deaths}/{match.assists}
+        <span className="font-display text-[1.4rem] tabular-nums text-white" aria-label={`${match.kills} kills, ${match.deaths} deaths, ${match.assists} assists`}>
+          {match.kills}/<span className="text-dire/90">{match.deaths}</span>/{match.assists}
         </span>
-        <span className="w-[5.5rem] text-[1rem] tabular-nums text-white/70">{match.gpm} GPM</span>
-        <span className="w-[8rem] text-[0.95rem] text-white/60">
-          {match.durationMinutes} min · {match.ago}
+        <span className="text-[1rem] tabular-nums text-white/75">
+          {match.gpm} <span className="text-[0.85rem] text-white/45">GPM</span>
         </span>
+        <span className="whitespace-nowrap text-[0.95rem] tabular-nums text-white/65">{match.durationMinutes} min</span>
+        <span className="whitespace-nowrap text-[0.95rem] text-white/50">{match.ago}</span>
         <span className="flex gap-[0.25rem]" aria-hidden="true">
           {match.itemImages.map((image, slot) => (
             <span key={slot} className="relative block h-[1.6rem] w-[2.2rem] overflow-hidden rounded-[0.25rem] bg-white/5">
@@ -101,15 +110,16 @@ export function MatchRow({ match }: { match: MatchRowData }) {
         </span>
         <ChevronDown
           aria-hidden="true"
-          className={`ml-auto size-[1.3rem] text-white/50 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`ml-auto size-[1.3rem] text-white/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
       <Link
         href={`/matches/${match.id}`}
         aria-label={`Full match: ${match.heroName}, ${match.won ? "win" : "loss"}, ${match.ago}`}
-        className="grid shrink-0 place-items-center border-l border-white/10 px-[1rem] text-[0.95rem] font-medium text-accent transition-colors hover:bg-accent/10"
+        className="flex shrink-0 items-center gap-[0.4rem] border-l border-white/10 px-[0.8rem] text-[0.95rem] font-medium text-accent transition-colors hover:bg-accent/10 md:px-[1rem]"
       >
-        Full match
+        <span className="hidden md:inline">Full match</span>
+        <ExternalLink className="size-[1.1rem] md:hidden" aria-hidden="true" />
       </Link>
       </div>
       {open && (

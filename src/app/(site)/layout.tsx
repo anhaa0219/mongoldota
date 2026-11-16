@@ -7,7 +7,7 @@ import { SteamLogin } from "@/components/SteamLogin";
 import { TopNav } from "@/components/TopNav";
 
 const frameClass =
-  "relative isolate flex min-h-dvh w-full overflow-hidden bg-ink shadow-[0_2.5rem_6rem_rgb(0_0_0/0.45)] lg:h-[calc(100dvh-13.75rem)] lg:min-h-0 lg:rounded-[3rem]";
+  "relative isolate flex min-h-dvh w-full overflow-hidden bg-ink shadow-[0_2.5rem_6rem_rgb(0_0_0/0.45)] lg:h-[calc(100dvh-4.5rem)] lg:min-h-0 lg:rounded-[3rem]";
 
 /** The rounded app frame for signed-in pages. Page backgrounds fill it from behind. */
 export default function SiteLayout({ children }: LayoutProps<"/">) {

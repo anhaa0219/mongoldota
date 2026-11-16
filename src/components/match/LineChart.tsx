@@ -98,8 +98,8 @@ export function LineChart({ title, series, time, onTime, format, split = false }
           <line x1={xOf(cursorMinute)} x2={xOf(cursorMinute)} y1={0} y2={HEIGHT} className="stroke-accent" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
           {hovered !== null && <line x1={xOf(hovered)} x2={xOf(hovered)} y1={0} y2={HEIGHT} className="stroke-white/40" vectorEffect="non-scaling-stroke" />}
         </svg>
-        <span className="pointer-events-none absolute left-0 top-0 text-[0.75rem] text-white/40">{format(range.max)}</span>
-        {range.min < 0 && <span className="pointer-events-none absolute bottom-0 left-0 text-[0.75rem] text-white/40">{format(range.min)}</span>}
+        <span className="pointer-events-none absolute left-0 top-0 text-[0.85rem] text-white/40">{format(range.max)}</span>
+        {range.min < 0 && <span className="pointer-events-none absolute bottom-0 left-0 text-[0.85rem] text-white/40">{format(range.min)}</span>}
         {hovered !== null && (
           <div
             className="pointer-events-none absolute top-[0.4rem] z-10 flex -translate-x-1/2 flex-col gap-[0.15rem] whitespace-nowrap rounded-[0.5rem] bg-ink/95 px-[0.7rem] py-[0.4rem] text-[0.85rem] text-white ring-1 ring-white/15"
@@ -118,7 +118,7 @@ export function LineChart({ title, series, time, onTime, format, split = false }
           </div>
         )}
       </div>
-      <div className="relative h-[1rem] text-[0.75rem] text-white/40" aria-hidden="true">
+      <div className="relative h-[1rem] text-[0.85rem] text-white/40" aria-hidden="true">
         {ticks.map((minute) => (
           <span key={minute} className="absolute -translate-x-1/2 tabular-nums" style={{ left: `${(minute / (points - 1)) * 100}%` }}>
             {minute}′

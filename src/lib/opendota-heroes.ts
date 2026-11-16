@@ -1,6 +1,7 @@
-/** Hero and item data from OpenDota: trending heroes, hero index, item index. */
+/** Hero and item data from OpenDota: draft heroes, hero index, item index. */
 
 import { getJson } from "@/lib/opendota";
+import type { DraftHero } from "@/types/draft";
 import type { HeroInfo, ItemIndex } from "@/types/opendota";
 
 const STEAM_CDN = "https://cdn.cloudflare.steamstatic.com";
@@ -8,65 +9,32 @@ const HERO_PREFIX = "npc_dota_hero_";
 const SIX_HOURS = 6 * 3600;
 const ONE_DAY = 86400;
 
-type BracketCounts = Partial<Record<`${number}_pick` | `${number}_win`, number>>;
-
-interface RawHeroStat extends BracketCounts {
+interface RawHeroStat {
   id: number;
   /** e.g. "npc_dota_hero_antimage" */
   name: string;
   localized_name: string;
-  img: string;
   pub_pick: number;
   pub_win: number;
-  pub_pick_trend: number[];
-}
-
-export interface HeroTrend {
-  id: number;
-  name: string;
-  image: string;
-  /** All brackets, or only the medal bracket passed in. */
-  picks: number;
-  winRate: number;
-  /** % change in daily picks across the week. */
-  pickChange: number;
+  roles?: string[];
 }
 
 function getHeroStats() {
   return getJson<RawHeroStat[]>("/heroStats", SIX_HOURS);
 }
 
-/** OpenDota leaves some brackets empty (Immortal is always 0), so fall back to all brackets. */
-function bracketCounts(hero: RawHeroStat, medalTier?: number) {
-  const allBrackets = { picks: hero.pub_pick, wins: hero.pub_win };
-  if (!medalTier) return allBrackets;
-
-  const picks = hero[`${medalTier}_pick`] ?? 0;
-  if (picks === 0) return allBrackets;
-  return { picks, wins: hero[`${medalTier}_win`] ?? 0 };
-}
-
-/** Pass medalTier (1-8) to get winrates for that medal bracket only. */
-export async function getTrendingHeroes(medalTier?: number): Promise<HeroTrend[]> {
-  const heroes = await getHeroStats();
-  if (!heroes) return [];
-
+/** Draft page heroes, alphabetical, with overall public win rate and roles. Empty when OpenDota is unavailable. */
+export async function getDraftHeroes(): Promise<DraftHero[]> {
+  const heroes = (await getHeroStats()) ?? [];
   return heroes
-    .map((hero) => {
-      const { picks, wins } = bracketCounts(hero, medalTier);
-      const fullDays = hero.pub_pick_trend.slice(0, -1); // last entry is today, still filling up
-      const first = fullDays[0] ?? 0;
-      const last = fullDays.at(-1) ?? 0;
-      return {
-        id: hero.id,
-        name: hero.localized_name,
-        image: `${STEAM_CDN}${hero.img}`,
-        picks,
-        winRate: picks ? (wins / picks) * 100 : 0,
-        pickChange: first ? ((last - first) / first) * 100 : 0,
-      };
-    })
-    .sort((a, b) => b.pickChange - a.pickChange);
+    .map((hero) => ({
+      id: hero.id,
+      name: hero.localized_name,
+      slug: hero.name.replace(HERO_PREFIX, ""),
+      winRate: hero.pub_pick ? (hero.pub_win / hero.pub_pick) * 100 : 50,
+      roles: hero.roles ?? [],
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /** hero id -> name + slug. Empty when OpenDota is unavailable. */

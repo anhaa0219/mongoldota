@@ -25,7 +25,7 @@ function Trend({ form }: { form: FormTrend }) {
   return (
     <table className="mt-[0.8rem] w-full text-[0.95rem] tabular-nums">
       <thead>
-        <tr className="text-[0.8rem] uppercase tracking-wider text-white/45">
+        <tr className="text-[0.85rem] uppercase tracking-wider text-white/45">
           <th className="pb-[0.2rem] text-left font-normal">Form</th>
           <th className="pb-[0.2rem] text-right font-normal">Last {form.recent.matches}</th>
           <th className="pb-[0.2rem] text-right font-normal">Before</th>

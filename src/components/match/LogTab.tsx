@@ -28,7 +28,7 @@ export function LogTab({ view, followed }: { view: MatchView; followed: number }
                 <span className={`relative block h-[1.9rem] w-[2.6rem] overflow-hidden rounded-[0.3rem] ${item.cost >= 2000 ? "ring-1 ring-accent/70" : "ring-1 ring-white/10"}`}>
                   <Image unoptimized src={item.image} alt={item.name} fill sizes="2.6rem" className="object-cover" />
                 </span>
-                <span className="text-[0.75rem] tabular-nums text-white/55">{formatDuration(purchase.time)}</span>
+                <span className="text-[0.85rem] tabular-nums text-white/55">{formatDuration(purchase.time)}</span>
               </li>
             ) : null;
           })}

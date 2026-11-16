@@ -4,13 +4,14 @@ import { HeroComparison } from "@/components/HeroComparison";
 import { SuggestionList } from "@/components/SuggestionList";
 
 describe("coach panels", () => {
-  it("shows each benchmark with how many players it beats", () => {
+  it("shows each benchmark with its rank among players of that hero", () => {
     const html = renderToStaticMarkup(
       <HeroComparison heroName="Puck" rows={[{ metric: "gold_per_min", label: "GPM", yours: 512.4, median: 521, betterThan: 47.6 }]} />,
     );
     expect(html).toContain("You vs other Puck players");
     expect(html).toContain("512");
-    expect(html).toContain("beats 48%");
+    expect(html).toContain("Bottom 48%");
+    expect(html).toContain("better than 48% of Puck players");
   });
 
   it("asks for more games when there is nothing to compare", () => {

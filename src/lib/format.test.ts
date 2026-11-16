@@ -29,3 +29,9 @@ describe("timeAgo", () => {
     expect(timeAgo(now - 65 * day, now)).toBe("2 mo ago");
   });
 });
+
+describe("timeAgo without a time", () => {
+  it("prints nothing instead of NaN", () => {
+    expect(timeAgo(Number.NaN, 0)).toBe("");
+  });
+});

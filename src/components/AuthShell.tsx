@@ -17,7 +17,7 @@ const features = [
  */
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative isolate flex min-h-dvh w-full overflow-hidden bg-ink lg:h-[calc(100dvh-13.75rem)] lg:min-h-0 lg:rounded-[3rem] lg:shadow-[0_2.5rem_6rem_rgb(0_0_0/0.45)]">
+    <div className="relative isolate flex min-h-dvh w-full overflow-hidden bg-ink lg:h-[calc(100dvh-4.5rem)] lg:min-h-0 lg:rounded-[3rem] lg:shadow-[0_2.5rem_6rem_rgb(0_0_0/0.45)]">
       {/* Live wallpaper; skipped when the visitor prefers reduced motion */}
       <video
         autoPlay
