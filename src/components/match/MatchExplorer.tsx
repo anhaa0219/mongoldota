@@ -11,19 +11,10 @@ import { NotParsedCard } from "@/components/match/NotParsedCard";
 import { Scoreboard } from "@/components/match/Scoreboard";
 import { StoryTab } from "@/components/match/StoryTab";
 import { TimeScrubber, type PlaybackSpeed } from "@/components/match/TimeScrubber";
+import { MATCH_TABS, type MatchTab } from "@/lib/match-tabs";
 import { clampTime } from "@/lib/match-view-timeline";
 import { useMatchPlayback, usePrefersReducedMotion } from "@/lib/use-match-playback";
 import type { MatchView } from "@/types/match-view";
-
-export const MATCH_TABS = [
-  { id: "story", label: "Story" },
-  { id: "laning", label: "Laning" },
-  { id: "graphs", label: "Graphs" },
-  { id: "combat", label: "Combat" },
-  { id: "map", label: "Map" },
-  { id: "log", label: "Items & Log" },
-] as const;
-export type MatchTab = (typeof MATCH_TABS)[number]["id"];
 
 const TIMELINE_TABS: readonly MatchTab[] = ["story", "graphs", "map"];
 const START_SECONDS = 600; // open at the end of the laning stage

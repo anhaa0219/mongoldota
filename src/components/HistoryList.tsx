@@ -17,12 +17,12 @@ export async function HistoryList() {
   const [matches, heroes, items] = await Promise.all([getRecentMatches(accountId), getHeroIndex(), getItemIndex()]);
   if (matches === null) return <PlayerDataNotice reason="error" />;
   if (matches.length === 0) return <PlayerDataNotice reason="no-matches" />;
-  // Save these matches to the database after the response is sent (never slows the page).
-  after(() => syncRecentMatches(matches.map((match) => match.id)));
-
   // Cache Components: reading the current time needs an explicit request-time marker first,
   // otherwise Next reports "unstable value Date.now() while prerendering" (a cookie read is not enough).
+  // after() reads the clock too, so it must also come after this line.
   await connection();
+  // Save these matches to the database after the response is sent (never slows the page).
+  after(() => syncRecentMatches(matches.map((match) => match.id)));
   // Server Component: renders once per request, so "now" is the request time.
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();

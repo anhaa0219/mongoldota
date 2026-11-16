@@ -153,6 +153,9 @@ describe("summarize", () => {
     const summary = summarize([match({ kills: 3, gpm: 400 }), match({ kills: 4, gpm: 601 })], heroes);
     expect(summary?.averages.kills).toBe(3.5);
     expect(summary?.averages.gpm).toBe(500.5);
+    // KDA over all matches: (3+7 + 4+7) / (3+3); a deathless stretch counts as 1 death
+    expect(summary?.averages.kda).toBe(3.5);
+    expect(summarize([match({ kills: 3, assists: 2, deaths: 0 })], heroes)?.averages.kda).toBe(5);
   });
 
   it("finds the main lane among parsed matches only", () => {

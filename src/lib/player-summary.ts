@@ -60,6 +60,12 @@ function average(matches: MatchSummary[], pick: (match: MatchSummary) => number)
   return matches.reduce((sum, match) => sum + pick(match), 0) / matches.length;
 }
 
+/** (kills + assists) / deaths over all matches; a deathless stretch counts as 1 death. */
+function kda(matches: MatchSummary[]) {
+  const sum = (pick: (match: MatchSummary) => number) => matches.reduce((total, match) => total + pick(match), 0);
+  return (sum((match) => match.kills) + sum((match) => match.assists)) / Math.max(1, sum((match) => match.deaths));
+}
+
 /** Most common lane among parsed matches; ties go to the lowest lane number. */
 function mainLane(matches: MatchSummary[]): PlayerSummary["mainLane"] {
   const lanes = matches.flatMap((match) => (match.parsed && match.laneRole ? [match.laneRole] : []));
@@ -95,6 +101,8 @@ export function summarize(matches: MatchSummary[], heroes: Map<number, HeroInfo>
       gpm: average(matches, (match) => match.gpm),
       xpm: average(matches, (match) => match.xpm),
       lastHits: average(matches, (match) => match.lastHits),
+      heroDamage: average(matches, (match) => match.heroDamage),
+      kda: kda(matches),
     },
     mainLane: mainLane(matches),
   };

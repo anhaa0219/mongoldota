@@ -3,11 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { MATCH_TABS, MatchExplorer, type MatchTab } from "@/components/match/MatchExplorer";
+import { MatchExplorer } from "@/components/match/MatchExplorer";
 import { PageBackdrop } from "@/components/PageBackdrop";
 import { timeAgo } from "@/lib/format";
 import { getLinkedAccountId } from "@/lib/linked-account";
 import { parseMatchId } from "@/lib/match-id";
+import { toMatchTab } from "@/lib/match-tabs";
 import { loadMatch } from "@/lib/match-store";
 import { requireUserId } from "@/lib/require-user";
 import { toMatchView } from "@/lib/match-view";
@@ -17,10 +18,6 @@ import { site } from "@/lib/site-content";
 export async function generateMetadata({ params }: PageProps<"/matches/[matchId]">): Promise<Metadata> {
   const { matchId } = await params;
   return { title: `Match ${matchId} · ${site.gameTitle}` };
-}
-
-function toTab(value: string | string[] | undefined): MatchTab {
-  return MATCH_TABS.find((option) => option.id === value)?.id ?? "story";
 }
 
 function MatchSkeleton() {
@@ -54,7 +51,7 @@ async function MatchLoader({ params, searchParams }: PageProps<"/matches/[matchI
   const view = toMatchView(raw, heroes, items, accountId ? Number(accountId) : null);
   // eslint-disable-next-line react-hooks/purity -- request-time Server Component (after connection())
   const ago = timeAgo(view.header.startTime + view.header.durationSeconds * 1000, Date.now());
-  return <MatchExplorer view={view} initialTab={toTab((await searchParams).tab)} ago={ago} />;
+  return <MatchExplorer view={view} initialTab={toMatchTab((await searchParams).tab)} ago={ago} />;
 }
 
 export default function MatchPage(props: PageProps<"/matches/[matchId]">) {

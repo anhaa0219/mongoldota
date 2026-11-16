@@ -11,13 +11,12 @@ function formatAverage(stat: PlaystyleStat) {
 export function PlaystylePanel({ stats }: { stats: PlaystyleStat[] }) {
   if (stats.length === 0) return null;
   return (
-    <StatPanel title="Playstyle · per match">
-      <dl className="grid grid-cols-2 gap-x-[1rem] gap-y-[1.1rem] sm:grid-cols-4">
+    <StatPanel title="Playstyle · per match, last 100">
+      <dl className="grid grid-cols-2 gap-x-[1rem] gap-y-[0.9rem] sm:grid-cols-4 lg:grid-cols-8">
         {stats.map((stat) => (
-          <div key={stat.label}>
-            <dt className="text-[1rem] uppercase tracking-wider text-white/55">{stat.label}</dt>
-            <dd className="font-display text-[2rem] leading-none">{formatAverage(stat)}</dd>
-            <dd className="mt-[0.2rem] text-[0.85rem] text-white/40">{stat.matches} games</dd>
+          <div key={stat.label} className="min-w-0" title={`Average over ${stat.matches} games that have this stat`}>
+            <dt className="truncate text-[0.85rem] uppercase tracking-wider text-white/55">{stat.label}</dt>
+            <dd className="font-display text-[1.6rem] leading-none">{formatAverage(stat)}</dd>
           </div>
         ))}
       </dl>

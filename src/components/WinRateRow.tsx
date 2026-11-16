@@ -6,15 +6,15 @@ export function WinRateRow({ label, record, children }: { label: string; record:
   return (
     <li className="flex items-center gap-[0.8rem]">
       {children}
-      <div className="flex min-w-0 flex-1 flex-col gap-[0.3rem]">
-        <div className="flex items-baseline justify-between gap-[0.6rem] text-[1.05rem]">
+      <div className="flex min-w-0 flex-1 flex-col gap-[0.25rem]">
+        <div className="flex items-baseline justify-between gap-[0.6rem] text-[0.98rem]">
           <span className="truncate text-white/80">{label}</span>
           <span className="shrink-0 tabular-nums text-white">
             {rate}% <span className="text-white/45">· {record.matches}</span>
           </span>
         </div>
         <div
-          className="h-[0.4rem] overflow-hidden rounded-full bg-white/10"
+          className="h-[0.35rem] overflow-hidden rounded-full bg-white/10"
           role="meter"
           aria-label={`${label} win rate`}
           aria-valuenow={rate}

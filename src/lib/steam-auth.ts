@@ -10,6 +10,24 @@ const STEAM_ID_OFFSET = BigInt("76561197960265728");
 export const SESSION_COOKIE = "steam_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+  maxAge: SESSION_MAX_AGE,
+} as const;
+
+/**
+ * Dev only: the 64-bit Steam ID from DEV_STEAM_ID, used to sign in without
+ * Steam on networks that block steamcommunity.com. Always null in production.
+ */
+export function devSteamId() {
+  if (process.env.NODE_ENV !== "development") return null;
+  const steamId = process.env.DEV_STEAM_ID?.trim();
+  return steamId && /^\d{17}$/.test(steamId) ? steamId : null;
+}
+
 function secret() {
   const value = process.env.AUTH_SECRET;
   if (value) return value;

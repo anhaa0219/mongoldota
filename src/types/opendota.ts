@@ -86,7 +86,8 @@ export interface PlayerSummary {
   /** In RecordLabel order. */
   records: { label: RecordLabel; value: number; hero: HeroInfo; matchId: number }[];
   /** Unrounded. */
-  averages: { kills: number; deaths: number; assists: number; gpm: number; xpm: number; lastHits: number };
+  /** kda = (kills + assists) / deaths over all matches (deaths of at least 1). */
+  averages: { kills: number; deaths: number; assists: number; gpm: number; xpm: number; lastHits: number; heroDamage: number; kda: number };
   /** share is 0-100 (rounded) of parsed matches. Null when no match is parsed. */
   mainLane: { lane: LaneRole; share: number } | null;
   /** Up to 5, same order as mostPlayed (which is topHeroes[0]). */

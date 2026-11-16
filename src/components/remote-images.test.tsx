@@ -56,7 +56,7 @@ describe("remote Dota images load straight from the CDN", () => {
   it("Stats panels: record and top hero portraits", () => {
     const summary = summarize([match], new Map([[1, { id: 1, name: "Axe", slug: "axe" }]]));
     if (!summary) throw new Error("expected a summary");
-    const html = renderToStaticMarkup(<PlayerStats summary={summary} />);
+    const html = renderToStaticMarkup(<PlayerStats summary={summary} form={null} />);
     expect(html).toContain("<img");
     expect(html).not.toContain(OPTIMIZER);
   });
