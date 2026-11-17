@@ -66,22 +66,24 @@ export function MatchRow({ match }: { match: MatchRowData }) {
     await load();
   }
 
+  // The panel paints --panel-tint under its pointer light (a bg-* class would replace the light).
   const tint = match.won
-    ? "bg-[linear-gradient(90deg,rgb(146_200_74/0.13),transparent_32%)]"
-    : "bg-[linear-gradient(90deg,rgb(226_73_47/0.13),transparent_32%)]";
+    ? "[--panel-tint:linear-gradient(90deg,rgb(146_200_74/0.13),transparent_32%)]"
+    : "[--panel-tint:linear-gradient(90deg,rgb(226_73_47/0.13),transparent_32%)]";
+  const wasOpened = detail.status !== "idle";
 
   return (
-    <li className={`glass-panel overflow-hidden rounded-[1.2rem] ${tint}`}>
+    <li className={`glass-panel group/row overflow-hidden rounded-[1.2rem] ${tint}`}>
       <div className="flex items-stretch">
       <button
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        className="flex min-w-0 flex-1 flex-wrap items-center gap-x-[1.2rem] gap-y-[0.6rem] px-[1rem] py-[0.7rem] text-left transition-colors hover:bg-white/5 md:grid md:grid-cols-[minmax(11rem,1fr)_6.5rem_5.2rem_4.2rem_5.6rem_auto_1.3rem]"
+        className="flex min-w-0 flex-1 flex-wrap items-center gap-x-[1.2rem] gap-y-[0.6rem] px-[1rem] py-[0.7rem] text-left transition-colors hover:bg-white/5 active:scale-[0.995] md:grid md:grid-cols-[minmax(11rem,1fr)_6.5rem_5.2rem_4.2rem_5.6rem_auto_1.3rem]"
       >
         <span className="flex min-w-[11rem] flex-1 items-center gap-[0.9rem]">
           <span className="relative block h-[2.5rem] w-[4.4rem] shrink-0 overflow-hidden rounded-[0.4rem] bg-white/10">
-            {match.heroSlug && <Image unoptimized src={heroPortrait(match.heroSlug)} alt="" fill sizes="4.5rem" className="object-cover" />}
+            {match.heroSlug && <Image unoptimized src={heroPortrait(match.heroSlug)} alt="" fill sizes="4.5rem" className="object-cover transition-transform duration-300 group-hover/row:scale-110" />}
           </span>
           <span className="flex min-w-0 flex-col gap-[0.25rem] leading-tight">
             <span className="truncate text-[1.15rem] font-medium text-white">{match.heroName}</span>
@@ -122,11 +124,16 @@ export function MatchRow({ match }: { match: MatchRowData }) {
         <ExternalLink className="size-[1.1rem] md:hidden" aria-hidden="true" />
       </Link>
       </div>
-      {open && (
-        <div className="border-t border-white/10 px-[1rem] py-[1.2rem]">
-          <DetailBody state={detail} matchId={match.id} onCheckAgain={load} />
+      {/* The row grows from 0 to its content's height; the details stay mounted once loaded */}
+      <div className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+        <div className="min-h-0 overflow-hidden" inert={!open}>
+          {wasOpened && (
+            <div className="border-t border-white/10 px-[1rem] py-[1.2rem]">
+              <DetailBody state={detail} matchId={match.id} onCheckAgain={load} />
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </li>
   );
 }

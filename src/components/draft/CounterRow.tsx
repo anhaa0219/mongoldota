@@ -21,10 +21,10 @@ export function CounterRow({ suggestion, hero, heroes, personal, onPick }: Count
         type="button"
         onClick={() => onPick(hero.id)}
         title={`Add ${hero.name} to your team`}
-        className="flex w-full items-center gap-[0.7rem] rounded-[0.7rem] px-[0.4rem] py-[0.3rem] text-left hover:bg-white/[0.06]"
+        className="group flex w-full items-center gap-[0.7rem] rounded-[0.7rem] px-[0.4rem] py-[0.3rem] text-left transition-colors hover:bg-white/[0.07] active:scale-[0.995]"
       >
         <span className="relative block h-[1.9rem] w-[3.4rem] shrink-0 overflow-hidden rounded-[0.3rem] bg-white/10">
-          <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="3.4rem" className="object-cover" />
+          <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="3.4rem" className="object-cover transition-transform duration-300 group-hover:scale-110" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[0.98rem] text-white">{hero.name}</span>

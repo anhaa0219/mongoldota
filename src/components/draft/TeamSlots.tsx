@@ -33,11 +33,11 @@ export function TeamSlots({ side, heroIds, heroes, selected, onSelect, onClear }
                 type="button"
                 onClick={() => (hero ? onClear({ side, index }) : onSelect({ side, index }))}
                 aria-label={hero ? `Remove ${hero.name}` : `Choose a hero for ${side} slot ${index + 1}`}
-                className={`group relative block aspect-[16/9] w-full overflow-hidden rounded-[0.6rem] bg-white/[0.06] ${ring} transition-shadow`}
+                className={`group relative block aspect-[16/9] w-full overflow-hidden rounded-[0.6rem] bg-white/[0.06] ${ring} transition-shadow hover:ring-white/40`}
               >
                 {hero ? (
                   <>
-                    <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="10rem" className="object-cover" />
+                    <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="10rem" className="pop-in object-cover" />
                     <span className="absolute inset-x-0 bottom-0 truncate bg-ink/75 px-[0.4rem] py-[0.15rem] text-left text-[0.85rem] text-white">
                       {hero.name}
                     </span>

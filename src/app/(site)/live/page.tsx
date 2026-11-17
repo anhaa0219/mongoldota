@@ -49,10 +49,10 @@ async function LiveLoader() {
 export default function LivePage() {
   return (
     <>
-      <PageBackdrop />
-      <div className="relative z-20 flex w-full flex-1 flex-col gap-[1.2rem] px-[1.3rem] pb-12 md:px-8 lg:min-h-0 lg:overflow-y-auto lg:px-[5rem] lg:pb-[2.4rem]">
+      <PageBackdrop tone="live" />
+      <div className="page-enter relative z-20 flex w-full flex-1 flex-col gap-[1.2rem] px-[1.3rem] pb-12 md:px-8 lg:min-h-0 lg:overflow-y-auto lg:px-[5rem] lg:pb-[2.4rem]">
         <h1 className="title-metal font-display text-[3.5rem] uppercase leading-none lg:text-[5rem]">Live Coach</h1>
-        <Suspense fallback={<div className="glass-panel h-[18rem] animate-pulse rounded-[1.4rem]" />}>
+        <Suspense fallback={<div className="glass-panel shimmer h-[18rem] rounded-[1.4rem]" />}>
           <LiveLoader />
         </Suspense>
       </div>

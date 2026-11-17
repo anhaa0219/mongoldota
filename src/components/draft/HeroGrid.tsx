@@ -44,9 +44,9 @@ export function HeroGrid({ heroes, isPicked, onPick }: { heroes: HeroInfo[]; isP
                 className="group block w-full text-left disabled:cursor-not-allowed disabled:opacity-25"
               >
                 <span className="relative block aspect-[16/9] overflow-hidden rounded-[0.45rem] bg-white/10 ring-1 ring-white/10 transition group-enabled:group-hover:ring-accent">
-                  {hero.slug && <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="7rem" className="object-cover" />}
+                  {hero.slug && <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="7rem" className="object-cover transition-transform duration-300 group-enabled:group-hover:scale-110" />}
                 </span>
-                <span className="mt-[0.15rem] block truncate text-[0.85rem] text-white/70">{hero.name}</span>
+                <span className="mt-[0.15rem] block truncate text-[0.85rem] text-white/70 transition-colors group-enabled:group-hover:text-accent">{hero.name}</span>
               </button>
             </li>
           );

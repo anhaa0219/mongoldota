@@ -21,7 +21,7 @@ export function WinRateRow({ label, record, children }: { label: string; record:
           aria-valuemin={0}
           aria-valuemax={100}
         >
-          <div className="h-full rounded-full bg-radiant" style={{ width: `${rate}%` }} />
+          <div className="grow-x h-full rounded-full bg-radiant" style={{ width: `${rate}%` }} />
         </div>
       </div>
     </li>

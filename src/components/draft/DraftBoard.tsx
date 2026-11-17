@@ -126,7 +126,7 @@ export function DraftBoard({
   }
 
   return (
-    <div className="relative z-20 flex min-h-0 flex-1 flex-col gap-[1rem]">
+    <div className="stagger relative z-20 flex min-h-0 flex-1 flex-col gap-[1rem]">
       <div className="glass-panel flex flex-col gap-[0.8rem] rounded-[1.4rem] p-[1.1rem] md:flex-row md:items-start md:gap-[1.4rem]">
         <TeamSlots side="radiant" heroIds={draft.radiant} {...slotProps} />
         <span className="self-center font-display text-[1.6rem] text-white/40 md:mt-[3.2rem] md:self-start">

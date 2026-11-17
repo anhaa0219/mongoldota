@@ -104,7 +104,7 @@ export function MatchExplorer({ view, initialTab, ago }: { view: MatchView; init
         />
       )}
 
-      <div role="tabpanel" aria-label={MATCH_TABS.find((option) => option.id === tab)?.label}>
+      <div key={tab} role="tabpanel" className="rise-in" aria-label={MATCH_TABS.find((option) => option.id === tab)?.label}>
         <TabContent tab={tab} view={view} followed={followed} time={time} onTime={moveTo} />
       </div>
     </div>

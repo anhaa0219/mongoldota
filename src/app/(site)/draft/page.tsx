@@ -25,9 +25,9 @@ async function DraftLoader() {
 export default function DraftPage() {
   return (
     <>
-      <PageBackdrop />
-      <div className="relative flex w-full flex-1 flex-col px-[1.3rem] pb-12 md:px-8 lg:min-h-0 lg:px-[5rem] lg:pb-[2.4rem]">
-        <Suspense fallback={<div className="glass-panel relative z-20 h-[12rem] animate-pulse rounded-[1.4rem]" />}>
+      <PageBackdrop tone="duel" />
+      <div className="page-enter relative flex w-full flex-1 flex-col px-[1.3rem] pb-12 md:px-8 lg:min-h-0 lg:px-[5rem] lg:pb-[2.4rem]">
+        <Suspense fallback={<div className="glass-panel shimmer z-20 h-[12rem] rounded-[1.4rem]" />}>
           <DraftLoader />
         </Suspense>
       </div>

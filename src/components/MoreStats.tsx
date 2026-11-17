@@ -54,7 +54,7 @@ function LanesAndSides({ summary }: { summary: PlayerSummary }) {
 /** Second row of the Stats page: top heroes, lanes & sides, form & streaks. */
 export function MoreStats({ summary, form }: { summary: PlayerSummary; form: FormTrend | null }) {
   return (
-    <div className="grid gap-[1.1rem] md:grid-cols-3">
+    <div className="stagger grid gap-[1.1rem] [--stagger-base:140ms] md:grid-cols-3">
       <TopHeroes summary={summary} />
       <LanesAndSides summary={summary} />
       <FormPanel summary={summary} form={form} />

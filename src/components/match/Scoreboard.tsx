@@ -17,12 +17,12 @@ function Row({ player, followed, onFollow }: { player: ScoreboardPlayer; followe
       onClick={onFollow}
       aria-pressed={followed}
       title={`Follow ${player.hero.name} in the tabs below`}
-      className={`${columns} w-full rounded-[0.8rem] px-[0.6rem] py-[0.35rem] text-left transition-[background-color,box-shadow] ${
+      className={`${columns} w-full rounded-[0.8rem] px-[0.6rem] py-[0.35rem] group text-left transition-[background-color,box-shadow] active:scale-[0.995] ${
         followed ? "bg-accent/15 shadow-[inset_0_0_0_1px_rgb(254_186_135/0.6)]" : "hover:bg-white/5"
       }`}
     >
       <span className="relative block h-[2rem] w-[3.6rem] overflow-hidden rounded-[0.35rem] bg-white/10">
-        {player.hero.slug && <Image unoptimized src={heroPortrait(player.hero.slug)} alt="" fill sizes="3.6rem" className="object-cover" />}
+        {player.hero.slug && <Image unoptimized src={heroPortrait(player.hero.slug)} alt="" fill sizes="3.6rem" className="object-cover transition-transform duration-300 group-hover:scale-110" />}
       </span>
       <span className="min-w-0 leading-tight">
         <span className="block truncate text-[1.05rem] text-white">
@@ -71,7 +71,7 @@ function TeamRows({ team, players, followed, onFollow }: { team: Team; players: 
 /** All 10 players. Clicking a row follows that player in every tab. */
 export function Scoreboard({ players, followed, onFollow }: { players: ScoreboardPlayer[]; followed: number; onFollow: (slot: number) => void }) {
   return (
-    <section className="glass-panel overflow-x-auto rounded-[1.6rem] p-[0.9rem]" aria-label="Scoreboard">
+    <section className="glass-panel rise-in overflow-x-auto rounded-[1.6rem] p-[0.9rem] [--rise-delay:70ms]" aria-label="Scoreboard">
       <div className="min-w-[30rem]">
         <div className={`${columns} px-[0.6rem] pb-[0.4rem] text-[0.85rem] uppercase tracking-[0.12em] text-white/40`}>
           <span />

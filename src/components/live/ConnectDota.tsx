@@ -69,7 +69,7 @@ export function ConnectDota({ connected, hasToken, lastSeen, now, onDownloaded }
   const note = "text-[0.95rem] leading-relaxed text-white/70";
 
   return (
-    <section aria-label="Connect Dota" className="glass-panel flex flex-col gap-[1.2rem] rounded-[1.4rem] p-[1.2rem]">
+    <section aria-label="Connect Dota" className="glass-panel rise-in flex flex-col gap-[1.2rem] rounded-[1.4rem] p-[1.2rem]">
       <div className="flex flex-wrap items-baseline justify-between gap-[0.5rem]">
         <h2 className="font-display text-[1.8rem] uppercase tracking-[0.06em] text-white">Connect Dota</h2>
         <p className="text-[0.9rem] text-white/50">Once, about 1 minute</p>

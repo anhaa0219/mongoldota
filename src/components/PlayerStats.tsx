@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { CountUp } from "@/components/CountUp";
 import { HeroHeadline } from "@/components/HeroHeadline";
 import { MoreStats } from "@/components/MoreStats";
 import { StatPanel as Panel } from "@/components/StatPanel";
@@ -15,27 +16,33 @@ function Last100({ summary }: { summary: PlayerSummary }) {
   return (
     <Panel title={`Last ${wins + losses} matches`}>
       <p className="flex items-baseline gap-[0.8rem] font-display leading-none">
-        <span className="text-[2.8rem] text-radiant">{wins}W</span>
+        <span className="text-[2.8rem] text-radiant">
+          <CountUp value={wins} suffix="W" />
+        </span>
         <span className="text-[1.7rem] text-white/40">/</span>
-        <span className="text-[2.8rem] text-dire">{losses}L</span>
+        <span className="text-[2.8rem] text-dire">
+          <CountUp value={losses} suffix="L" />
+        </span>
       </p>
       <div
-        className="mt-[0.7rem] flex h-[0.5rem] overflow-hidden rounded-full"
+        className="mt-[0.7rem] flex h-[0.5rem] overflow-hidden rounded-full bg-dire"
         role="meter"
         aria-label="Win rate"
         aria-valuenow={winRate}
         aria-valuemin={0}
         aria-valuemax={100}
       >
-        <span className="bg-radiant" style={{ width: `${winRate}%` }} />
-        <span className="flex-1 bg-dire" />
+        <span className="grow-x bg-radiant" style={{ width: `${winRate}%` }} />
       </div>
-      <p className="mt-[0.4rem] text-[1rem] text-white/70">{winRate}% win rate</p>
+      <p className="mt-[0.4rem] text-[1rem] text-white/70">
+        <CountUp value={winRate} suffix="%" /> win rate
+      </p>
       <div className="mt-[0.8rem] flex flex-wrap items-center gap-[0.3rem]" aria-label={`Last ${last10.length}: ${last10.join(" ")}`}>
         {last10.map((result, i) => (
           <span
             key={i}
-            className={`grid size-[1.45rem] place-items-center rounded-[0.3rem] text-[0.85rem] font-semibold ${
+            style={{ animationDelay: `${300 + i * 45}ms` }}
+            className={`pop-in grid size-[1.45rem] place-items-center rounded-[0.3rem] text-[0.85rem] font-semibold ${
               result === "W" ? "bg-radiant/25 text-radiant" : "bg-dire/25 text-dire"
             }`}
           >
@@ -50,7 +57,7 @@ function Last100({ summary }: { summary: PlayerSummary }) {
 function HeroThumb({ hero }: { hero: HeroInfo }) {
   return (
     <span className="relative block h-[1.8rem] w-[3.2rem] shrink-0 overflow-hidden rounded-[0.35rem] bg-white/10">
-      {hero.slug && <Image unoptimized src={heroPortrait(hero.slug)} alt={hero.name} fill sizes="4rem" className="object-cover" />}
+      {hero.slug && <Image unoptimized src={heroPortrait(hero.slug)} alt={hero.name} fill sizes="4rem" className="object-cover transition-transform duration-300 group-hover:scale-110" />}
     </span>
   );
 }
@@ -68,7 +75,7 @@ function Records({ summary }: { summary: PlayerSummary }) {
             >
               <HeroThumb hero={record.hero} />
               <span className="min-w-0 flex-1 truncate text-[1rem] text-white/75 group-hover:text-white">{record.label}</span>
-              <span className="font-display text-[1.4rem] leading-none">{compact.format(record.value)}</span>
+              <span className="font-display text-[1.4rem] leading-none transition-colors group-hover:text-accent">{compact.format(record.value)}</span>
             </Link>
           </li>
         ))}
@@ -108,7 +115,7 @@ export function PlayerStats({ summary, form, children }: { summary: PlayerSummar
   return (
     <div className="relative z-20 flex min-w-0 flex-col gap-[1.1rem] px-[1.3rem] lg:px-0">
       <HeroHeadline summary={summary} />
-      <div className="grid gap-[1.1rem] md:grid-cols-3">
+      <div className="stagger grid gap-[1.1rem] md:grid-cols-3">
         <Last100 summary={summary} />
         <Averages summary={summary} />
         <Records summary={summary} />

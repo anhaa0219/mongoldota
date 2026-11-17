@@ -1,4 +1,5 @@
 import { Crosshair, Shield, Sword, Trees, type LucideIcon } from "lucide-react";
+import { CountUp } from "@/components/CountUp";
 import type { LaneRole, PlayerSummary } from "@/types/opendota";
 
 const lanes: Record<LaneRole, { name: string; icon: LucideIcon }> = {
@@ -8,7 +9,7 @@ const lanes: Record<LaneRole, { name: string; icon: LucideIcon }> = {
   4: { name: "Jungle", icon: Trees },
 };
 
-function Stat({ value, label, tone = "text-white" }: { value: string; label: string; tone?: string }) {
+function Stat({ value, label, tone = "text-white" }: { value: React.ReactNode; label: string; tone?: string }) {
   return (
     <div className="flex flex-col gap-[0.25rem] px-[1.2rem] first:pl-0 last:pr-0">
       <span className={`font-display text-[1.9rem] leading-none ${tone}`}>{value}</span>
@@ -22,10 +23,10 @@ function LaneEmblem({ lane, share }: NonNullable<PlayerSummary["mainLane"]>) {
   const { name, icon: LaneIcon } = lanes[lane];
   return (
     <div
-      className="glass-panel flex items-center gap-[0.8rem] rounded-full py-[0.4rem] pl-[0.4rem] pr-[1.4rem]"
+      className="glass-panel rise-in group flex items-center gap-[0.8rem] rounded-full py-[0.4rem] pl-[0.4rem] pr-[1.4rem] [--rise-delay:120ms]"
       title={`${share}% of your analysed matches (all heroes) were in the ${name.toLowerCase()}. Unanalysed matches have no lane data.`}
     >
-      <span className="grid size-[3rem] place-items-center rounded-full bg-[radial-gradient(circle_at_30%_30%,#ffd9b8,#feba87_45%,#c9783f)] shadow-[0_0_1.2rem_rgb(254_186_135/0.45)]">
+      <span className="grid size-[3rem] place-items-center rounded-full bg-[radial-gradient(circle_at_30%_30%,#ffd9b8,#feba87_45%,#c9783f)] shadow-[0_0_1.2rem_rgb(254_186_135/0.45)] transition-[rotate,box-shadow] duration-300 group-hover:rotate-12 group-hover:shadow-[0_0_2rem_rgb(254_186_135/0.8)]">
         <LaneIcon className="size-[1.4rem] text-ink" aria-hidden="true" />
       </span>
       <span className="flex flex-col leading-tight">
@@ -43,7 +44,7 @@ export function HeroHeadline({ summary }: { summary: PlayerSummary }) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-x-[2rem] gap-y-[1rem]">
       <div className="min-w-0">
-        <p className="mt-10 flex items-center gap-[0.7rem] font-display text-[1.5rem] uppercase tracking-[0.12em] text-accent lg:mt-0">
+        <p className="rise-in mt-10 flex items-center gap-[0.7rem] font-display text-[1.5rem] uppercase tracking-[0.12em] text-accent lg:mt-0">
           <span className="h-px w-[2rem] bg-accent/70" aria-hidden="true" />
           Your most played hero
         </p>
@@ -54,9 +55,9 @@ export function HeroHeadline({ summary }: { summary: PlayerSummary }) {
 
       <div className="flex flex-wrap items-center gap-[1rem]">
         {mainLane && <LaneEmblem {...mainLane} />}
-        <div className="glass-panel flex items-center divide-x divide-white/10 rounded-[1.2rem] px-[1.4rem] py-[0.7rem]">
-          <Stat value={String(mostPlayed.matches)} label={`${mostPlayed.hero.name} games`} />
-          <Stat value={`${Math.round(mostPlayed.winRate)}%`} label="Win rate" tone="text-radiant" />
+        <div className="glass-panel rise-in flex items-center divide-x divide-white/10 rounded-[1.2rem] px-[1.4rem] py-[0.7rem] [--rise-delay:180ms]">
+          <Stat value={<CountUp value={mostPlayed.matches} />} label={`${mostPlayed.hero.name} games`} />
+          <Stat value={<CountUp value={mostPlayed.winRate} suffix="%" />} label="Win rate" tone="text-radiant" />
         </div>
       </div>
     </header>

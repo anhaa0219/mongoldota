@@ -17,7 +17,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
         <div className={frameClass}>
           <Sidebar />
           <div className="relative flex min-w-0 flex-1 flex-col">
-            <div className="absolute right-4 top-5 z-30 flex items-center gap-[0.8rem] lg:right-[3rem] lg:top-[3.2rem]">
+            <div className="glass-blur absolute right-4 top-5 z-30 flex items-center gap-[0.8rem] lg:right-[3rem] lg:top-[3.2rem]">
               <Suspense fallback={null}>
                 <MedalBadge />
               </Suspense>

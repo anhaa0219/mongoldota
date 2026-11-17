@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Germania_One, Jost } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { PointerGlow } from "@/components/PointerGlow";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 import { site } from "@/lib/site-content";
 import "./globals.css";
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ClerkProvider appearance={clerkAppearance} signInUrl="/sign-in" signUpUrl="/sign-up" afterSignOutUrl="/sign-in">
           {children}
         </ClerkProvider>
+        <PointerGlow />
       </body>
     </html>
   );

@@ -109,7 +109,7 @@ export function LockScreen({ draft, heroById, mySide, onSideChange, onUnlock }: 
   };
 
   return (
-    <section aria-label="Locked draft" className="relative z-20 flex min-h-0 flex-1 flex-col gap-[0.9rem]">
+    <section aria-label="Locked draft" className="stagger relative z-20 flex min-h-0 flex-1 flex-col gap-[0.9rem]">
       <div className="glass-panel flex flex-col gap-[0.9rem] rounded-[1.4rem] p-[1rem]">
         <div className="flex items-center justify-between gap-[1rem]">
           <h2 className="font-display text-[1.6rem] uppercase tracking-[0.06em] text-white">Lock in</h2>

@@ -54,7 +54,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
         aria-haspopup="menu"
         aria-expanded={open}
         title="Language"
-        className="text-white/80 transition-colors hover:text-accent"
+        className="grid size-[3.6rem] place-items-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-accent aria-expanded:bg-white/10 aria-expanded:text-accent"
       >
         <Languages className={className} />
       </button>
@@ -62,7 +62,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
       {open && (
         <ul
           role="menu"
-          className="glass-panel absolute bottom-0 left-full z-40 ml-[2.4rem] w-[11rem] overflow-hidden rounded-[1rem] py-[0.4rem]"
+          className="glass-panel glass-blur pop-in absolute bottom-0 left-full z-40 ml-[1.6rem] w-[11rem] origin-bottom-left overflow-hidden rounded-[1rem] py-[0.4rem]"
         >
           {languages.map((item) => (
             <li key={item.code} role="none">

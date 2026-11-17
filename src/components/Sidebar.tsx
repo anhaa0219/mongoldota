@@ -13,7 +13,7 @@ export function Sidebar() {
         <Logo />
       </div>
 
-      <div className="mt-auto flex w-full flex-col items-center gap-[3.75rem] border-t border-white/[0.08] pb-[5rem] pt-[5.1rem]">
+      <div className="mt-auto flex w-full flex-col items-center gap-[2.05rem] border-t border-white/[0.08] pb-[4.15rem] pt-[4.25rem]">
         <ThemeToggle className={iconClass} />
         <LanguageSwitcher className={iconClass} />
         <SignOutButton>
@@ -21,7 +21,7 @@ export function Sidebar() {
             type="button"
             aria-label="Log out"
             title="Log out"
-            className="text-white/55 transition-colors hover:text-accent"
+            className="grid size-[3.6rem] place-items-center rounded-full text-white/55 transition-colors hover:bg-dire/15 hover:text-dire"
           >
             <LogOut className={iconClass} />
           </button>

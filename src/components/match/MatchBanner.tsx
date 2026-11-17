@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/CountUp";
 import { formatDuration } from "@/lib/format";
 import type { MatchView, ScoreboardPlayer } from "@/types/match-view";
 
@@ -8,7 +9,7 @@ export function MatchBanner({ view, ago, linked }: { view: MatchView; ago: strin
   const youWon = linked ? linked.team === winner : null;
 
   return (
-    <header className="relative overflow-hidden rounded-[1.8rem] border border-white/10 px-[1.6rem] py-[1.4rem]">
+    <header className="rise-in relative overflow-hidden rounded-[1.8rem] border border-white/10 px-[1.6rem] py-[1.4rem]">
       {/* Winning side's colour washes in from its corner */}
       <div
         aria-hidden="true"
@@ -33,9 +34,13 @@ export function MatchBanner({ view, ago, linked }: { view: MatchView; ago: strin
           )}
         </div>
         <p className="font-display text-[3.4rem] leading-none tabular-nums" aria-label={`Score ${header.radiantScore} to ${header.direScore}`}>
-          <span className="text-radiant">{header.radiantScore}</span>
+          <span className="text-radiant">
+            <CountUp value={header.radiantScore} />
+          </span>
           <span className="mx-[0.6rem] text-white/30">:</span>
-          <span className="text-dire">{header.direScore}</span>
+          <span className="text-dire">
+            <CountUp value={header.direScore} />
+          </span>
         </p>
       </div>
       {!view.parsed && (

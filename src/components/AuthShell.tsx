@@ -49,7 +49,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           <ul className="mt-10 hidden flex-col gap-5 lg:flex">
             {features.map(({ icon: Icon, text }) => (
               <li key={text} className="flex items-center gap-4 text-[1.4rem] text-white/85">
-                <span className="glass-panel grid size-[3.4rem] place-items-center rounded-full">
+                <span className="glass-panel glass-blur grid size-[3.4rem] place-items-center rounded-full">
                   <Icon className="size-[1.6rem] stroke-[1.75] text-accent" aria-hidden="true" />
                 </span>
                 {text}

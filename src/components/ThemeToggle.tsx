@@ -22,8 +22,11 @@ export function ThemeToggle({ className }: { className?: string }) {
   const label = theme === "dark" ? "Switch to light mode" : "Switch to night mode";
 
   return (
-    <button type="button" onClick={toggle} aria-label={label} title={label} className="text-white transition-colors hover:text-accent">
-      {theme === "dark" ? <Moon className={className} /> : <Sun className={className} />}
+    <button type="button" onClick={toggle} aria-label={label} title={label} className="grid size-[3.6rem] place-items-center rounded-full text-white transition-colors hover:bg-white/10 hover:text-accent">
+      {/* The key replays the pop each time the theme flips */}
+      <span key={theme} className="pop-in block">
+        {theme === "dark" ? <Moon className={className} /> : <Sun className={className} />}
+      </span>
     </button>
   );
 }

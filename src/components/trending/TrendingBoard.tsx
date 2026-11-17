@@ -30,7 +30,7 @@ export function TrendingBoard({ heroes, myBracket }: { heroes: HeroMeta[]; myBra
   const usesDivine = bracket === "8" && dataBracket(heroes, bracket) === "7";
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-[0.8rem]">
+    <div className="rise-in flex min-h-0 flex-1 flex-col gap-[0.8rem] [--rise-delay:80ms]">
       <BracketTabs value={bracket} myBracket={myBracket} onChange={setBracket} />
       {usesDivine && <p className="text-[0.85rem] text-white/55">OpenDota has no Immortal-only data, so Immortal shows Divine numbers.</p>}
       <MetaHighlights rows={rows.filter(isSampled)} heroById={heroById} />

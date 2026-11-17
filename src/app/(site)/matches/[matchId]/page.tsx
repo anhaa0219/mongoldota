@@ -22,10 +22,10 @@ export async function generateMetadata({ params }: PageProps<"/matches/[matchId]
 
 function MatchSkeleton() {
   return (
-    <div className="flex animate-pulse flex-col gap-[1.2rem]">
-      <div className="glass-panel h-[9rem] rounded-[1.8rem]" />
-      <div className="glass-panel h-[24rem] rounded-[1.6rem]" />
-      <div className="glass-panel h-[14rem] rounded-[1.6rem]" />
+    <div className="flex flex-col gap-[1.2rem]">
+      <div className="glass-panel shimmer h-[9rem] rounded-[1.8rem]" />
+      <div className="glass-panel shimmer h-[24rem] rounded-[1.6rem]" />
+      <div className="glass-panel shimmer h-[14rem] rounded-[1.6rem]" />
     </div>
   );
 }
@@ -57,8 +57,8 @@ async function MatchLoader({ params, searchParams }: PageProps<"/matches/[matchI
 export default function MatchPage(props: PageProps<"/matches/[matchId]">) {
   return (
     <>
-      <PageBackdrop />
-      <div className="relative w-full flex-1 px-[1.3rem] pb-12 md:px-8 lg:min-h-0 lg:overflow-y-auto lg:px-[5rem] lg:pb-[4rem]">
+      <PageBackdrop tone="steel" />
+      <div className="page-enter relative w-full flex-1 px-[1.3rem] pb-12 md:px-8 lg:min-h-0 lg:overflow-y-auto lg:px-[5rem] lg:pb-[4rem]">
         <Suspense fallback={<MatchSkeleton />}>
           <MatchLoader {...props} />
         </Suspense>

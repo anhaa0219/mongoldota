@@ -42,9 +42,9 @@ export async function StatsView() {
       </Suspense>
       <PageBackdrop heroSlug={summary.mostPlayed.hero.slug} />
       {/* Desktop: stats on the left, coach on the right, sized to fit the fixed-height frame without scrolling */}
-      <div className="relative w-full flex-1 pb-12 md:px-8 lg:grid lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_minmax(28rem,34rem)] lg:gap-[1.6rem] lg:overflow-y-auto lg:px-[5rem] lg:pb-[2.4rem]">
+      <div className="glass-blur relative w-full flex-1 pb-12 md:px-8 lg:grid lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_minmax(28rem,34rem)] lg:gap-[1.6rem] lg:overflow-y-auto lg:px-[5rem] lg:pb-[2.4rem]">
         <PlayerStats summary={summary} form={form}>
-          <Suspense fallback={<div className="glass-panel h-[7.5rem] animate-pulse rounded-[1.4rem]" />}>
+          <Suspense fallback={<div className="glass-panel shimmer h-[7.5rem] rounded-[1.4rem]" />}>
             <PlaystyleSection accountId={accountId} />
           </Suspense>
         </PlayerStats>

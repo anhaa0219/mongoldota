@@ -18,14 +18,14 @@ export function MetaHighlights({ rows, heroById }: { rows: MetaRow[]; heroById: 
     { label: "Rising this week", row: best((row) => row.pickChange), value: (row) => `+${Math.round(row.pickChange)}% picks`, tone: "text-sky-300" },
   ];
   return (
-    <div className="grid gap-[0.7rem] sm:grid-cols-3">
+    <div className="stagger grid gap-[0.7rem] sm:grid-cols-3">
       {highlights.map(({ label, row, value, tone }) => {
         const hero = row && heroById.get(row.heroId);
         return (
-          <div key={label} className="glass-panel flex items-center gap-[0.8rem] rounded-[1.1rem] p-[0.6rem]">
+          <div key={label} className="glass-panel group flex items-center gap-[0.8rem] rounded-[1.1rem] p-[0.6rem]">
             {hero && (
               <span className="relative block h-[2.6rem] w-[4.6rem] shrink-0 overflow-hidden rounded-[0.5rem]">
-                <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="4.6rem" className="object-cover" />
+                <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="4.6rem" className="object-cover transition-transform duration-300 group-hover:scale-110" />
               </span>
             )}
             <span className="min-w-0">

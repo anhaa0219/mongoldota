@@ -8,7 +8,7 @@ import { clampPage, pageButtons, pageCount, pageItems } from "@/lib/pagination";
 const PAGE_SIZE = 10;
 
 const buttonClass =
-  "flex items-center gap-[0.3rem] rounded-full bg-white/[0.08] px-[1rem] py-[0.45rem] text-[0.95rem] text-white/85 hover:bg-white/[0.14] disabled:pointer-events-none disabled:opacity-35";
+  "flex items-center gap-[0.3rem] rounded-full bg-white/[0.08] px-[1rem] py-[0.45rem] text-[0.95rem] text-white/85 transition-colors hover:bg-white/[0.14] disabled:pointer-events-none disabled:opacity-35";
 
 /** History rows, 10 per page, with Prev / Next and page numbers. Changing page scrolls back to the first row. */
 export function PagedMatchList({ rows }: { rows: MatchRowData[] }) {
@@ -29,7 +29,7 @@ export function PagedMatchList({ rows }: { rows: MatchRowData[] }) {
       <p className="text-[0.95rem] text-white/55" aria-live="polite">
         Matches {first}–{last} of {rows.length}
       </p>
-      <ul className="flex flex-col gap-[0.6rem]">
+      <ul className="stagger flex flex-col gap-[0.6rem]">
         {pageItems(rows, current, PAGE_SIZE).map((row) => (
           <MatchRow key={row.id} match={row} />
         ))}
@@ -52,8 +52,8 @@ export function PagedMatchList({ rows }: { rows: MatchRowData[] }) {
                 type="button"
                 onClick={() => goTo(entry)}
                 aria-current={entry === current ? "page" : undefined}
-                className={`grid size-[2.3rem] place-items-center rounded-full text-[0.95rem] tabular-nums ${
-                  entry === current ? "bg-accent font-semibold text-ink" : "bg-white/[0.06] text-white/75 hover:bg-white/[0.13]"
+                className={`grid size-[2.3rem] place-items-center rounded-full text-[0.95rem] tabular-nums transition-colors ${
+                  entry === current ? "bg-accent font-semibold text-ink shadow-[0_0_1rem_rgb(254_186_135/0.45)]" : "bg-white/[0.06] text-white/75 hover:bg-white/[0.13]"
                 }`}
               >
                 {entry}

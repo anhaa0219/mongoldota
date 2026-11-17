@@ -43,8 +43,8 @@ export async function CoachSection({ accountId, summary, heroMatches, form }: Co
 export function CoachSkeleton() {
   return (
     <>
-      <div className="glass-panel h-[17rem] animate-pulse rounded-[1.4rem]" />
-      <div className="glass-panel min-h-[20rem] flex-1 animate-pulse rounded-[1.4rem]" />
+      <div className="glass-panel shimmer h-[17rem] rounded-[1.4rem]" />
+      <div className="glass-panel shimmer min-h-[20rem] flex-1 rounded-[1.4rem]" />
     </>
   );
 }

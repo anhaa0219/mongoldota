@@ -53,13 +53,13 @@ export function MetaTable({ rows, heroById, isSampled, showBans }: { rows: MetaR
             const hero = heroById.get(row.heroId);
             if (!hero) return null;
             return (
-              <tr key={row.heroId} className={`hover:bg-white/[0.05] ${isSampled(row) ? "" : "opacity-45"}`} title={isSampled(row) ? undefined : "Too few games to trust these rates"}>
+              <tr key={row.heroId} className={`group transition-colors hover:bg-white/[0.06] ${isSampled(row) ? "" : "opacity-45"}`} title={isSampled(row) ? undefined : "Too few games to trust these rates"}>
                 <td className="border-b border-white/[0.06] px-[0.6rem] py-[0.35rem]">
                   <span className="flex items-center gap-[0.6rem]">
                     <span className="relative block h-[1.7rem] w-[3rem] shrink-0 overflow-hidden rounded-[0.3rem] bg-white/10">
-                      <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="3rem" className="object-cover" />
+                      <Image unoptimized src={heroPortrait(hero.slug)} alt="" fill sizes="3rem" className="object-cover transition-transform duration-300 group-hover:scale-110" />
                     </span>
-                    <span className="truncate text-white">{hero.name}</span>
+                    <span className="truncate text-white transition-colors group-hover:text-accent">{hero.name}</span>
                   </span>
                 </td>
                 <td className="border-b border-white/[0.06] px-[0.6rem] text-right">

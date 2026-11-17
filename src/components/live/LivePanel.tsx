@@ -30,7 +30,7 @@ export function LivePanel({ snapshot, heroName, items, updatedAt, now }: LivePan
   const status = live ? "Live" : age === null ? "Waiting for Dota" : `Last update ${Math.max(1, Math.round(age / 60_000))} min ago`;
 
   return (
-    <section aria-label="Your game" className="glass-panel flex flex-col gap-[0.9rem] rounded-[1.4rem] p-[1rem]">
+    <section aria-label="Your game" className="glass-panel rise-in flex flex-col gap-[0.9rem] rounded-[1.4rem] p-[1rem]">
       <div className="flex flex-wrap items-center gap-[1rem]">
         <div className="relative h-[3.6rem] w-[6.4rem] shrink-0 overflow-hidden rounded-[0.8rem]">
           <Image unoptimized src={heroPortrait(snapshot.heroKey)} alt="" fill sizes="6.4rem" className="object-cover" />
