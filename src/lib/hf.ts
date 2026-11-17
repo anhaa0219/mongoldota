@@ -65,3 +65,8 @@ export function askVisionModel(prompt: string, imageDataUrl: string): Promise<Mo
 export function askTextModel(prompt: string): Promise<ModelResult> {
   return chat({ model: process.env.HF_ADVICE_MODEL || DEFAULT_MODEL, content: prompt, maxTokens: 8000, effort: "medium", timeoutMs: 120_000 });
 }
+
+/** Short live-coach answers: low effort and a 30 s limit so tips arrive while they still matter. Model: HF_ADVICE_MODEL or the default. */
+export function askQuickModel(prompt: string): Promise<ModelResult> {
+  return chat({ model: process.env.HF_ADVICE_MODEL || DEFAULT_MODEL, content: prompt, maxTokens: 1500, effort: "low", timeoutMs: 30_000 });
+}

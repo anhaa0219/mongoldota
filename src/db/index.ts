@@ -10,7 +10,3 @@ const url = process.env.DATABASE_URL;
 // connect_timeout: fail in 5 s (default 30 s) so an unreachable database never stalls a page;
 // idle_timeout: close idle connections (also limits leaks from dev hot reloads).
 export const db = url ? drizzle(postgres(url, { prepare: false, connect_timeout: 5, idle_timeout: 20 }), { schema }) : null;
-
-export function hasDatabase(): boolean {
-  return db !== null;
-}

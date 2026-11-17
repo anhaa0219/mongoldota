@@ -1,3 +1,0 @@
-// payment helpers
-
-export {};

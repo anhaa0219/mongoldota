@@ -48,8 +48,6 @@ src/
     index.ts        the db connection
   lib/
     hf.ts           Hugging Face client
-    pinecone.ts     Pinecone client
-    wire.ts         payment helpers
   types/            shared TypeScript types
 .env.example        list of keys, no values
 ```

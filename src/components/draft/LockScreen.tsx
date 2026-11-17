@@ -8,6 +8,7 @@ import { LineupColumn } from "@/components/draft/LineupColumn";
 import { SideSwitch } from "@/components/draft/SideSwitch";
 import { assignPosition, guessPositions, laneOpponentPositions, lanePartnerPositions } from "@/lib/draft-lanes";
 import { adviceRequestKey, lineupKey, LOCK_KEY, lockSchema, type SavedLock } from "@/lib/draft-storage";
+import { useLockedDraftSync } from "@/lib/use-locked-draft-sync";
 import { useStoredState } from "@/lib/use-stored-state";
 import type { AdviceItem, AdviceResponse, DraftHero, DraftSlots, PlacedHero, Position } from "@/types/draft";
 import type { Side } from "@/types/game";
@@ -79,6 +80,12 @@ export function LockScreen({ draft, heroById, mySide, onSideChange, onUnlock }: 
   };
   const partners = myPosition ? myTeam.filter((hero) => hero.id === myHeroId || inPositions(mySide, lanePartnerPositions(myPosition))(hero)) : [];
   const opponents = myPosition ? enemyTeam.filter(inPositions(enemySide, laneOpponentPositions(myPosition))) : [];
+
+  useLockedDraftSync(
+    myHeroId === null
+      ? null
+      : { side: mySide, myHeroId, allies: placed(myTeam, positions[mySide]), enemies: placed(enemyTeam, positions[enemySide]) },
+  );
 
   const setPosition = (side: Side) => (heroId: number, position: Position) =>
     save({ positions: { radiant: [...positions.radiant], dire: [...positions.dire], [side]: [...assignPosition(positions[side], heroId, position)] } });

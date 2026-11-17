@@ -1,15 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const auth = vi.hoisted(() => ({ steamId: "76561197960265729" as string | null, secretMissing: false }));
+const state = vi.hoisted(() => ({
+  steamId: "76561197960265729" as string | null,
+  userId: "user_1" as string | null,
+  saveWorks: true,
+  saved: [] as [string, string][],
+}));
 
 vi.mock("@/lib/steam-auth", () => ({
   SESSION_COOKIE: "steam_session",
-  SESSION_COOKIE_OPTIONS: { httpOnly: true, path: "/" },
   siteOrigin: (origin: string) => origin,
-  verifySteamLogin: async () => auth.steamId,
-  createSession: (steamId: string) => {
-    if (auth.secretMissing) throw new Error("AUTH_SECRET is not set");
-    return `${steamId}.signature`;
+  verifySteamLogin: async () => state.steamId,
+}));
+vi.mock("@clerk/nextjs/server", () => ({ auth: async () => ({ userId: state.userId }) }));
+vi.mock("@/lib/steam-link-store", () => ({
+  saveSteamLink: async (clerkUserId: string, steamId: string) => {
+    if (!state.saveWorks) return false;
+    state.saved.push([clerkUserId, steamId]);
+    return true;
   },
 }));
 
@@ -19,26 +27,32 @@ const callback = () => GET(new NextRequest("https://mongoldota.example/api/auth/
 
 describe("Steam login callback", () => {
   beforeEach(() => {
-    auth.steamId = "76561197960265729";
-    auth.secretMissing = false;
+    state.steamId = "76561197960265729";
+    state.userId = "user_1";
+    state.saveWorks = true;
+    state.saved = [];
   });
 
-  it("signs in and goes home", async () => {
+  it("links Steam to the signed-in account and goes home", async () => {
     const response = await callback();
     expect(response.headers.get("location")).toBe("https://mongoldota.example/");
-    expect(response.cookies.get("steam_session")?.value).toBe("76561197960265729.signature");
+    expect(state.saved).toEqual([["user_1", "76561197960265729"]]);
   });
 
   it("sends a failed Steam check back with login=failed", async () => {
-    auth.steamId = null;
+    state.steamId = null;
     expect((await callback()).headers.get("location")).toBe("https://mongoldota.example/?login=failed");
+    expect(state.saved).toEqual([]);
   });
 
-  it("never crashes when AUTH_SECRET is missing: redirects with login=failed and sets no cookie", async () => {
-    auth.secretMissing = true;
-    const response = await callback();
-    expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("https://mongoldota.example/?login=failed");
-    expect(response.cookies.get("steam_session")).toBeUndefined();
+  it("sends a signed-out player to sign-in and saves nothing", async () => {
+    state.userId = null;
+    expect((await callback()).headers.get("location")).toBe("https://mongoldota.example/sign-in");
+    expect(state.saved).toEqual([]);
+  });
+
+  it("reports login=failed when the link cannot be saved", async () => {
+    state.saveWorks = false;
+    expect((await callback()).headers.get("location")).toBe("https://mongoldota.example/?login=failed");
   });
 });

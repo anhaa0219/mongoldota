@@ -1,3 +1,0 @@
-// Pinecone client
-
-export {};
