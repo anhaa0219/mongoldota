@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { LiveSnapshot, LiveTip } from "@/types/live";
+import type { AdviceFacts } from "@/types/draft";
+import type { LiveSnapshot, LiveTip, LockedDraft } from "@/types/live";
 
 const NOW = 1_800_000_000_000;
 const SNAPSHOT = { matchId: "m1", clockSeconds: 600, heroId: 47, heroKey: "viper", level: 16, alive: true, respawnSeconds: 0, kills: 7, deaths: 4, assists: 5, lastHits: 80, denies: 10, gold: 1840, gpm: 512, xpm: 600, inventory: [null, null, null, null, null, null], owned: [], team: "radiant", buildings: [], buildingTeams: [] } satisfies LiveSnapshot;
@@ -12,6 +13,10 @@ const state = vi.hoisted(() => ({
   modelCalls: 0,
   modelDelayMs: 0,
   reserved: new Map<string, number>(),
+  /** The last prompt sent to the model. */
+  lastPrompt: "",
+  locked: null as { draft: LockedDraft; updatedAt: number } | null,
+  facts: null as AdviceFacts | null,
 }));
 
 vi.mock("@clerk/nextjs/server", () => ({ auth: async () => ({ userId: state.userId }) }));
@@ -26,7 +31,7 @@ vi.mock("@/lib/live-slots-store", () => ({
   },
 }));
 vi.mock("@/lib/live-tips-store", () => ({
-  getLockedDraft: async () => null,
+  getLockedDraft: async () => state.locked,
   getTips: async () => state.tips,
   getPlanTip: async () => state.tips.find((tip) => tip.kind === "plan") ?? null,
   addTip: async (_user: string, tip: Omit<LiveTip, "id" | "createdAt">) => {
@@ -35,13 +40,14 @@ vi.mock("@/lib/live-tips-store", () => ({
   },
 }));
 vi.mock("@/lib/hf", () => ({
-  askQuickModel: async () => {
+  askQuickModel: async (prompt: string) => {
+    state.lastPrompt = prompt;
     state.modelCalls += 1;
     await new Promise((resolve) => setTimeout(resolve, state.modelDelayMs));
     return { ok: true, text: "Stay near Mars until you have BKB." };
   },
 }));
-vi.mock("@/lib/draft-advice-facts", () => ({ gatherAdviceFacts: async () => null }));
+vi.mock("@/lib/draft-advice-facts", () => ({ gatherAdviceFacts: async () => state.facts }));
 vi.mock("@/lib/opendota-heroes", () => ({
   getDraftHeroes: async () => [{ id: 47, name: "Viper", slug: "viper", winRate: 51, roles: [] }],
   getItemIndex: async () => ({ byId: new Map(), byKey: new Map() }),
@@ -61,6 +67,9 @@ describe("POST /api/live/coach", () => {
     state.modelCalls = 0;
     state.modelDelayMs = 0;
     state.reserved = new Map();
+    state.lastPrompt = "";
+    state.locked = null;
+    state.facts = null;
   });
 
   it("rejects signed-out requests with 401", async () => {
@@ -97,6 +106,44 @@ describe("POST /api/live/coach", () => {
     state.tips = [{ id: 9, matchId: "m1", clockSeconds: 0, kind: "plan", text: "Item plan: Dragon Lance", plan: ["dragon_lance"], createdAt: NOW - 120_000 }];
     await send({ kinds: ["plan"], replan: true });
     expect(state.modelCalls).toBe(1);
+  });
+
+  it("lets a big moment through 25 s after the last tip", async () => {
+    state.reserved.set("tip:m1", NOW - 30_000);
+    expect((await send({ kinds: ["kill", "death"] })).status).toBe(200);
+  });
+
+  it("accepts the new kinds, 12 at most", async () => {
+    const twelve = ["teamfight", "buyback", "aegis", "assist", "streak", "nobuyback", "kill", "death", "item", "gold", "building", "lookahead"];
+    expect((await send({ kinds: twelve, details: twelve.map(() => "") })).status).toBe(200);
+    expect((await send({ kinds: Array(13).fill("kill") })).status).toBe(400);
+  });
+
+  it("uses the picked position when there is no draft", async () => {
+    await send({ kinds: ["asked"], position: 3 });
+    expect(state.lastPrompt).toContain("Lane: top (off lane), against the enemy pos 1 and pos 5 (heroes unknown).");
+  });
+
+  it("rejects a position outside 1-5", async () => {
+    for (const position of [0, 6, 2.5, "3"]) expect((await send({ kinds: ["asked"], position })).status).toBe(400);
+  });
+
+  it("lets a locked draft win over the picked position", async () => {
+    state.locked = { draft: { side: "radiant", myHeroId: 47, allies: [{ heroId: 47, position: 1 }], enemies: [] }, updatedAt: NOW - 60_000 };
+    state.facts = {
+      myHero: { name: "Viper", roles: ["Carry"], winRate: 51 },
+      position: 1,
+      allies: [],
+      enemies: [],
+      lane: { partners: ["Lion (pos 5)"], opponents: [{ name: "Axe", position: 3, myWinRate: 54, games: 1240 }] },
+      items: { start: [], early: [], mid: [], late: [] },
+      bkb: [],
+      durations: [],
+      personal: null,
+      abilities: [],
+    };
+    await send({ kinds: ["asked"], position: 3 });
+    expect(state.lastPrompt).toContain("Lane: bot (safe lane) with Lion (pos 5), against Axe (pos 3).");
   });
 
   it("saves and returns a tip", async () => {

@@ -20,16 +20,21 @@ import { getItemPopularity } from "@/lib/opendota-draft";
 import { getDraftHeroes, getItemIndex } from "@/lib/opendota-heroes";
 import { dotaAccountId } from "@/lib/steam-auth";
 import { LIVE_EVENT_KINDS, type LiveEventKind, type LiveSnapshot } from "@/types/live";
+import type { Position } from "@/types/draft";
 import type { ItemIndex } from "@/types/opendota";
 
 const STALE_MS = 2 * 60_000;
 const RECENT_TIPS = 3;
+/** A long fight can gather this many different moments into one request. */
+const MAX_KINDS = 12;
 
 const requestSchema = z.object({
-  kinds: z.array(z.enum(LIVE_EVENT_KINDS as [LiveEventKind, ...LiveEventKind[]])).min(1).max(6),
-  details: z.array(z.string().max(60)).max(6).optional(),
+  kinds: z.array(z.enum(LIVE_EVENT_KINDS as [LiveEventKind, ...LiveEventKind[]])).min(1).max(MAX_KINDS),
+  details: z.array(z.string().max(60)).max(MAX_KINDS).optional(),
   /** Write a new item plan even if this match has one (the player bought off-plan). */
   replan: z.boolean().optional(),
+  /** The position the player picked on the Live page; used only when there is no usable locked draft. */
+  position: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]).optional(),
 });
 
 const FAILURE_MESSAGES = {
@@ -51,7 +56,7 @@ async function planCandidates(heroId: number, items: ItemIndex) {
   return [...unique.values()].map(({ key, name }) => ({ key, name }));
 }
 
-async function gameContext(userId: string, snapshot: LiveSnapshot) {
+async function gameContext(userId: string, snapshot: LiveSnapshot, pickedPosition: Position | null) {
   const [heroes, items, locked, steamId] = await Promise.all([getDraftHeroes(), getItemIndex(), getLockedDraft(userId), getGsiSteamId(userId)]);
   const draft = freshDraft(locked, Date.now());
   const accountId = steamId ? dotaAccountId(steamId) : null;
@@ -59,7 +64,7 @@ async function gameContext(userId: string, snapshot: LiveSnapshot) {
   const facts = draft && draft.myHeroId === snapshot.heroId ? await gatherAdviceFacts({ ...draft, accountId }) : null;
   const heroName = heroes.find((hero) => hero.id === snapshot.heroId)?.name ?? snapshot.heroKey;
   const itemName = (key: string) => items.byKey.get(key)?.name ?? key;
-  const lane = laneInfo({ team: snapshot.team, facts, position: null });
+  const lane = laneInfo({ team: snapshot.team, facts, position: pickedPosition });
   return { items, facts, heroName, itemName, lane };
 }
 
@@ -69,7 +74,7 @@ export async function POST(request: Request) {
 
   const input = requestSchema.safeParse(await request.json().catch(() => null));
   if (!input.success) return reply({ error: "Unknown coach request." }, 400);
-  const { kinds, details, replan } = input.data;
+  const { kinds, details, replan, position } = input.data;
 
   const row = await getLiveRow(userId);
   const snapshot = row?.snapshot;
@@ -83,7 +88,7 @@ export async function POST(request: Request) {
   const { slot, cutoff } = coachSlot(kinds, matchId, Date.now());
   if (!(await reserveSlot(userId, slot, cutoff))) return reply({ skipped: true }, 429);
 
-  const { items, facts, heroName, itemName, lane } = await gameContext(userId, snapshot);
+  const { items, facts, heroName, itemName, lane } = await gameContext(userId, snapshot, position ?? null);
 
   if (kinds.includes("plan")) {
     const candidates = await planCandidates(snapshot.heroId, items);
