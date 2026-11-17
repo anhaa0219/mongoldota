@@ -32,6 +32,15 @@ export interface LiveSnapshot {
   buildings: LiveBuilding[];
   /** Teams Dota reported buildings for: a building of these teams missing from `buildings` has fallen. */
   buildingTeams: Side[];
+  // The fields below are missing when Dota does not send them, and in every snapshot stored before they were added.
+  /** player.kill_streak: hero kills without dying. */
+  killStreak?: number;
+  /** hero.buyback_cost in gold. */
+  buybackCost?: number;
+  /** hero.buyback_cooldown: seconds until buyback can be used again; 0 when ready. */
+  buybackCooldown?: number;
+  /** Hero kills scored by each team (map.radiant_score, map.dire_score). */
+  score?: { radiant: number; dire: number };
 }
 
 export type BuildingKind = "tower" | "melee" | "ranged" | "ancient";

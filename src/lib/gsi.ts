@@ -22,7 +22,7 @@ const num = z.number().optional();
 const gsiSchema = z.object({
   auth: z.object({ token: z.string().min(1) }).passthrough(),
   map: z
-    .object({ matchid: z.string().optional(), clock_time: num, game_state: z.string().optional() })
+    .object({ matchid: z.string().optional(), clock_time: num, game_state: z.string().optional(), radiant_score: num, dire_score: num })
     .passthrough()
     .optional(),
   player: z
@@ -37,11 +37,12 @@ const gsiSchema = z.object({
       gold: num,
       gpm: num,
       xpm: num,
+      kill_streak: num,
     })
     .passthrough()
     .optional(),
   hero: z
-    .object({ id: num, name: z.string().optional(), level: num, alive: z.boolean().optional(), respawn_seconds: num })
+    .object({ id: num, name: z.string().optional(), level: num, alive: z.boolean().optional(), respawn_seconds: num, buyback_cost: num, buyback_cooldown: num })
     .passthrough()
     .optional(),
   items: z.record(z.string(), z.unknown()).optional(),
@@ -92,6 +93,10 @@ export function toLiveSnapshot(payload: GsiPayload, steamId: string): LiveSnapsh
     team: player.team_name === "radiant" || player.team_name === "dire" ? player.team_name : null,
     buildings,
     buildingTeams: teams,
+    killStreak: player.kill_streak,
+    buybackCost: hero.buyback_cost,
+    buybackCooldown: hero.buyback_cooldown,
+    score: map.radiant_score !== undefined && map.dire_score !== undefined ? { radiant: map.radiant_score, dire: map.dire_score } : undefined,
   };
 }
 

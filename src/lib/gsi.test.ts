@@ -21,6 +21,27 @@ describe("parseGsiPayload", () => {
 });
 
 describe("toLiveSnapshot", () => {
+  it("reads kill streak, buyback and team scores when Dota sends them", () => {
+    const body = gsiFixture();
+    Object.assign(body.player, { kill_streak: 4 });
+    Object.assign(body.hero, { buyback_cost: 1450, buyback_cooldown: 0 });
+    Object.assign(body.map, { radiant_score: 12, dire_score: 9 });
+    expect(snapshotOf(body)).toMatchObject({ killStreak: 4, buybackCost: 1450, buybackCooldown: 0, score: { radiant: 12, dire: 9 } });
+  });
+
+  it("leaves the new fields out when Dota does not send them", () => {
+    const snapshot = snapshotOf(gsiFixture());
+    expect(snapshot?.killStreak).toBeUndefined();
+    expect(snapshot?.buybackCost).toBeUndefined();
+    expect(snapshot?.score).toBeUndefined();
+  });
+
+  it("needs both team scores", () => {
+    const body = gsiFixture();
+    Object.assign(body.map, { radiant_score: 12 });
+    expect(snapshotOf(body)?.score).toBeUndefined();
+  });
+
   it("maps the player's own game", () => {
     const snapshot = snapshotOf(gsiFixture());
     expect(snapshot).toMatchObject({
