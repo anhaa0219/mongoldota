@@ -1,6 +1,7 @@
 /** Dota 2 Game State Integration payloads: validation, mapping to a LiveSnapshot, and write throttling. Pure. */
 
 import { z } from "zod";
+import { parseBuildings } from "@/lib/gsi-buildings";
 import type { LiveSnapshot } from "@/types/live";
 
 const HERO_PREFIX = "npc_dota_hero_";
@@ -27,6 +28,7 @@ const gsiSchema = z.object({
   player: z
     .object({
       steamid: z.string().optional(),
+      team_name: z.string().optional(),
       kills: num,
       deaths: num,
       assists: num,
@@ -43,6 +45,7 @@ const gsiSchema = z.object({
     .passthrough()
     .optional(),
   items: z.record(z.string(), z.unknown()).optional(),
+  buildings: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type GsiPayload = z.infer<typeof gsiSchema>;
@@ -66,6 +69,7 @@ export function toLiveSnapshot(payload: GsiPayload, steamId: string): LiveSnapsh
   if (!map?.matchid || !map.game_state || !IN_GAME_STATES.has(map.game_state)) return null;
   if (!player?.steamid || player.steamid !== steamId) return null;
   if (!hero?.id || hero.id <= 0 || !hero.name) return null;
+  const { buildings, teams } = parseBuildings(payload.buildings);
 
   return {
     matchId: map.matchid,
@@ -85,6 +89,9 @@ export function toLiveSnapshot(payload: GsiPayload, steamId: string): LiveSnapsh
     xpm: player.xpm ?? 0,
     inventory: Array.from({ length: INVENTORY_SLOTS }, (_, index) => itemKey(items, `slot${index}`)),
     owned: OWNED_SLOTS.flatMap((slot) => itemKey(items, slot) ?? []),
+    team: player.team_name === "radiant" || player.team_name === "dire" ? player.team_name : null,
+    buildings,
+    buildingTeams: teams,
   };
 }
 

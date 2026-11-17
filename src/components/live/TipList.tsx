@@ -1,4 +1,4 @@
-import { Coins, Crosshair, ListOrdered, MessageCircle, ShoppingBag, Skull, Telescope, type LucideIcon } from "lucide-react";
+import { Castle, Coins, Crosshair, ListOrdered, MessageCircle, ShoppingBag, Skull, Telescope, type LucideIcon } from "lucide-react";
 import { formatDuration } from "@/lib/format";
 import type { LiveEventKind, LiveTip } from "@/types/live";
 
@@ -7,6 +7,7 @@ const ICONS: Record<LiveEventKind, { icon: LucideIcon; label: string }> = {
   kill: { icon: Crosshair, label: "After a kill" },
   gold: { icon: Coins, label: "Gold ready" },
   item: { icon: ShoppingBag, label: "Item bought" },
+  building: { icon: Castle, label: "Building fell" },
   lookahead: { icon: Telescope, label: "Coming up" },
   asked: { icon: MessageCircle, label: "You asked" },
   plan: { icon: ListOrdered, label: "Item plan" },
@@ -39,7 +40,7 @@ export function TipList({ tips, asking, error, canAsk, onAsk }: TipListProps) {
       </div>
       {error && <p className="text-[0.95rem] text-dire">{error}</p>}
       <ol aria-live="polite" className="flex min-h-0 flex-1 flex-col gap-[0.6rem] overflow-y-auto">
-        {tips.length === 0 && <li className="text-[0.95rem] text-white/55">Tips appear here when you die, get a kill, buy an item, have gold for your next item, and every few minutes.</li>}
+        {tips.length === 0 && <li className="text-[0.95rem] text-white/55">Tips appear here when you die, get a kill, buy an item, have gold for your next item, a tower or barracks falls, and every few minutes.</li>}
         {tips.map((tip) => {
           const { icon: Icon, label } = ICONS[tip.kind];
           return (

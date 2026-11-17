@@ -49,7 +49,10 @@ export const aiAdvice = pgTable(
 
 /** Live Coach: one Game State Integration token per player (only its SHA-256 hash), with the Steam ID it was made for. */
 export const gsiTokens = pgTable("gsi_tokens", {
-  clerkUserId: text("clerk_user_id").primaryKey(),
+  // Unlinking Steam removes the token made for that account (and, through it, the live data below).
+  clerkUserId: text("clerk_user_id")
+    .primaryKey()
+    .references(() => steamLinks.clerkUserId, { onDelete: "cascade" }),
   tokenHash: text("token_hash").notNull().unique(),
   steamId: text("steam_id").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -57,7 +60,9 @@ export const gsiTokens = pgTable("gsi_tokens", {
 
 /** Live Coach: the player's latest game state from Dota. A null snapshot means connected but not in a match. */
 export const liveStates = pgTable("live_states", {
-  clerkUserId: text("clerk_user_id").primaryKey(),
+  clerkUserId: text("clerk_user_id")
+    .primaryKey()
+    .references(() => gsiTokens.clerkUserId, { onDelete: "cascade" }),
   matchId: text("match_id"),
   snapshot: jsonb("snapshot").$type<LiveSnapshot>(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
@@ -75,7 +80,9 @@ export const liveTips = pgTable(
   "live_tips",
   {
     id: serial("id").primaryKey(),
-    clerkUserId: text("clerk_user_id").notNull(),
+    clerkUserId: text("clerk_user_id")
+      .notNull()
+      .references(() => gsiTokens.clerkUserId, { onDelete: "cascade" }),
     matchId: text("match_id").notNull(),
     clockSeconds: integer("clock_seconds").notNull(),
     kind: text("kind").notNull(),
@@ -90,7 +97,9 @@ export const liveTips = pgTable(
 export const liveCoachSlots = pgTable(
   "live_coach_slots",
   {
-    clerkUserId: text("clerk_user_id").notNull(),
+    clerkUserId: text("clerk_user_id")
+      .notNull()
+      .references(() => gsiTokens.clerkUserId, { onDelete: "cascade" }),
     slot: text("slot").notNull(),
     reservedAt: timestamp("reserved_at", { withTimezone: true }).notNull(),
   },

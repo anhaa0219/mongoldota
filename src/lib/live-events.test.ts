@@ -28,6 +28,9 @@ function snap(changes: Partial<LiveSnapshot> = {}): LiveSnapshot {
     xpm: 600,
     inventory: [null, null, null, null, null, null],
     owned: [],
+    team: "radiant",
+    buildings: [],
+    buildingTeams: [],
     ...changes,
   };
 }
@@ -42,6 +45,13 @@ describe("detectEvents", () => {
 
   it("reports kills once with the count", () => {
     expect(detectEvents(snap({ kills: 7 }), snap({ kills: 9 }), null, COSTS, seenOf(snap({ kills: 7 })))).toEqual([{ kind: "kill", detail: "2" }]);
+  });
+
+  it("reports a fallen tower", () => {
+    const tower = { team: "radiant" as const, kind: "tower" as const, lane: "top" as const, tier: 1, healthPct: 10 };
+    const before = snap({ buildings: [tower], buildingTeams: ["radiant"] });
+    const after = snap({ buildings: [], buildingTeams: ["radiant"] });
+    expect(detectEvents(before, after, null, COSTS, seenOf(before))).toEqual([{ kind: "building", detail: "radiant:tower:top:1" }]);
   });
 
   it("reports a bought item", () => {

@@ -43,6 +43,13 @@
       "when": 1794885441061,
       "tag": "0005_steam_links",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794888095750,
+      "tag": "0006_live_coach_foreign_keys",
+      "breakpoints": true
     }
   ]
 }

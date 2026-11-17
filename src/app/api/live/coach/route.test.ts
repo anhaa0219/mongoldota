@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { LiveSnapshot, LiveTip } from "@/types/live";
 
 const NOW = 1_800_000_000_000;
-const SNAPSHOT = { matchId: "m1", clockSeconds: 600, heroId: 47, heroKey: "viper", level: 16, alive: true, respawnSeconds: 0, kills: 7, deaths: 4, assists: 5, lastHits: 80, denies: 10, gold: 1840, gpm: 512, xpm: 600, inventory: [null, null, null, null, null, null], owned: [] } satisfies LiveSnapshot;
+const SNAPSHOT = { matchId: "m1", clockSeconds: 600, heroId: 47, heroKey: "viper", level: 16, alive: true, respawnSeconds: 0, kills: 7, deaths: 4, assists: 5, lastHits: 80, denies: 10, gold: 1840, gpm: 512, xpm: 600, inventory: [null, null, null, null, null, null], owned: [], team: "radiant", buildings: [], buildingTeams: [] } satisfies LiveSnapshot;
 
 const state = vi.hoisted(() => ({
   userId: "user_1" as string | null,

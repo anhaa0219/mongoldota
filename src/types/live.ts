@@ -26,13 +26,33 @@ export interface LiveSnapshot {
   inventory: (string | null)[];
   /** Every item key in slot0..slot8, stash0..stash5 and neutral0. */
   owned: string[];
+  /** player.team_name; null when Dota does not say. */
+  team: Side | null;
+  /** Standing buildings of the teams in `buildingTeams` (as a player Dota usually reports only your own team). */
+  buildings: LiveBuilding[];
+  /** Teams Dota reported buildings for: a building of these teams missing from `buildings` has fallen. */
+  buildingTeams: Side[];
 }
 
-export type LiveEventKind = "death" | "kill" | "gold" | "item" | "lookahead" | "asked" | "plan";
+export type BuildingKind = "tower" | "melee" | "ranged" | "ancient";
+export type BuildingLane = "top" | "mid" | "bot" | "base";
 
-export const LIVE_EVENT_KINDS: readonly LiveEventKind[] = ["death", "kill", "gold", "item", "lookahead", "asked", "plan"];
+export interface LiveBuilding {
+  team: Side;
+  kind: BuildingKind;
+  /** "base" for the Ancient. */
+  lane: BuildingLane;
+  /** Towers 1-4; 0 for barracks and the Ancient. */
+  tier: number;
+  /** 1-100, rounded up so a scratched building never reads 0. */
+  healthPct: number;
+}
 
-/** detail: an item key ("item", "gold"), the number of kills ("kill"), otherwise "". */
+export type LiveEventKind = "death" | "kill" | "gold" | "item" | "building" | "lookahead" | "asked" | "plan";
+
+export const LIVE_EVENT_KINDS: readonly LiveEventKind[] = ["death", "kill", "gold", "item", "building", "lookahead", "asked", "plan"];
+
+/** detail: an item key ("item", "gold"), the number of kills ("kill"), a building key ("building"), otherwise "". */
 export interface LiveEvent {
   kind: LiveEventKind;
   detail: string;

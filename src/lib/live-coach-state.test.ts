@@ -12,7 +12,7 @@ const COSTS = new Map([
 const snap = (changes: Partial<LiveSnapshot> = {}): LiveSnapshot => ({
   matchId: "m1", clockSeconds: 600, heroId: 47, heroKey: "viper", level: 16, alive: true, respawnSeconds: 0,
   kills: 7, deaths: 3, assists: 5, lastHits: 80, denies: 10, gold: 1000, gpm: 512, xpm: 600,
-  inventory: [null, null, null, null, null, null], owned: [], ...changes,
+  inventory: [null, null, null, null, null, null], owned: [], team: "radiant", buildings: [], buildingTeams: [], ...changes,
 });
 
 describe("absorbSnapshot", () => {

@@ -12,8 +12,8 @@ describe("buildGsiConfig", () => {
     expect(config).toMatch(/"heartbeat"\s+"30\.0"/);
   });
 
-  it("asks for the six data sections", () => {
-    for (const section of ["provider", "map", "player", "hero", "abilities", "items"]) {
+  it("asks for the seven data sections", () => {
+    for (const section of ["provider", "map", "player", "hero", "abilities", "items", "buildings"]) {
       expect(config).toMatch(new RegExp(`"${section}"\\s+"1"`));
     }
   });

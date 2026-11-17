@@ -6,7 +6,7 @@ export const SETUP_FOLDER = "gamestate_integration";
 export const SETUP_FILE = "gamestate_integration_mongoldota.cfg";
 export const SETUP_ZIP_NAME = "mongoldota-dota-setup.zip";
 
-const DATA_SECTIONS = ["provider", "map", "player", "hero", "abilities", "items"];
+const DATA_SECTIONS = ["provider", "map", "player", "hero", "abilities", "items", "buildings"];
 
 /** Dota sends the game state to `<siteUrl>/api/gsi` about once a second, with the token in every request. */
 export function buildGsiConfig(siteUrl: string, token: string): string {

@@ -1,0 +1,4 @@
+ALTER TABLE "gsi_tokens" ADD CONSTRAINT "gsi_tokens_clerk_user_id_steam_links_clerk_user_id_fk" FOREIGN KEY ("clerk_user_id") REFERENCES "public"."steam_links"("clerk_user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "live_coach_slots" ADD CONSTRAINT "live_coach_slots_clerk_user_id_gsi_tokens_clerk_user_id_fk" FOREIGN KEY ("clerk_user_id") REFERENCES "public"."gsi_tokens"("clerk_user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "live_states" ADD CONSTRAINT "live_states_clerk_user_id_gsi_tokens_clerk_user_id_fk" FOREIGN KEY ("clerk_user_id") REFERENCES "public"."gsi_tokens"("clerk_user_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "live_tips" ADD CONSTRAINT "live_tips_clerk_user_id_gsi_tokens_clerk_user_id_fk" FOREIGN KEY ("clerk_user_id") REFERENCES "public"."gsi_tokens"("clerk_user_id") ON DELETE cascade ON UPDATE no action;

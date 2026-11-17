@@ -19,6 +19,7 @@ export function gsiFixture() {
     player: {
       steamid: FIXTURE_STEAM_ID,
       name: "Tester",
+      team_name: "radiant",
       activity: "playing",
       kills: 7,
       deaths: 3,
@@ -43,6 +44,14 @@ export function gsiFixture() {
       stash0: { name: "item_ultimate_orb" },
       stash1: empty,
       neutral0: empty,
+    },
+    buildings: {
+      radiant: {
+        dota_goodguys_tower1_top: { health: 1800, max_health: 1800 },
+        dota_goodguys_tower1_mid: { health: 450, max_health: 1800 },
+        good_rax_melee_top: { health: 2200, max_health: 2200 },
+        dota_goodguys_fort: { health: 4500, max_health: 4500 },
+      },
     },
     auth: { token: "t0k" },
   };

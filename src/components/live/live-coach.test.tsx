@@ -15,7 +15,7 @@ const DRAFT: LockedDraft = { side: "radiant", myHeroId: 47, allies: [{ heroId: 4
 const SNAPSHOT: LiveSnapshot = {
   matchId: "m1", clockSeconds: 600, heroId: 47, heroKey: "viper", level: 16, alive: true, respawnSeconds: 0,
   kills: 7, deaths: 3, assists: 5, lastHits: 80, denies: 10, gold: 1840, gpm: 512, xpm: 600,
-  inventory: ["dragon_lance", null, null, null, null, null], owned: ["dragon_lance"],
+  inventory: ["dragon_lance", null, null, null, null, null], owned: ["dragon_lance"], team: "radiant", buildings: [], buildingTeams: [],
 };
 const tip = (id: number, text: string): LiveTip => ({ id, matchId: "m1", clockSeconds: 600 + id, kind: "death", text, plan: null, createdAt: id });
 

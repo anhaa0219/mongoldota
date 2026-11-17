@@ -21,6 +21,9 @@ const SNAPSHOT: LiveSnapshot = {
   xpm: 600,
   inventory: ["dragon_lance", null, null, null, null, null],
   owned: ["dragon_lance"],
+  team: "radiant",
+  buildings: [{ team: "radiant", kind: "tower", lane: "mid", tier: 2, healthPct: 40 }],
+  buildingTeams: ["radiant"],
 };
 
 const FACTS: AdviceFacts = {
@@ -53,6 +56,12 @@ describe("buildLiveTipPrompt", () => {
     expect(prompt).toContain("K 7 / D 3 / A 5");
     expect(prompt).toContain("died");
     expect(prompt).toContain("bought Dragon Lance");
+  });
+
+  it("describes the buildings and a fallen one", () => {
+    const prompt = buildLiveTipPrompt({ ...base, events: [{ kind: "building", detail: "dire:melee:bot:0" }] });
+    expect(prompt).toContain("damaged: mid T2 tower 40%");
+    expect(prompt).toContain("The enemy (Dire) just lost the bot melee barracks.");
   });
 
   it("names the enemies when the draft is known", () => {

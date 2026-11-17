@@ -1,5 +1,6 @@
-/** Coach events from two consecutive live snapshots: deaths, kills, item buys and gold for the next planned item. Pure. */
+/** Coach events from two consecutive live snapshots: deaths, kills, fallen buildings, item buys and gold for the next planned item. Pure. */
 
+import { fallenBuildings } from "@/lib/gsi-buildings";
 import type { LiveEvent, LiveSnapshot } from "@/types/live";
 
 /** Cheaper items (consumables, small components) never trigger a tip. */
@@ -34,6 +35,7 @@ export function detectEvents(prev: LiveSnapshot | null, next: LiveSnapshot, plan
   const events: LiveEvent[] = [];
   if (next.deaths > prev.deaths) events.push({ kind: "death", detail: "" });
   if (next.kills > prev.kills) events.push({ kind: "kill", detail: String(next.kills - prev.kills) });
+  for (const key of fallenBuildings(prev, next)) events.push({ kind: "building", detail: key });
 
   for (const [key, count] of countItems(next.owned)) {
     if ((costs.get(key) ?? 0) < MIN_ITEM_COST) continue;

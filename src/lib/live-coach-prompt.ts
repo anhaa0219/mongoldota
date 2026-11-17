@@ -2,7 +2,9 @@
 
 import { POSITION_NAMES } from "@/lib/draft-advice";
 import { formatDuration } from "@/lib/format";
+import { buildingLabel, describeBuildings, parseBuildingKey, teamName } from "@/lib/gsi-buildings";
 import type { AdviceFacts } from "@/types/draft";
+import type { Side } from "@/types/game";
 import type { LiveEvent, LiveSnapshot } from "@/types/live";
 
 const MAX_TIP_LENGTH = 300;
@@ -18,15 +20,24 @@ function gameLine(snapshot: LiveSnapshot, heroName: string, itemName: ItemName):
     `Game time ${formatDuration(snapshot.clockSeconds)}. The player is ${heroName}, level ${snapshot.level}${snapshot.alive ? "" : `, dead (respawn in ${snapshot.respawnSeconds}s)`}.`,
     `K ${snapshot.kills} / D ${snapshot.deaths} / A ${snapshot.assists}. Last hits ${snapshot.lastHits}. Gold ${snapshot.gold}, GPM ${snapshot.gpm}, XPM ${snapshot.xpm}.`,
     `Items: ${items}.`,
+    ...describeBuildings(snapshot),
   ].join("\n");
 }
 
-function eventLine(event: LiveEvent, itemName: ItemName): string {
+function buildingLine(detail: string, playerTeam: Side | null): string {
+  const building = parseBuildingKey(detail);
+  if (!building) return "- A building just fell.";
+  return `- ${teamName(building.team, playerTeam)} just lost the ${buildingLabel(building)}.`;
+}
+
+function eventLine(event: LiveEvent, itemName: ItemName, playerTeam: Side | null): string {
   switch (event.kind) {
     case "death":
       return "- They just died.";
     case "kill":
       return `- They just got ${event.detail} kill${event.detail === "1" ? "" : "s"}.`;
+    case "building":
+      return buildingLine(event.detail, playerTeam);
     case "item":
       return `- They just bought ${itemName(event.detail)}.`;
     case "gold":
@@ -76,7 +87,7 @@ export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName
     plan ? `Their item plan: ${plan.map(itemName).join(" → ")}.` : "",
     "",
     "What just happened:",
-    ...events.map((event) => eventLine(event, itemName)),
+    ...events.map((event) => eventLine(event, itemName, snapshot.team)),
     ...(recentTips.length > 0 ? ["", "Do not repeat these recent tips:", ...recentTips.map((tip) => `- ${tip}`)] : []),
     "",
     "Answer with the tip only: no heading, no list.",

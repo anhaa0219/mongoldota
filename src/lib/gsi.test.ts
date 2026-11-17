@@ -40,6 +40,9 @@ describe("toLiveSnapshot", () => {
     expect(snapshot?.inventory[1]).toBeNull();
     expect(snapshot?.inventory).toHaveLength(6);
     expect(snapshot?.owned).toContain("ultimate_orb");
+    expect(snapshot?.team).toBe("radiant");
+    expect(snapshot?.buildingTeams).toEqual(["radiant"]);
+    expect(snapshot?.buildings).toContainEqual({ team: "radiant", kind: "tower", lane: "mid", tier: 1, healthPct: 25 });
   });
 
   it("returns null for another player's steamid", () => {
