@@ -73,9 +73,9 @@ describe("POST /api/live/coach", () => {
     expect((await send({ kinds: ["death"] })).status).toBe(409);
   });
 
-  it("refuses a second automatic tip inside 90 s", async () => {
+  it("still refuses a small moment inside 90 s", async () => {
     state.reserved.set("tip:m1", NOW - 30_000);
-    const response = await send({ kinds: ["death"] });
+    const response = await send({ kinds: ["kill"] });
     expect(response.status).toBe(429);
     expect(state.modelCalls).toBe(0);
   });
