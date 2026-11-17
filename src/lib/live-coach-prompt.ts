@@ -1,55 +1,15 @@
 /** Prompts for the live coach (one short tip, or an item plan) from real numbers only, and parsing the replies. Pure. */
 
 import { POSITION_NAMES } from "@/lib/draft-advice";
-import { formatDuration } from "@/lib/format";
-import { buildingLabel, describeBuildings, parseBuildingKey, teamName } from "@/lib/gsi-buildings";
+import { eventLine, gameLine, type ItemName } from "@/lib/live-coach-lines";
+import { laneLines, type LaneInfo } from "@/lib/live-lane";
 import type { AdviceFacts } from "@/types/draft";
-import type { Side } from "@/types/game";
 import type { LiveEvent, LiveSnapshot } from "@/types/live";
 
 const MAX_TIP_LENGTH = 300;
 const MAX_PLAN_ITEMS = 6;
 
-type ItemName = (key: string) => string;
-
 const pct = (value: number) => `${Math.round(value)}%`;
-
-function gameLine(snapshot: LiveSnapshot, heroName: string, itemName: ItemName): string {
-  const items = snapshot.inventory.flatMap((key) => (key ? itemName(key) : [])).join(", ") || "none";
-  return [
-    `Game time ${formatDuration(snapshot.clockSeconds)}. The player is ${heroName}, level ${snapshot.level}${snapshot.alive ? "" : `, dead (respawn in ${snapshot.respawnSeconds}s)`}.`,
-    `K ${snapshot.kills} / D ${snapshot.deaths} / A ${snapshot.assists}. Last hits ${snapshot.lastHits}. Gold ${snapshot.gold}, GPM ${snapshot.gpm}, XPM ${snapshot.xpm}.`,
-    `Items: ${items}.`,
-    ...describeBuildings(snapshot),
-  ].join("\n");
-}
-
-function buildingLine(detail: string, playerTeam: Side | null): string {
-  const building = parseBuildingKey(detail);
-  if (!building) return "- A building just fell.";
-  return `- ${teamName(building.team, playerTeam)} just lost the ${buildingLabel(building)}.`;
-}
-
-function eventLine(event: LiveEvent, itemName: ItemName, playerTeam: Side | null): string {
-  switch (event.kind) {
-    case "death":
-      return "- They just died.";
-    case "kill":
-      return `- They just got ${event.detail} kill${event.detail === "1" ? "" : "s"}.`;
-    case "building":
-      return buildingLine(event.detail, playerTeam);
-    case "item":
-      return `- They just bought ${itemName(event.detail)}.`;
-    case "gold":
-      return `- They now have enough gold for ${itemName(event.detail)}.`;
-    case "lookahead":
-      return "- Quiet moment: tell them what to expect and prepare for in the next 3-5 minutes.";
-    case "asked":
-      return "- They asked for advice right now.";
-    case "plan":
-      return "- The match just started.";
-  }
-}
 
 function teamLines(facts: AdviceFacts): string[] {
   const enemies = facts.enemies.map((enemy) => {
@@ -75,19 +35,23 @@ interface TipInput {
   itemName: ItemName;
   plan: string[] | null;
   recentTips: string[];
+  /** The player's lane; null when there is neither a usable draft nor a picked position. */
+  lane: LaneInfo | null;
 }
 
-export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan, recentTips }: TipInput): string {
+export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan, recentTips, lane }: TipInput): string {
   return [
     "You are an expert Dota 2 coach talking to a player DURING their match.",
     "Give ONE short, specific tip (at most 2 sentences) for what just happened. Use only the numbers below; never invent statistics.",
+    "If they just got a kill, are on a kill streak, or their team won a teamfight, start with a few words of praise, then give the next move.",
     "",
     gameLine(snapshot, heroName, itemName),
     ...(facts ? ["", ...teamLines(facts)] : []),
+    ...(lane ? ["", ...laneLines(lane, heroName, snapshot.clockSeconds)] : []),
     plan ? `Their item plan: ${plan.map(itemName).join(" → ")}.` : "",
     "",
     "What just happened:",
-    ...events.map((event) => eventLine(event, itemName, snapshot.team)),
+    ...events.map((event) => eventLine(event, itemName, snapshot.team, lane?.lane ?? null)),
     ...(recentTips.length > 0 ? ["", "Do not repeat these recent tips:", ...recentTips.map((tip) => `- ${tip}`)] : []),
     "",
     "Answer with the tip only: no heading, no list.",
@@ -99,15 +63,17 @@ interface PlanInput {
   heroName: string;
   facts: AdviceFacts | null;
   candidates: { key: string; name: string }[];
+  lane: LaneInfo | null;
 }
 
-export function buildItemPlanPrompt({ snapshot, heroName, facts, candidates }: PlanInput): string {
+export function buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane }: PlanInput): string {
   return [
     `You are an expert Dota 2 coach. The player's match just started; they play ${heroName}.`,
     `Choose the 4-${MAX_PLAN_ITEMS} core items they should build next, in buy order, from the candidates below.`,
     "",
     `Items they own now: ${snapshot.owned.join(", ") || "none"}.`,
     ...(facts ? teamLines(facts) : []),
+    ...(lane ? laneLines(lane, heroName, snapshot.clockSeconds) : []),
     "",
     "Candidates (key: name):",
     ...candidates.map(({ key, name }) => `- ${key}: ${name}`),

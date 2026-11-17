@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PLAN_RETRY_MS, markSpoke, stepCoach } from "@/lib/live-coach-timing";
 import { absorbSnapshot, EMPTY_MEMORY, needsReplan, shouldAskPlan } from "@/lib/live-coach-state";
-import type { LiveEvent, LiveFeed, LiveTip } from "@/types/live";
+import type { LiveEvent, LiveFeed, LiveTip, Moment } from "@/types/live";
 
 const TICK_MS = 1000;
 /** No coaching on data older than this: Dota is closed or the connection dropped. */
 const FRESH_MS = 60_000;
 const FAILED = "The coach could not answer. Try again.";
+const isEvent = (moment: Moment): moment is LiveEvent => moment.kind !== "teamkill";
 
 interface CoachInput {
   feed: LiveFeed;
@@ -91,7 +92,7 @@ export function useLiveCoach({ feed, plan, costs, onTip }: CoachInput): { asking
     const timer = setInterval(() => {
       const current = latest.current.feed;
       if (!current.snapshot || current.updatedAt === null || Date.now() - current.updatedAt > FRESH_MS || busy.current) return;
-      const { state, fire } = stepCoach(memory.current.clock, { nowMs: Date.now(), clockSeconds: current.snapshot.clockSeconds, events: memory.current.queued });
+      const { state, fire } = stepCoach(memory.current.clock, { nowMs: Date.now(), clockSeconds: current.snapshot.clockSeconds, events: memory.current.queued.filter(isEvent) });
       memory.current = { ...memory.current, queued: [], clock: state };
       if (fire) void send(fire);
     }, TICK_MS);

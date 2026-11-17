@@ -118,3 +118,54 @@ describe("nextPlannedItem", () => {
     expect(nextPlannedItem(["dragon_lance"], ["dragon_lance"])).toBeNull();
   });
 });
+
+describe("new moments", () => {
+  const detect = (prev: LiveSnapshot, next: LiveSnapshot) => detectEvents(prev, next, null, COSTS, seenOf(prev));
+
+  it("reports assists", () => {
+    expect(detect(snap({ assists: 5 }), snap({ assists: 7 }))).toEqual([{ kind: "assist", detail: "2" }]);
+  });
+
+  it("reports a streak when it reaches 3, 5 or 8", () => {
+    expect(detect(snap({ killStreak: 2 }), snap({ killStreak: 3 }))).toContainEqual({ kind: "streak", detail: "3" });
+    expect(detect(snap({ killStreak: 3 }), snap({ killStreak: 4 }))).not.toContainEqual(expect.objectContaining({ kind: "streak" }));
+    expect(detect(snap({ killStreak: 4 }), snap({ killStreak: 6 }))).toContainEqual({ kind: "streak", detail: "6" });
+  });
+
+  it("reports a buyback when the cooldown starts", () => {
+    expect(detect(snap({ buybackCooldown: 0 }), snap({ buybackCooldown: 480 }))).toEqual([{ kind: "buyback", detail: "" }]);
+  });
+
+  it("warns once when buyback gold is lost after 30:00", () => {
+    const late = { clockSeconds: 1800, buybackCost: 1500, buybackCooldown: 0 };
+    expect(detect(snap({ ...late, gold: 1600 }), snap({ ...late, gold: 900 }))).toEqual([{ kind: "nobuyback", detail: "" }]);
+    expect(detect(snap({ ...late, gold: 900 }), snap({ ...late, gold: 800 }))).toEqual([]);
+    expect(detect(snap({ ...late, clockSeconds: 1799, gold: 1600 }), snap({ ...late, clockSeconds: 1799, gold: 900 }))).toEqual([]);
+    expect(detect(snap({ ...late, gold: 1600 }), snap({ ...late, gold: 900, buybackCooldown: 480 }))).toEqual([{ kind: "buyback", detail: "" }]);
+  });
+
+  it("reports picking up the Aegis", () => {
+    expect(detect(snap(), snap({ owned: ["aegis"] }))).toEqual([{ kind: "aegis", detail: "" }]);
+  });
+
+  it("counts kills for each team from the scores", () => {
+    const moments = detect(snap({ score: { radiant: 10, dire: 8 } }), snap({ score: { radiant: 12, dire: 9 } }));
+    expect(moments).toEqual([{ kind: "teamkill", detail: "ours" }, { kind: "teamkill", detail: "ours" }, { kind: "teamkill", detail: "theirs" }]);
+  });
+
+  it("reports nothing new for game states stored before these fields existed", () => {
+    expect(detect(snap(), snap())).toEqual([]);
+  });
+
+  it("does not treat the first appearance of a field as a change", () => {
+    expect(detect(snap(), snap({ killStreak: 5, buybackCost: 1500, buybackCooldown: 480, score: { radiant: 9, dire: 9 } }))).toEqual([]);
+  });
+
+  it("ignores score jumps across a gap of more than 30 game-seconds", () => {
+    expect(detect(snap({ clockSeconds: 600, score: { radiant: 10, dire: 8 } }), snap({ clockSeconds: 720, score: { radiant: 15, dire: 12 } }))).toEqual([]);
+  });
+
+  it("ignores scores when the player's team is unknown", () => {
+    expect(detect(snap({ team: null, score: { radiant: 10, dire: 8 } }), snap({ team: null, score: { radiant: 13, dire: 8 } }))).toEqual([]);
+  });
+});

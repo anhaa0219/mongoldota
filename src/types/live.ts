@@ -57,15 +57,59 @@ export interface LiveBuilding {
   healthPct: number;
 }
 
-export type LiveEventKind = "death" | "kill" | "gold" | "item" | "building" | "lookahead" | "asked" | "plan";
+export type LiveEventKind =
+  | "death"
+  | "kill"
+  | "assist"
+  | "streak"
+  | "teamfight"
+  | "buyback"
+  | "nobuyback"
+  | "aegis"
+  | "gold"
+  | "item"
+  | "building"
+  | "lookahead"
+  | "asked"
+  | "plan";
 
-export const LIVE_EVENT_KINDS: readonly LiveEventKind[] = ["death", "kill", "gold", "item", "building", "lookahead", "asked", "plan"];
+export const LIVE_EVENT_KINDS: readonly LiveEventKind[] = [
+  "death",
+  "kill",
+  "assist",
+  "streak",
+  "teamfight",
+  "buyback",
+  "nobuyback",
+  "aegis",
+  "gold",
+  "item",
+  "building",
+  "lookahead",
+  "asked",
+  "plan",
+];
 
-/** detail: an item key ("item", "gold"), the number of kills ("kill"), a building key ("building"), otherwise "". */
+/** Moments that get a tip soon after they happen; every other kind waits for the usual gap. "buyback" = the player bought back. */
+export const BIG_EVENT_KINDS: readonly LiveEventKind[] = ["death", "teamfight", "buyback", "aegis"];
+
+/**
+ * detail: an item key ("item", "gold"), how many ("kill", "assist"), the streak length ("streak"),
+ * a building key ("building"), a teamfight summary ("teamfight", see live-moments.ts), otherwise "".
+ */
 export interface LiveEvent {
   kind: LiveEventKind;
   detail: string;
 }
+
+/** A hero kill scored by the player's team ("ours") or the enemy ("theirs"), from the team scores. Browser only: never sent to the coach. */
+export interface TeamKill {
+  kind: "teamkill";
+  detail: "ours" | "theirs";
+}
+
+/** What the page notices between two game states, before a group of them becomes coach events. */
+export type Moment = LiveEvent | TeamKill;
 
 export interface LiveTip {
   id: number;

@@ -12,6 +12,7 @@ import { coachSlot } from "@/lib/live-coach-timing";
 import { buildItemPlanPrompt, buildLiveTipPrompt, parseItemPlan, parseLiveTip } from "@/lib/live-coach-prompt";
 import { MIN_ITEM_COST } from "@/lib/live-events";
 import { freshDraft } from "@/lib/live-freshness";
+import { laneInfo } from "@/lib/live-lane";
 import { reserveSlot } from "@/lib/live-slots-store";
 import { getGsiSteamId, getLiveRow } from "@/lib/live-store";
 import { addTip, getLockedDraft, getPlanTip, getTips } from "@/lib/live-tips-store";
@@ -58,7 +59,8 @@ async function gameContext(userId: string, snapshot: LiveSnapshot) {
   const facts = draft && draft.myHeroId === snapshot.heroId ? await gatherAdviceFacts({ ...draft, accountId }) : null;
   const heroName = heroes.find((hero) => hero.id === snapshot.heroId)?.name ?? snapshot.heroKey;
   const itemName = (key: string) => items.byKey.get(key)?.name ?? key;
-  return { items, facts, heroName, itemName };
+  const lane = laneInfo({ team: snapshot.team, facts, position: null });
+  return { items, facts, heroName, itemName, lane };
 }
 
 export async function POST(request: Request) {
@@ -81,11 +83,11 @@ export async function POST(request: Request) {
   const { slot, cutoff } = coachSlot(kinds, matchId, Date.now());
   if (!(await reserveSlot(userId, slot, cutoff))) return reply({ skipped: true }, 429);
 
-  const { items, facts, heroName, itemName } = await gameContext(userId, snapshot);
+  const { items, facts, heroName, itemName, lane } = await gameContext(userId, snapshot);
 
   if (kinds.includes("plan")) {
     const candidates = await planCandidates(snapshot.heroId, items);
-    const result = await askQuickModel(buildItemPlanPrompt({ snapshot, heroName, facts, candidates }));
+    const result = await askQuickModel(buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane }));
     if (!result.ok) return modelFailure(result.reason);
     const plan = parseItemPlan(result.text, new Set(candidates.map((item) => item.key)));
     if (plan.length === 0) return modelFailure("failed");
@@ -95,7 +97,7 @@ export async function POST(request: Request) {
 
   const events = kinds.map((kind, index) => ({ kind, detail: details?.[index] ?? "" }));
   const recent = (await getTips(userId, matchId, RECENT_TIPS + 1)).filter((tip) => tip.kind !== "plan").slice(0, RECENT_TIPS);
-  const prompt = buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan: planTip?.plan ?? null, recentTips: recent.map((tip) => tip.text) });
+  const prompt = buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan: planTip?.plan ?? null, recentTips: recent.map((tip) => tip.text), lane });
   const result = await askQuickModel(prompt);
   if (!result.ok) return modelFailure(result.reason);
   const text = parseLiveTip(result.text);

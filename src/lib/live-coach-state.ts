@@ -2,7 +2,7 @@
 
 import { IDLE_CLOCK, type CoachClock } from "@/lib/live-coach-timing";
 import { countItems, detectEvents, raiseSeen } from "@/lib/live-events";
-import type { LiveEvent, LiveSnapshot } from "@/types/live";
+import type { LiveSnapshot, Moment } from "@/types/live";
 
 /** Off-plan items cheaper than this are usually components of planned items, so they don't change the plan. */
 export const REPLAN_MIN_COST = 2000;
@@ -11,8 +11,8 @@ export interface CoachMemory {
   previous: LiveSnapshot | null;
   /** The most of each item had at once this match. */
   seen: Map<string, number>;
-  /** Events waiting for the timing rules. */
-  queued: LiveEvent[];
+  /** Moments waiting for the timing rules. */
+  queued: Moment[];
   clock: CoachClock;
 }
 
@@ -28,7 +28,7 @@ export function absorbSnapshot(memory: CoachMemory, snapshot: LiveSnapshot, plan
 }
 
 /** True when the player bought an expensive item the plan doesn't have. */
-export function needsReplan(events: LiveEvent[], plan: string[] | null, costs: Map<string, number>): boolean {
+export function needsReplan(events: Moment[], plan: string[] | null, costs: Map<string, number>): boolean {
   if (!plan) return false;
   return events.some((event) => event.kind === "item" && !plan.includes(event.detail) && (costs.get(event.detail) ?? 0) >= REPLAN_MIN_COST);
 }

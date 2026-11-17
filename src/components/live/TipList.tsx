@@ -1,10 +1,16 @@
-import { Castle, Coins, Crosshair, ListOrdered, MessageCircle, ShoppingBag, Skull, Telescope, type LucideIcon } from "lucide-react";
+import { Castle, Coins, Crosshair, Crown, Flame, Handshake, ListOrdered, MessageCircle, PiggyBank, ShoppingBag, Skull, Swords, Telescope, Undo2, type LucideIcon } from "lucide-react";
 import { formatDuration } from "@/lib/format";
 import type { LiveEventKind, LiveTip } from "@/types/live";
 
 const ICONS: Record<LiveEventKind, { icon: LucideIcon; label: string }> = {
   death: { icon: Skull, label: "After a death" },
   kill: { icon: Crosshair, label: "After a kill" },
+  assist: { icon: Handshake, label: "Assist" },
+  streak: { icon: Flame, label: "Kill streak" },
+  teamfight: { icon: Swords, label: "After a teamfight" },
+  buyback: { icon: Undo2, label: "Bought back" },
+  nobuyback: { icon: PiggyBank, label: "No buyback gold" },
+  aegis: { icon: Crown, label: "Aegis" },
   gold: { icon: Coins, label: "Gold ready" },
   item: { icon: ShoppingBag, label: "Item bought" },
   building: { icon: Castle, label: "Building fell" },
@@ -26,7 +32,7 @@ interface TipListProps {
 /** The coach's tips for this match, newest on top, and the Ask coach now button. */
 export function TipList({ tips, asking, error, canAsk, onAsk }: TipListProps) {
   return (
-    <section aria-label="Coach" className="glass-panel flex min-h-0 flex-1 flex-col gap-[0.8rem] rounded-[1.4rem] p-[1rem]">
+    <section aria-label="Coach" className="glass-panel rise-in flex min-h-0 flex-1 flex-col gap-[0.8rem] rounded-[1.4rem] p-[1rem] [--rise-delay:80ms]">
       <div className="flex items-center justify-between gap-[1rem]">
         <h2 className="font-display text-[1.5rem] uppercase tracking-[0.06em] text-white">Coach</h2>
         <button
@@ -44,7 +50,7 @@ export function TipList({ tips, asking, error, canAsk, onAsk }: TipListProps) {
         {tips.map((tip) => {
           const { icon: Icon, label } = ICONS[tip.kind];
           return (
-            <li key={tip.id} className="flex gap-[0.7rem] rounded-[1rem] bg-white/[0.05] px-[0.8rem] py-[0.6rem]">
+            <li key={tip.id} className="rise-in flex gap-[0.7rem] rounded-[1rem] bg-white/[0.05] px-[0.8rem] py-[0.6rem] transition-colors hover:bg-white/[0.09]">
               <Icon className="mt-[0.15rem] size-[1.1rem] shrink-0 text-accent" aria-label={label} />
               <p className="min-w-0 text-[1rem] leading-snug text-white/90">
                 <span className="mr-[0.5rem] tabular-nums text-white/45">{formatDuration(tip.clockSeconds)}</span>
