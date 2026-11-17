@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PLAN_RETRY_MS, markSpoke, stepCoach } from "@/lib/live-coach-timing";
 import { absorbSnapshot, EMPTY_MEMORY, needsReplan, shouldAskPlan } from "@/lib/live-coach-state";
+import type { Position } from "@/types/draft";
 import type { LiveEvent, LiveFeed, LiveTip } from "@/types/live";
 
 const TICK_MS = 1000;
@@ -16,6 +17,8 @@ interface CoachInput {
   plan: string[] | null;
   costs: Map<string, number>;
   onTip: (tip: LiveTip) => void;
+  /** The position picked on the page; null when a locked draft gives it. */
+  position: Position | null;
 }
 
 type CoachReply = { tip?: LiveTip; error?: string; skipped?: boolean };
@@ -26,17 +29,17 @@ type Outcome = "tip" | "skipped" | "busy" | "failed";
  * Asks for the item plan once per match (retrying after a minute) and again when the player buys off-plan.
  * Runs only while this page is open.
  */
-export function useLiveCoach({ feed, plan, costs, onTip }: CoachInput): { asking: boolean; error: string | null; ask: () => void } {
+export function useLiveCoach({ feed, plan, costs, onTip, position }: CoachInput): { asking: boolean; error: string | null; ask: () => void } {
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const memory = useRef(EMPTY_MEMORY);
   const planAsk = useRef<{ matchId: string | null; retryAt: number }>({ matchId: null, retryAt: 0 });
   const busy = useRef(false);
-  const latest = useRef({ feed, plan, costs, onTip });
+  const latest = useRef({ feed, plan, costs, onTip, position });
 
   useEffect(() => {
-    latest.current = { feed, plan, costs, onTip };
-  }, [feed, plan, costs, onTip]);
+    latest.current = { feed, plan, costs, onTip, position };
+  }, [feed, plan, costs, onTip, position]);
 
   const send = useCallback(async (events: LiveEvent[], replan = false): Promise<Outcome> => {
     if (busy.current) return "busy";
@@ -46,7 +49,7 @@ export function useLiveCoach({ feed, plan, costs, onTip }: CoachInput): { asking
       const response = await fetch("/api/live/coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kinds: events.map((event) => event.kind), details: events.map((event) => event.detail), replan }),
+        body: JSON.stringify({ kinds: events.map((event) => event.kind), details: events.map((event) => event.detail), replan, position: latest.current.position ?? undefined }),
       });
       const reply = (await response.json()) as CoachReply;
       if (reply.tip) latest.current.onTip(reply.tip);

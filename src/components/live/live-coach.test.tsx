@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { DraftStrip } from "@/components/live/DraftStrip";
 import { LivePanel } from "@/components/live/LivePanel";
+import { PositionPicker } from "@/components/live/PositionPicker";
 import { TipList } from "@/components/live/TipList";
 import type { LiveSnapshot, LiveTip, LockedDraft } from "@/types/live";
 
@@ -53,5 +54,14 @@ describe("LivePanel", () => {
     expect(html).toContain("1,840");
     expect(html).toContain("Dragon Lance");
     expect(html).toContain("Live");
+  });
+});
+
+describe("PositionPicker", () => {
+  it("marks the chosen position and says when it is only a guess", () => {
+    const html = renderToStaticMarkup(<PositionPicker value={3} isGuess onChange={() => {}} />);
+    expect(html).toMatch(/aria-checked="true"[^>]*>3</);
+    expect(html).toContain("Our guess");
+    expect(renderToStaticMarkup(<PositionPicker value={3} isGuess={false} onChange={() => {}} />)).not.toContain("Our guess");
   });
 });

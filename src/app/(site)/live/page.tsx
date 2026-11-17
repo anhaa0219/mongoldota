@@ -39,7 +39,7 @@ async function LiveLoader() {
       initialHasToken={hasToken}
       initialNow={now}
       draft={draft}
-      heroes={heroes.map(({ id, name, slug }) => ({ id, name, slug }))}
+      heroes={heroes.map(({ id, name, slug, roles }) => ({ id, name, slug, roles }))}
       items={items}
     />
   );

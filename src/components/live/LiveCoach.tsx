@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { ConnectDota } from "@/components/live/ConnectDota";
 import { DraftStrip } from "@/components/live/DraftStrip";
 import { LivePanel } from "@/components/live/LivePanel";
+import { PositionPicker } from "@/components/live/PositionPicker";
 import { TipList } from "@/components/live/TipList";
 import { isDotaConnected } from "@/lib/live-freshness";
 import type { LiveFeedState } from "@/lib/live-rows";
 import { useLiveCoach } from "@/lib/use-live-coach";
 import { useLiveFeed } from "@/lib/use-live-feed";
+import { useLivePosition } from "@/lib/use-live-position";
 import type { LiveFeed, LiveTip, LockedDraft } from "@/types/live";
 
 const CLOCK_TICK_MS = 10_000;
@@ -22,7 +24,7 @@ export interface LiveCoachProps {
   /** The server's clock, so the first render matches. */
   initialNow: number;
   draft: LockedDraft | null;
-  heroes: { id: number; name: string; slug: string }[];
+  heroes: { id: number; name: string; slug: string; roles: string[] }[];
   items: { key: string; name: string; image: string; cost: number }[];
 }
 
@@ -36,7 +38,8 @@ export function LiveCoach({ clerkUserId, initialFeed, initialTips, initialPlan, 
   const costs = useMemo(() => new Map(items.map((item) => [item.key, item.cost])), [items]);
   const itemInfo = useMemo(() => new Map(items.map((item) => [item.key, { name: item.name, image: item.image }])), [items]);
   const heroNames = useMemo(() => new Map(heroes.map((hero) => [hero.id, hero.name])), [heroes]);
-  const coach = useLiveCoach({ feed, plan, costs, onTip: addLocalTip });
+  const { position, isGuess, choose } = useLivePosition(feed.snapshot, draft, heroes);
+  const coach = useLiveCoach({ feed, plan, costs, onTip: addLocalTip, position });
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), CLOCK_TICK_MS);
@@ -72,6 +75,7 @@ export function LiveCoach({ clerkUserId, initialFeed, initialTips, initialPlan, 
     <div className="grid min-h-0 flex-1 gap-[1rem] lg:grid-cols-[minmax(0,1fr)_minmax(24rem,32rem)]">
       <div className="flex min-w-0 flex-col gap-[1rem]">
         <LivePanel snapshot={snapshot} heroName={heroName} items={itemInfo} updatedAt={feed.updatedAt} now={now} />
+        {position !== null && <PositionPicker value={position} isGuess={isGuess} onChange={choose} />}
         <DraftStrip draft={draft} heroNames={heroNames} liveHeroId={snapshot.heroId} />
         <p className="text-[0.85rem] text-white/45">
           Numbers come from your game and OpenDota. Tips are written by AI (Qwen) and can get small details wrong.
