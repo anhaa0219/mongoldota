@@ -83,8 +83,9 @@ describe("stepCoach", () => {
 
 describe("coachSlot", () => {
   const NOW = 1_000_000;
-  it("gives small automatic tips a 90 s slot per match", () => expect(coachSlot(["kill"], "m1", NOW)).toEqual({ slot: "tip:m1", cutoff: new Date(NOW - 90_000) }));
-  it("lets a big moment through after 25 s", () => expect(coachSlot(["kill", "death"], "m1", NOW).cutoff).toEqual(new Date(NOW - 25_000)));
+  // The browser keeps the full 90 s and 25 s gaps; the server's claim is 3 s more lenient so a tip sent exactly on the gap is not refused.
+  it("gives small automatic tips a slot per match, 3 s short of 90 s", () => expect(coachSlot(["kill"], "m1", NOW)).toEqual({ slot: "tip:m1", cutoff: new Date(NOW - 87_000) }));
+  it("lets a big moment through 3 s short of 25 s", () => expect(coachSlot(["kill", "death"], "m1", NOW).cutoff).toEqual(new Date(NOW - 22_000)));
   it("lets Ask coach through after 15 s", () => expect(coachSlot(["asked"], "m1", NOW).cutoff).toEqual(new Date(NOW - 15_000)));
   it("keeps the item plan in its own slot, retried after a minute", () => expect(coachSlot(["plan"], "m1", NOW)).toEqual({ slot: "plan:m1", cutoff: new Date(NOW - 60_000) }));
 });

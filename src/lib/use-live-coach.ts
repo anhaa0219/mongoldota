@@ -19,6 +19,8 @@ interface CoachInput {
   onTip: (tip: LiveTip) => void;
   /** The position picked on the page; null when a locked draft gives it. */
   position: Position | null;
+  /** True while that position is only a guess from the hero's roles. */
+  positionIsGuess: boolean;
 }
 
 type CoachReply = { tip?: LiveTip; error?: string; skipped?: boolean };
@@ -29,17 +31,17 @@ type Outcome = "tip" | "skipped" | "busy" | "failed";
  * Asks for the item plan once per match (retrying after a minute) and again when the player buys off-plan.
  * Runs only while this page is open.
  */
-export function useLiveCoach({ feed, plan, costs, onTip, position }: CoachInput): { asking: boolean; error: string | null; ask: () => void } {
+export function useLiveCoach({ feed, plan, costs, onTip, position, positionIsGuess }: CoachInput): { asking: boolean; error: string | null; ask: () => void } {
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const memory = useRef(EMPTY_MEMORY);
   const planAsk = useRef<{ matchId: string | null; retryAt: number }>({ matchId: null, retryAt: 0 });
   const busy = useRef(false);
-  const latest = useRef({ feed, plan, costs, onTip, position });
+  const latest = useRef({ feed, plan, costs, onTip, position, positionIsGuess });
 
   useEffect(() => {
-    latest.current = { feed, plan, costs, onTip, position };
-  }, [feed, plan, costs, onTip, position]);
+    latest.current = { feed, plan, costs, onTip, position, positionIsGuess };
+  }, [feed, plan, costs, onTip, position, positionIsGuess]);
 
   const send = useCallback(async (events: LiveEvent[], replan = false): Promise<Outcome> => {
     if (busy.current) return "busy";
@@ -49,7 +51,7 @@ export function useLiveCoach({ feed, plan, costs, onTip, position }: CoachInput)
       const response = await fetch("/api/live/coach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kinds: events.map((event) => event.kind), details: events.map((event) => event.detail), replan, position: latest.current.position ?? undefined }),
+        body: JSON.stringify({ kinds: events.map((event) => event.kind), details: events.map((event) => event.detail), replan, position: latest.current.position ?? undefined, positionIsGuess: latest.current.positionIsGuess }),
       });
       const reply = (await response.json()) as CoachReply;
       if (reply.tip) latest.current.onTip(reply.tip);

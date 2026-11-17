@@ -113,6 +113,34 @@ describe("POST /api/live/coach", () => {
     expect((await send({ kinds: ["kill", "death"] })).status).toBe(200);
   });
 
+  it("does not refuse a big moment sent exactly on the 25 s gap", async () => {
+    // The earlier claim was made a little after the browser fired, so the server sees slightly less than 25 s.
+    state.reserved.set("tip:m1", NOW - 24_800);
+    expect((await send({ kinds: ["death"] })).status).toBe(200);
+  });
+
+  it("still refuses a big moment well inside the gap", async () => {
+    state.reserved.set("tip:m1", NOW - 15_000);
+    expect((await send({ kinds: ["death"] })).status).toBe(429);
+  });
+
+  it("stores a tip under its biggest moment, not the oldest one", async () => {
+    await send({ kinds: ["item", "death"], details: ["dragon_lance", ""] });
+    expect(state.added[0].kind).toBe("death");
+    state.reserved = new Map();
+    await send({ kinds: ["kill", "buyback"], details: ["1", ""] });
+    expect(state.added[1].kind).toBe("buyback");
+    state.reserved = new Map();
+    await send({ kinds: ["kill", "item"], details: ["1", "dragon_lance"] });
+    expect(state.added[2].kind).toBe("kill");
+  });
+
+  it("tells the coach when the position is only a guess", async () => {
+    await send({ kinds: ["asked"], position: 3, positionIsGuess: true });
+    expect(state.lastPrompt).toContain("They probably play Position 3 (off lane)");
+    expect(state.lastPrompt).toContain("Likely lane: top (off lane)");
+  });
+
   it("accepts the new kinds, 12 at most", async () => {
     const twelve = ["teamfight", "buyback", "aegis", "assist", "streak", "nobuyback", "kill", "death", "item", "gold", "building", "lookahead"];
     expect((await send({ kinds: twelve, details: twelve.map(() => "") })).status).toBe(200);

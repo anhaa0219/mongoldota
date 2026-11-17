@@ -14,6 +14,12 @@ export const BIG_GAP_MS = 25_000;
 export const MIN_GAP_MS = 90_000;
 export const LOOKAHEAD_GAME_SECONDS = 240;
 export const ASK_GAP_MS = 15_000;
+/**
+ * The server's claim on an automatic tip is this much more lenient than the browser's gap. The browser sends a
+ * waiting tip on the first tick the gap has passed, but the server measures from when it claimed the previous
+ * tip, a little later; without this a tip sent exactly on the gap is refused and lost.
+ */
+export const SLOT_TOLERANCE_MS = 3_000;
 
 export interface CoachClock {
   /** Moments of the group that is still open. */
@@ -73,11 +79,12 @@ export const PLAN_RETRY_MS = 60_000;
 
 /**
  * The server-side slot a coach request must claim (per player and match), and the cutoff it must be older than:
- * tips share one slot (90 s apart, 25 s when the request has a big moment, Ask coach 15 s), the item plan
- * has its own (one attempt per minute).
+ * tips share one slot (90 s apart, 25 s when the request has a big moment, both less SLOT_TOLERANCE_MS;
+ * Ask coach 15 s), the item plan has its own (one attempt per minute).
  */
 export function coachSlot(kinds: LiveEventKind[], matchId: string, nowMs: number): { slot: string; cutoff: Date } {
   if (kinds.includes("plan")) return { slot: `plan:${matchId}`, cutoff: new Date(nowMs - PLAN_RETRY_MS) };
-  const gap = kinds.includes("asked") ? ASK_GAP_MS : kinds.some(isBigKind) ? BIG_GAP_MS : MIN_GAP_MS;
+  if (kinds.includes("asked")) return { slot: `tip:${matchId}`, cutoff: new Date(nowMs - ASK_GAP_MS) };
+  const gap = (kinds.some(isBigKind) ? BIG_GAP_MS : MIN_GAP_MS) - SLOT_TOLERANCE_MS;
   return { slot: `tip:${matchId}`, cutoff: new Date(nowMs - gap) };
 }

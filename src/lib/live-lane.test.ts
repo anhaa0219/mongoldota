@@ -53,6 +53,19 @@ describe("laneLines", () => {
     ]);
   });
 
+  it("words a guessed position as a guess", () => {
+    const lane = laneInfo({ team: "radiant", facts: null, position: 3, isGuess: true });
+    if (!lane) throw new Error("expected a lane");
+    expect(laneLines(lane, "Axe", 600)).toEqual([
+      "They probably play Position 3 (off lane): a guess from the hero's roles that the player has not confirmed.",
+      "Likely lane: top (off lane), against the enemy pos 1 and pos 5 (heroes unknown).",
+    ]);
+  });
+
+  it("never treats a locked draft's position as a guess", () => {
+    expect(laneInfo({ team: "radiant", facts: FACTS, position: 3, isGuess: true })?.isGuess).toBeUndefined();
+  });
+
   it("says just the lane role when the team is unknown, and no doubled 'mid'", () => {
     expect(laneLines({ position: 2, lane: null, partners: [], opponents: null }, "Puck", 900)[1]).toBe("Lane: mid, against the enemy pos 2 (heroes unknown).");
   });

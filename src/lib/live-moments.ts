@@ -48,7 +48,7 @@ export const TEAMFIGHT_HERO_DEATHS = 3;
 export const TEAMFIGHT_OWN_ACTIONS = 2;
 
 const FIGHT_KINDS: readonly LiveEventKind[] = ["death", "kill", "assist"];
-const isEvent = (moment: Moment): moment is LiveEvent => moment.kind !== "teamkill";
+const isEvent = (moment: Moment): moment is LiveEvent => moment.kind !== "teamkill" && moment.kind !== "gap";
 
 /** How many kills or assists the events of one kind add up to. */
 function countOf(events: LiveEvent[], kind: LiveEventKind): number {
@@ -58,10 +58,11 @@ function countOf(events: LiveEvent[], kind: LiveEventKind): number {
 /**
  * One group of moments to the events the coach is told about. A burst of kills becomes a single "teamfight"
  * event (replacing the player's own deaths, kills and assists in it); kills by either team that are not
- * part of a fight are dropped, so a group can come back empty.
+ * part of a fight are dropped, so a group can come back empty. A group with a jump in the game state is never a fight.
  */
 export function closeGroup(moments: Moment[]): LiveEvent[] {
   const events = moments.filter(isEvent);
+  if (moments.some((moment) => moment.kind === "gap")) return events;
   const ours = moments.filter((moment) => moment.kind === "teamkill" && moment.detail === "ours").length;
   const theirs = moments.filter((moment) => moment.kind === "teamkill" && moment.detail === "theirs").length;
   const hasScores = ours + theirs > 0;

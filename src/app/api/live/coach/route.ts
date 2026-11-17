@@ -9,6 +9,7 @@ import { z } from "zod";
 import { gatherAdviceFacts } from "@/lib/draft-advice-facts";
 import { askQuickModel } from "@/lib/hf";
 import { coachSlot } from "@/lib/live-coach-timing";
+import { isBigKind } from "@/lib/live-moments";
 import { buildItemPlanPrompt, buildLiveTipPrompt, parseItemPlan, parseLiveTip } from "@/lib/live-coach-prompt";
 import { MIN_ITEM_COST } from "@/lib/live-events";
 import { freshDraft } from "@/lib/live-freshness";
@@ -35,6 +36,8 @@ const requestSchema = z.object({
   replan: z.boolean().optional(),
   /** The position the player picked on the Live page; used only when there is no usable locked draft. */
   position: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]).optional(),
+  /** True while that position is only the page's guess from the hero's roles. */
+  positionIsGuess: z.boolean().optional(),
 });
 
 const FAILURE_MESSAGES = {
@@ -56,7 +59,7 @@ async function planCandidates(heroId: number, items: ItemIndex) {
   return [...unique.values()].map(({ key, name }) => ({ key, name }));
 }
 
-async function gameContext(userId: string, snapshot: LiveSnapshot, pickedPosition: Position | null) {
+async function gameContext(userId: string, snapshot: LiveSnapshot, picked: { position: Position | null; isGuess: boolean }) {
   const [heroes, items, locked, steamId] = await Promise.all([getDraftHeroes(), getItemIndex(), getLockedDraft(userId), getGsiSteamId(userId)]);
   const draft = freshDraft(locked, Date.now());
   const accountId = steamId ? dotaAccountId(steamId) : null;
@@ -64,7 +67,7 @@ async function gameContext(userId: string, snapshot: LiveSnapshot, pickedPositio
   const facts = draft && draft.myHeroId === snapshot.heroId ? await gatherAdviceFacts({ ...draft, accountId }) : null;
   const heroName = heroes.find((hero) => hero.id === snapshot.heroId)?.name ?? snapshot.heroKey;
   const itemName = (key: string) => items.byKey.get(key)?.name ?? key;
-  const lane = laneInfo({ team: snapshot.team, facts, position: pickedPosition });
+  const lane = laneInfo({ team: snapshot.team, facts, ...picked });
   return { items, facts, heroName, itemName, lane };
 }
 
@@ -74,7 +77,7 @@ export async function POST(request: Request) {
 
   const input = requestSchema.safeParse(await request.json().catch(() => null));
   if (!input.success) return reply({ error: "Unknown coach request." }, 400);
-  const { kinds, details, replan, position } = input.data;
+  const { kinds, details, replan, position, positionIsGuess } = input.data;
 
   const row = await getLiveRow(userId);
   const snapshot = row?.snapshot;
@@ -88,7 +91,7 @@ export async function POST(request: Request) {
   const { slot, cutoff } = coachSlot(kinds, matchId, Date.now());
   if (!(await reserveSlot(userId, slot, cutoff))) return reply({ skipped: true }, 429);
 
-  const { items, facts, heroName, itemName, lane } = await gameContext(userId, snapshot, position ?? null);
+  const { items, facts, heroName, itemName, lane } = await gameContext(userId, snapshot, { position: position ?? null, isGuess: positionIsGuess ?? false });
 
   if (kinds.includes("plan")) {
     const candidates = await planCandidates(snapshot.heroId, items);
@@ -108,6 +111,8 @@ export async function POST(request: Request) {
   const text = parseLiveTip(result.text);
   if (!text) return modelFailure("failed");
 
-  const tip = await addTip(userId, { matchId, clockSeconds, kind: kinds[0], text, plan: null });
+  // Shown with the tip: the big moment when there is one, since moments held from earlier come first in the list.
+  const kind = kinds.find(isBigKind) ?? kinds[0];
+  const tip = await addTip(userId, { matchId, clockSeconds, kind, text, plan: null });
   return tip ? reply({ tip }) : modelFailure("failed");
 }

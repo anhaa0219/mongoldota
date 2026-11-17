@@ -39,7 +39,7 @@ export function LiveCoach({ clerkUserId, initialFeed, initialTips, initialPlan, 
   const itemInfo = useMemo(() => new Map(items.map((item) => [item.key, { name: item.name, image: item.image }])), [items]);
   const heroNames = useMemo(() => new Map(heroes.map((hero) => [hero.id, hero.name])), [heroes]);
   const { position, isGuess, choose } = useLivePosition(feed.snapshot, draft, heroes);
-  const coach = useLiveCoach({ feed, plan, costs, onTip: addLocalTip, position });
+  const coach = useLiveCoach({ feed, plan, costs, onTip: addLocalTip, position, positionIsGuess: isGuess });
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), CLOCK_TICK_MS);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { countItems, detectEvents, nextPlannedItem, raiseSeen } from "@/lib/live-events";
+import { closeGroup } from "@/lib/live-moments";
 import type { LiveSnapshot } from "@/types/live";
 
 const COSTS = new Map([
@@ -163,6 +164,15 @@ describe("new moments", () => {
 
   it("ignores score jumps across a gap of more than 30 game-seconds", () => {
     expect(detect(snap({ clockSeconds: 600, score: { radiant: 10, dire: 8 } }), snap({ clockSeconds: 720, score: { radiant: 15, dire: 12 } }))).toEqual([]);
+  });
+
+  it("does not fold the player's own numbers across a long gap into a teamfight", () => {
+    const before = { clockSeconds: 600, kills: 2, deaths: 1, assists: 1 };
+    const after = { clockSeconds: 720, kills: 4, deaths: 2, assists: 3 };
+    const separate = [{ kind: "death", detail: "" }, { kind: "kill", detail: "2" }, { kind: "assist", detail: "2" }];
+    // With team scores, and without them (when Dota does not send any).
+    expect(closeGroup(detect(snap({ ...before, score: { radiant: 10, dire: 8 } }), snap({ ...after, score: { radiant: 15, dire: 12 } })))).toEqual(separate);
+    expect(closeGroup(detect(snap(before), snap(after)))).toEqual(separate);
   });
 
   it("ignores scores when the player's team is unknown", () => {

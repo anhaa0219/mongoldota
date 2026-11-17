@@ -10,7 +10,7 @@ export const MIN_ITEM_COST = 1000;
 export const STREAK_MARKS = [3, 5, 8];
 /** "No gold for buyback" only matters late: from 30:00 on the game clock. */
 export const NO_BUYBACK_FROM_SECONDS = 1800;
-/** Team scores are compared only between snapshots this close in game time; after a longer gap the jump is not one fight. */
+/** Snapshots further apart than this in game time (a dropped connection) are not one fight: no team kills, no teamfight. */
 export const MAX_SNAPSHOT_GAP_SECONDS = 30;
 const AEGIS = "aegis";
 
@@ -53,10 +53,9 @@ function buybackEvents(prev: LiveSnapshot, next: LiveSnapshot): LiveEvent[] {
   return lostGold && next.clockSeconds >= NO_BUYBACK_FROM_SECONDS ? [{ kind: "nobuyback", detail: "" }] : [];
 }
 
-/** One moment per hero kill either team scored, when the player's team is known and the snapshots are close in time. */
+/** One moment per hero kill either team scored, when the player's team is known. */
 function teamKills(prev: LiveSnapshot, next: LiveSnapshot): TeamKill[] {
   if (!prev.score || !next.score || !next.team) return [];
-  if (next.clockSeconds - prev.clockSeconds > MAX_SNAPSHOT_GAP_SECONDS) return [];
   const enemy = next.team === "radiant" ? "dire" : "radiant";
   const ours = Math.max(0, next.score[next.team] - prev.score[next.team]);
   const theirs = Math.max(0, next.score[enemy] - prev.score[enemy]);
@@ -86,5 +85,8 @@ export function detectEvents(prev: LiveSnapshot | null, next: LiveSnapshot, plan
   const cost = target ? costs.get(target) : undefined;
   if (target && cost !== undefined && prev.gold < cost && next.gold >= cost) events.push({ kind: "gold", detail: target });
 
+  // After a long gap the changes still count, but they did not happen together.
+  const jumped = next.clockSeconds - prev.clockSeconds > MAX_SNAPSHOT_GAP_SECONDS;
+  if (jumped) return events.length > 0 ? [...events, { kind: "gap", detail: "" }] : [];
   return [...events, ...teamKills(prev, next)];
 }

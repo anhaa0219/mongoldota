@@ -108,8 +108,14 @@ export interface TeamKill {
   detail: "ours" | "theirs";
 }
 
+/** The game state jumped (the connection dropped for a while): the changes around it are not one fight. Browser only. */
+export interface StateGap {
+  kind: "gap";
+  detail: "";
+}
+
 /** What the page notices between two game states, before a group of them becomes coach events. */
-export type Moment = LiveEvent | TeamKill;
+export type Moment = LiveEvent | TeamKill | StateGap;
 
 export interface LiveTip {
   id: number;
