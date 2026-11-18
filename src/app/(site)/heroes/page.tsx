@@ -1,31 +1,33 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { PageBackdrop } from "@/components/PageBackdrop";
-import { AiHeroPicks } from "@/components/trending/AiHeroPicks";
-import { TrendingBoard } from "@/components/trending/TrendingBoard";
-import { bracketForTier } from "@/lib/hero-meta";
-import { getLinkedAccountId } from "@/lib/linked-account";
-import { getPlayerRank } from "@/lib/opendota";
-import { getPersonalRecords } from "@/lib/opendota-draft";
-import { getHeroIndex } from "@/lib/opendota-heroes";
-import { getRecentMatches } from "@/lib/opendota-matches";
-import { getHeroMeta } from "@/lib/opendota-meta";
-import { summarize } from "@/lib/player-summary";
+import { PageBackdrop } from "@/app/(site)/_components/PageBackdrop";
+import { requireUserId } from "@/app/(site)/_utils/require-user";
+import { AiHeroPicks } from "./_features/AiHeroPicks";
+import { TrendingBoard } from "./_features/TrendingBoard";
+import { bracketForTier } from "./_utils/hero-meta";
+import { getLinkedAccountId } from "@/lib/steam/linked-account";
+import { getPlayerRank } from "@/lib/opendota/opendota";
+import { getPersonalRecords } from "@/lib/opendota/opendota-draft";
+import { getHeroIndex } from "@/lib/opendota/opendota-heroes";
+import { getRecentMatches } from "@/lib/opendota/opendota-matches";
+import { getHeroMeta } from "./_utils/opendota-meta";
+import { summarize } from "@/lib/player/player-summary";
 import { site } from "@/lib/site-content";
+import { getWords } from "@/lib/i18n/server";
+import { PicksSkeleton } from "./_components/PicksSkeleton";
 
 export const metadata: Metadata = {
   title: `Trending Heroes · ${site.gameTitle}`,
 };
 
-function PicksSkeleton() {
-  return <div className="glass-panel shimmer h-[15rem] rounded-[1.4rem]" aria-label="Loading AI picks" />;
-}
 
 /** The player's rank, record per hero and main lane (when Steam is linked), then the picks and the board. Reads cookies. */
 async function TrendingLoader() {
+  const clerkUserId = await requireUserId();
+  const words = await getWords(); // the layout's check does not stop this component from running
   const [heroes, accountId] = await Promise.all([getHeroMeta(), getLinkedAccountId()]);
   if (heroes.length === 0) {
-    return <p className="relative z-20 m-auto text-[1.4rem] text-white/80">Could not load hero stats from OpenDota. Try again in a minute.</p>;
+    return <p className="relative z-20 m-auto text-[1.4rem] text-white/80">{words.trending.statsFailed}</p>;
   }
 
   const [rank, personal, matches, heroIndex] = accountId
@@ -38,10 +40,10 @@ async function TrendingLoader() {
     <div className="relative z-20 flex min-h-0 flex-1 flex-col gap-[1rem]">
       {accountId ? (
         <Suspense fallback={<PicksSkeleton />}>
-          <AiHeroPicks accountId={accountId} heroes={heroes} bracket={myBracket ?? "all"} personal={personal} mainLane={mainLane} />
+          <AiHeroPicks accountId={accountId} clerkUserId={clerkUserId} heroes={heroes} bracket={myBracket ?? "all"} personal={personal} mainLane={mainLane} />
         </Suspense>
       ) : (
-        <p className="glass-panel rounded-[1.2rem] p-[0.9rem] text-[0.95rem] text-white/70">Link Steam to get 5 hero picks chosen for you.</p>
+        <p className="glass-panel rounded-[1.2rem] p-[0.9rem] text-[0.95rem] text-white/70">{words.trending.linkForPicks}</p>
       )}
       <TrendingBoard heroes={heroes} myBracket={myBracket} />
     </div>

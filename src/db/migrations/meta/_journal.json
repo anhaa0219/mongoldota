@@ -50,6 +50,13 @@
       "when": 1794888095750,
       "tag": "0006_live_coach_foreign_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794968869677,
+      "tag": "0007_first_korath",
+      "breakpoints": true
     }
   ]
 }

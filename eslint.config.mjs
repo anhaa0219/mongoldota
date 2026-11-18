@@ -14,7 +14,7 @@ const eslintConfig = defineConfig([
       "prefer-const": "error",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],
+      "max-lines": ["error", { max: 150, skipBlankLines: true, skipComments: true }],
     },
   },
   // Override default ignores of eslint-config-next.

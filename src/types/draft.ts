@@ -1,5 +1,6 @@
 /** Draft board shapes: 5 hero slots per team, filled by clicking or from a screenshot. */
 
+import type { AiLimit } from "@/types/ai";
 import type { Side } from "@/types/game";
 
 /** Hero id per slot, left to right; null = empty. Always 5 per team. */
@@ -11,7 +12,7 @@ export interface SlotRef {
 }
 
 /** What /api/draft/recognize answers. */
-export type RecognizeResponse = { draft: DraftSlots; found: number } | { error: string };
+export type RecognizeResponse = { draft: DraftSlots; found: number } | { error: string } | { limit: AiLimit };
 
 /** A hero on the Draft page: overall public win rate (0-100) and OpenDota roles ("Carry", "Support"...). */
 export interface DraftHero {
@@ -93,4 +94,4 @@ export interface AdviceItem {
   detail: string;
 }
 
-export type AdviceResponse = { advice: AdviceItem[] } | { error: string };
+export type AdviceResponse = { advice: AdviceItem[] } | { error: string } | { limit: AiLimit };

@@ -106,6 +106,23 @@ export const liveCoachSlots = pgTable(
   (table) => [primaryKey({ columns: [table.clerkUserId, table.slot] })],
 ).enableRLS();
 
+/** Every AI call that reached the provider, per player: kind, tokens when reported, and whether it worked. Read by the limits and the usage script. */
+export const aiCalls = pgTable(
+  "ai_calls",
+  {
+    id: serial("id").primaryKey(),
+    clerkUserId: text("clerk_user_id").notNull(),
+    kind: text("kind").notNull(),
+    /** Live Coach calls only. */
+    matchId: text("match_id"),
+    promptTokens: integer("prompt_tokens"),
+    answerTokens: integer("answer_tokens"),
+    ok: boolean("ok").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("ai_calls_user_time_idx").on(table.clerkUserId, table.createdAt)],
+).enableRLS();
+
 /** The Steam account linked to each MongolDota (Clerk) account, so the link follows the player across devices. */
 export const steamLinks = pgTable("steam_links", {
   clerkUserId: text("clerk_user_id").primaryKey(),

@@ -107,100 +107,22 @@ export interface RawTotal {
   sum: number;
 }
 
+export type PlaystyleField = "denies" | "hero_damage" | "tower_damage" | "hero_healing" | "stuns" | "actions_per_min" | "purchase_ward_observer" | "purchase_ward_sentry";
+
 export interface PlaystyleStat {
+  /** Picks the word for the label in each language. */
+  field: PlaystyleField;
+  /** English label (used in the AI coach prompt). */
   label: string;
   /** Per match, unrounded. */
   average: number;
   matches: number;
 }
 
-// ---------- One match (/matches/{id}) ----------
-
-export interface RawLogEntry {
-  time: number;
-  key: string;
-}
-
-export interface RawDetailPlayer {
-  /** Missing (not only null) for anonymous players in some responses. */
-  account_id?: number | null;
-  player_slot: number;
-  hero_id: number;
-  kills: number;
-  assists: number;
-  last_hits?: number | null;
-  denies?: number | null;
-  gold_per_min?: number | null;
-  xp_per_min?: number | null;
-  net_worth?: number | null;
-  level?: number | null;
-  hero_damage?: number | null;
-  tower_damage?: number | null;
-  hero_healing?: number | null;
-  item_neutral?: number | null;
-  aghanims_scepter?: number | null;
-  aghanims_shard?: number | null;
-  /** pct is 0-1: share of players on this hero this player beat. */
-  benchmarks?: { gold_per_min?: { pct: number }; xp_per_min?: { pct: number } } | null;
-  gold_t?: number[] | null;
-  purchase_log?: RawLogEntry[] | null;
-  kills_log?: RawLogEntry[] | null;
-  obs_placed?: number | null;
-  sen_placed?: number | null;
-}
-
-export interface RawMatchDetail {
-  /** OpenDota omits this field (not null) for unparsed matches. */
-  version?: number | null;
-  radiant_score: number;
-  dire_score: number;
-  players: RawDetailPlayer[];
-}
-
-export interface ItemTiming {
-  key: string;
-  name: string;
-  image: string;
-  seconds: number;
-  isBkb: boolean;
-}
-
+/** Items by id (final inventory) and by key (purchase log). */
 export interface ItemIndex {
   byId: Map<number, ItemInfo>;
   byKey: Map<string, ItemInfo>;
 }
 
-/** What every match has, parsed or not. */
-export interface MatchBasics {
-  /** 0-100, null when the team has no kills. */
-  killParticipation: number | null;
-  netWorth: number;
-  level: number;
-  lastHits: number;
-  denies: number;
-  gpm: number;
-  xpm: number;
-  /** 0-100: share of players on this hero beaten. Null when OpenDota has no benchmark. */
-  gpmPercentile: number | null;
-  xpmPercentile: number | null;
-  heroDamage: number;
-  towerDamage: number;
-  healing: number;
-  neutralItem: ItemInfo | null;
-  scepter: boolean;
-  shard: boolean;
-}
-
-export type MatchDetail =
-  | { parsed: false; basics: MatchBasics }
-  | {
-      parsed: true;
-      basics: MatchBasics;
-      /** Cumulative gold earned per minute (OpenDota gold_t), not net worth. */
-      goldEarned: number[];
-      itemTimings: ItemTiming[];
-      observers: number;
-      sentries: number;
-      /** Null when the hero is unknown, so deaths cannot be matched. */
-      deathMinutes: number[] | null;
-    };
+// One match: raw shapes are in opendota-match.ts, the History detail panel's shapes in match-detail.ts.

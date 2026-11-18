@@ -1,6 +1,6 @@
 # Three small fixes: theme button, phone layout, History filters — design
 
-Date: 2026-11-17 · Status: draft for approval
+Date: 2026-11-17 · Status: approved 2026-11-18
 
 Three independent small changes, written up together. Each can be built and reviewed on its own.
 

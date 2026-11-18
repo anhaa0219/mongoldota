@@ -1,6 +1,46 @@
 /** A full OpenDota /matches/{id} response (only the fields the app reads are typed; the rest is kept as-is). */
 
-import type { RawDetailPlayer, RawLogEntry, RawMatchDetail } from "@/types/opendota";
+export interface RawLogEntry {
+  time: number;
+  key: string;
+}
+
+/** One player of a /matches/{id} response: the fields every match has, parsed or not, plus the History panel's logs. */
+export interface RawDetailPlayer {
+  /** Missing (not only null) for anonymous players in some responses. */
+  account_id?: number | null;
+  player_slot: number;
+  hero_id: number;
+  kills: number;
+  assists: number;
+  last_hits?: number | null;
+  denies?: number | null;
+  gold_per_min?: number | null;
+  xp_per_min?: number | null;
+  net_worth?: number | null;
+  level?: number | null;
+  hero_damage?: number | null;
+  tower_damage?: number | null;
+  hero_healing?: number | null;
+  item_neutral?: number | null;
+  aghanims_scepter?: number | null;
+  aghanims_shard?: number | null;
+  /** pct is 0-1: share of players on this hero this player beat. */
+  benchmarks?: { gold_per_min?: { pct: number }; xp_per_min?: { pct: number } } | null;
+  gold_t?: number[] | null;
+  purchase_log?: RawLogEntry[] | null;
+  kills_log?: RawLogEntry[] | null;
+  obs_placed?: number | null;
+  sen_placed?: number | null;
+}
+
+export interface RawMatchDetail {
+  /** OpenDota omits this field (not null) for unparsed matches. */
+  version?: number | null;
+  radiant_score: number;
+  dire_score: number;
+  players: RawDetailPlayer[];
+}
 
 export interface RawPositionLog {
   time: number;

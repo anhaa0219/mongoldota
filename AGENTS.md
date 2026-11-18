@@ -10,12 +10,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Code rules
 
+The full rules are in `CLAUDE.md`. In short:
+
 | Rule | Bad | Good |
 |---|---|---|
 | No `any` | `(data: any)` | `(data: Post)` |
 | Names say what it is | `d`, `flag`, `handle()` | `posts`, `isLoading`, `savePost()` |
 | Return early | 3 nested `if` | `if (!user) return;` then the main code |
-| Small files | one 600-line page | one component per file, under 200 lines |
+| Small files | one 400-line page | one component per file, under 150 lines |
 | Check input on the server | trust `req.body` | validate it with zod first |
 | Catch errors from outside services | app crashes when Pinecone is slow | try/catch, friendly message to the user |
 | Never show raw errors | "PostgresError: relation..." | "Could not save. Try again." |
@@ -32,27 +34,41 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 | `prefer-const` | `let` never reassigned | `const` tells the reader "this never changes". |
 | `react-hooks/rules-of-hooks` | hook inside an `if` | Breaks React state. Comes with the Next config. |
 | `react-hooks/exhaustive-deps` | missing value in `useEffect` deps | Stale data bugs. Comes with the Next config. |
-| `max-lines` | files over 200 lines (blank lines and comments not counted) | Small files are easier to read and review. |
+| `max-lines` | files over 150 lines (blank lines and comments not counted) | Small files are easier to read and review. |
 
-Run `npm run lint` before finishing any task; it must pass with no errors.
+Before finishing any task, run `npm run lint` and `npx tsc --noEmit`; both must pass with no errors.
+
+## No tests
+
+This repo has no tests and no test runner. Don't write tests or add a test tool; lint and the typecheck are the only checks.
 
 ## Folder structure
 
 ```
 src/
-  app/              pages and API routes
-    api/            server endpoints, one folder per feature
-  components/       UI pieces, one per file
+  app/
+    (auth)/_components/     shared by sign-in and sign-up
+    (site)/_components/     the signed-in frame + UI shared by 2+ signed-in pages
+    (site)/_hooks/ _utils/  hooks and helpers shared by 2+ signed-in pages
+    (site)/<page>/          one folder per page (the "/" page is (site)/(stats)/)
+      page.tsx              the route: load data, render features
+      _features/            the page's sections (state, data)
+      _components/          the page's UI pieces (props in, markup out)
+      _hooks/               the page's client hooks
+      _utils/               the page's helpers, data helpers and page-only types (*-types.ts)
+    api/_utils/             helpers shared by several API routes
+    api/<feature>/route.ts  server endpoints, one folder per feature
+    api/<feature>/_utils/   helpers only that route uses
+  lib/                      code shared across areas (pages + API routes, auth + site, db), one subfolder per area:
+    ai/ draft/ live/ matches/ opendota/ player/ steam/   (format.ts, site-content.ts at the root)
+  types/                    types shared across areas or used by src/db
   db/
-    schema.ts       Drizzle tables
-    index.ts        the db connection
-  lib/
-    hf.ts           Hugging Face client
-  types/            shared TypeScript types
-.env.example        list of keys, no values
+    schema.ts               Drizzle tables
+    index.ts                the db connection
+.env.example                list of keys, no values
 ```
 
-New code goes in the folder that matches above. Don't create new top-level folders without asking. Never commit real keys; add every new env var name to `.env.example`.
+Each file (types included) goes in the `_` folders of the nearest route folder that contains everything using it; only code shared across areas goes in `src/lib` / `src/types`. Import your own folder's files with relative paths, a parent folder's with `@/app/...`, and never a sibling's. `src/lib` never imports from `src/app`. The full rules are in `CLAUDE.md`. Don't create new top-level folders without asking. Never commit real keys; add every new env var name to `.env.example`.
 
 <!-- BEGIN:nextjs-agent-feedback -->
 

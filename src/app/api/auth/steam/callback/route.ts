@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { siteOrigin, verifySteamLogin } from "@/lib/steam-auth";
-import { linkSteamResponse } from "@/lib/steam-link-response";
+import { siteOrigin, verifySteamLogin } from "@/lib/steam/steam-auth";
+import { linkSteamResponse } from "@/app/api/auth/steam/_utils/steam-link-response";
 
 /** Steam sends the player back here after sign-in; the verified Steam ID is linked to their MongolDota account. */
 export async function GET(request: NextRequest) {

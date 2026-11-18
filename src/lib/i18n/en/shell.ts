@@ -1,0 +1,41 @@
+/** The signed-in frame (nav, pills, notices), shared pieces and the sign-in screen. */
+export const shell = {
+  nav: { stats: "Stats", draft: "Draft", live: "Live Coach", heroes: "Trending Heroes", history: "History" },
+  sections: "Sections",
+  home: "Home",
+  medalTitle: "Medal and MMR estimated by OpenDota",
+  player: "Player",
+  linkSteam: "Link Steam",
+  syncStats: "Sync your Dota stats",
+  openSteamProfile: "Open Steam profile",
+  steamLinked: "Steam linked",
+  unlinkSteam: "Unlink Steam",
+  notice: {
+    notLinked: "Link Steam to see your stats",
+    noMatches: "No public matches found. In Dota 2: Settings > Options > Social > Expose Public Match Data.",
+    error: "Could not load your stats. Try again in a minute.",
+  },
+  analyse: {
+    failed: "OpenDota could not start the analysis. Try again later.",
+    requested: "OpenDota is analysing this match. Check again in a few minutes.",
+    checkAgain: "Check again",
+    explain: "Gold graph, item timings, wards and deaths need OpenDota to analyse the replay (recent matches only).",
+    asking: "Asking OpenDota…",
+    analyse: "Analyse with OpenDota",
+  },
+  advice: {
+    refreshTitle: "AI advice refreshes at most once every 12 hours",
+    updatedJustNow: "Updated just now",
+    updatedAgo: (time: string) => `Updated ${time} ago`,
+    newIn: (time: string) => `new advice in ${time}`,
+    newNextVisit: "new advice on the next visit",
+    underAMinute: "under a minute",
+    hoursMinutes: (hours: number, minutes: number) => `${hours}h ${minutes}m`,
+    minutes: (minutes: number) => `${minutes}m`,
+  },
+  auth: {
+    welcome: "Welcome to",
+    tagline: "Dota 2 match analysis: your stats, hero picks and lane predictions.",
+    features: ["Your stats from every match", "Hero picks that fit your role", "Lane predictions before the horn"],
+  },
+};

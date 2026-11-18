@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { DraftBoard } from "@/components/draft/DraftBoard";
-import { PageBackdrop } from "@/components/PageBackdrop";
-import { getLinkedAccountId } from "@/lib/linked-account";
-import { getPersonalRecords } from "@/lib/opendota-draft";
-import { getDraftHeroes } from "@/lib/opendota-heroes";
+import { DraftBoard } from "./_features/DraftBoard";
+import { PageBackdrop } from "@/app/(site)/_components/PageBackdrop";
+import { getLinkedAccountId } from "@/lib/steam/linked-account";
+import { getPersonalRecords } from "@/lib/opendota/opendota-draft";
+import { getDraftHeroes } from "@/lib/opendota/opendota-heroes";
 import { site } from "@/lib/site-content";
+import { getWords } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: `Draft · ${site.gameTitle}`,
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 async function DraftLoader() {
   const [heroes, accountId] = await Promise.all([getDraftHeroes(), getLinkedAccountId()]);
   if (heroes.length === 0) {
-    return <p className="relative z-20 m-auto text-[1.4rem] text-white/80">Could not load the hero list from OpenDota. Try again in a minute.</p>;
+    return <p className="relative z-20 m-auto text-[1.4rem] text-white/80">{(await getWords()).draft.heroListFailed}</p>;
   }
   const personal = accountId ? await getPersonalRecords(accountId) : {};
   return <DraftBoard heroes={heroes} personal={personal} />;

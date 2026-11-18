@@ -1,0 +1,46 @@
+import type { Words } from "../words";
+
+/** Эрэлттэй баатрууд хуудас: AI сонголт, зэрэглэлийн таб, онцлох мэдээлэл, баатрын хүснэгт. Медалийн нэр, үүрэг англиар. */
+export const trending: Words["trending"] = {
+  statsFailed: "OpenDota-аас баатрын статистикийг ачаалж чадсангүй. Нэг минутын дараа дахин оролдоно уу.",
+  linkForPicks: "Танд зориулсан 5 баатрын сонголт авахын тулд Steam-ээ холбоно уу.",
+  loadingPicks: "AI сонголтыг ачаалж байна",
+  aiPicks: (bracket) => `Танд зориулсан AI сонголт · ${bracket}`,
+  topPicks: (bracket) => `Танд тохирох шилдэг сонголт · ${bracket}`,
+  inRank: (rate) => `Зэрэглэлдээ ${rate}%`,
+  youRecord: (rate, games) => `Та ${rate}% · ${games}`,
+  fallback: {
+    winRateIn: (rate, bracket) => `${bracket}-д ${rate} ялалт`,
+    youWin: (rate, games) => `та ${games} тоглолтод ${rate} ялсан`,
+    fitsLane: "таны хамгийн их тоглодог lane-д тохирно",
+  },
+  all: "Бүгд",
+  rank: "Зэрэглэл",
+  yourRank: (label) => `${label} (таны зэрэглэл)`,
+  youTag: "та",
+  immortalNote: "OpenDota-д зөвхөн Immortal-ийн мэдээлэл байхгүй тул Immortal-д Divine-ийн тоог харуулна.",
+  highlights: {
+    bestWinRate: "Хамгийн өндөр ялалт",
+    mostPicked: "Хамгийн их сонгогдсон",
+    rising: "Энэ долоо хоногт өсөж буй",
+    ofGames: (rate) => `тоглолтын ${rate}%`,
+    picks: (change) => `+${change}% сонголт`,
+  },
+  table: {
+    label: "Зэрэглэлээр баатрууд",
+    search: "Баатар хайх…",
+    searchLabel: "Баатар хайх",
+    hero: "Баатар",
+    win: "Ялалт",
+    loss: "Ялагдал",
+    pick: "Сонголт",
+    ban: "Ban",
+    games: "Тоглолт",
+    days7: "7 хоног",
+    fewGames: "Эдгээр хувьд итгэхэд тоглолт хэтэрхий цөөн",
+    up: "өсөлт",
+    down: "бууралт",
+    trend: (picks, win) => `Долоо хоногт сонголт ${picks}%, ялалт ${win} пункт (бүх зэрэглэл)`,
+    footer: "OpenDota-гийн нээлттэй тоглолтууд (pro: мэргэжлийн тоглолт), 6 цаг тутам шинэчлэгдэнэ. Сонголт = баатар оролцсон тоглолтын хувь. Бүдэг мөрүүдэд тоглолт хэтэрхий цөөн.",
+  },
+};

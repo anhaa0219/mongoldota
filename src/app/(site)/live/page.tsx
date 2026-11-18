@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { LiveCoach } from "@/components/live/LiveCoach";
-import { PageBackdrop } from "@/components/PageBackdrop";
-import { PlayerDataNotice } from "@/components/PlayerDataNotice";
-import { getLinkedSteamId } from "@/lib/linked-account";
-import { freshDraft } from "@/lib/live-freshness";
-import { getLiveRow, hasGsiToken } from "@/lib/live-store";
-import { getLockedDraft, getPlanTip, getTips } from "@/lib/live-tips-store";
-import { getDraftHeroes, getItemIndex } from "@/lib/opendota-heroes";
-import { requireUserId } from "@/lib/require-user";
+import { LiveCoach } from "./_features/LiveCoach";
+import { PageBackdrop } from "@/app/(site)/_components/PageBackdrop";
+import { PlayerDataNotice } from "@/app/(site)/_components/PlayerDataNotice";
+import { getAiUsage } from "@/lib/ai/ai-calls-store";
+import { getLinkedSteamId } from "@/lib/steam/linked-account";
+import { freshDraft } from "@/lib/live/live-freshness";
+import { getLiveRow, hasGsiToken } from "@/lib/live/live-store";
+import { getLockedDraft, getPlanTip, getTips } from "@/lib/live/live-tips-store";
+import { getDraftHeroes, getItemIndex } from "@/lib/opendota/opendota-heroes";
+import { requireUserId } from "@/app/(site)/_utils/require-user";
 import { site } from "@/lib/site-content";
+import { PageTitle } from "@/app/(site)/_components/PageTitle";
 
 export const metadata: Metadata = {
   title: `Live Coach · ${site.gameTitle}`,
@@ -25,6 +27,8 @@ async function LiveLoader() {
   await connection();
   const [row, hasToken, locked, heroes, itemIndex] = await Promise.all([getLiveRow(userId), hasGsiToken(userId), getLockedDraft(userId), getDraftHeroes(), getItemIndex()]);
   const [tips, planTip] = row?.matchId ? await Promise.all([getTips(userId, row.matchId), getPlanTip(userId, row.matchId)]) : [[], null];
+  // "This match" only counts while the player is in one.
+  const usage = await getAiUsage(userId, row?.snapshot?.matchId ?? null);
   const items = [...itemIndex.byKey.values()].map(({ key, name, image, cost }) => ({ key, name, image, cost }));
   // eslint-disable-next-line react-hooks/purity -- request-time Server Component (after connection())
   const now = Date.now();
@@ -38,6 +42,7 @@ async function LiveLoader() {
       initialPlan={planTip?.plan ? { matchId: planTip.matchId, items: planTip.plan } : null}
       initialHasToken={hasToken}
       initialNow={now}
+      initialUsage={usage}
       draft={draft}
       heroes={heroes.map(({ id, name, slug, roles }) => ({ id, name, slug, roles }))}
       items={items}
@@ -51,7 +56,7 @@ export default function LivePage() {
     <>
       <PageBackdrop tone="live" />
       <div className="page-enter relative z-20 flex w-full flex-1 flex-col gap-[1.2rem] px-[1.3rem] pb-12 md:px-8 lg:min-h-0 lg:overflow-y-auto lg:px-[5rem] lg:pb-[2.4rem]">
-        <h1 className="title-metal font-display text-[3.5rem] uppercase leading-none lg:text-[5rem]">Live Coach</h1>
+        <PageTitle id="live" />
         <Suspense fallback={<div className="glass-panel shimmer h-[18rem] rounded-[1.4rem]" />}>
           <LiveLoader />
         </Suspense>

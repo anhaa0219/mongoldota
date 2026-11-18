@@ -77,6 +77,13 @@ body {
   font-family: var(--font-jost), sans-serif;
 }
 
+/* Mongolian (data-lang on the signed-in frame and the sign-in pages): fonts that have Ө and Ү. */
+[data-lang="mn"] {
+  --font-jost: var(--font-montserrat);
+  --font-display-face: var(--font-oswald);
+  font-family: var(--font-montserrat), sans-serif;
+}
+
 /* Browser surfaces in the palette: keyboard focus, text selection, scrollbars, and press feedback. */
 @layer base {
   :focus-visible {

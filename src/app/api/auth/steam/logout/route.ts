@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE, siteOrigin } from "@/lib/steam-auth";
-import { deleteSteamLink } from "@/lib/steam-link-store";
+import { SESSION_COOKIE, siteOrigin } from "@/lib/steam/steam-auth";
+import { deleteSteamLink } from "@/lib/steam/steam-link-store";
 
 /** Unlinks Steam from the signed-in account (and clears any old per-browser link). */
 export async function POST(request: NextRequest) {

@@ -1,0 +1,32 @@
+/** Friendly messages the server sends (API routes). Never raw errors. */
+export const errors = {
+  signIn: "Sign in first.",
+  linkSteam: "Link Steam first.",
+  pickDraft: "Pick your hero, positions, and at least one enemy.",
+  heroOnTeam: "Your hero must be on your team.",
+  heroDataFailed: "Could not load hero data from OpenDota. Try again.",
+  invalidHero: "Invalid hero id.",
+  matchupsFailed: "Could not load matchups from OpenDota. Try again.",
+  attachScreenshot: "Attach a screenshot.",
+  imageType: "Use a PNG, JPG or WebP image.",
+  imageTooLarge: "The image is too large (4 MB max).",
+  heroListFailed: "Could not load the hero list. Try again later.",
+  unknownCoachRequest: "Unknown coach request.",
+  startMatch: "Start a match first.",
+  liveNotSetUp: "Live Coach is not set up yet.",
+  invalidMatch: "Invalid match id.",
+  matchFailed: "Could not load this match. Try again.",
+  notInMatch: "You are not in this match.",
+  openDotaUnreachable: "Could not reach OpenDota. Try again later.",
+  parseFailed: "OpenDota could not start the analysis. Try again later.",
+  ai: {
+    noKey: "Advice is not set up yet (HF_API_KEY is missing).",
+    noCredits: "Hugging Face has no credits left for advice.",
+    failed: "The coach could not answer. Try again.",
+  },
+  screenshotAi: {
+    noKey: "Screenshot reading is not set up yet (HF_API_KEY is missing). Pick heroes by clicking.",
+    noCredits: "Hugging Face has no credits left for screenshot reading. Pick heroes by clicking.",
+    failed: "Could not read the screenshot. Try again, or pick heroes by clicking.",
+  },
+};

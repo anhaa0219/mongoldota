@@ -1,5 +1,7 @@
 /** Small display formatters. Pure. */
 
+import type { Words } from "@/lib/i18n/words";
+
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
@@ -14,13 +16,13 @@ export function formatDuration(seconds: number): string {
   return `${sign}${minutes}:${rest}`;
 }
 
-/** "just now", "5 min ago", "2 h ago", "3 d ago", "2 mo ago"; "" when the time is unknown. */
-export function timeAgo(playedAt: number, now: number): string {
+/** "just now", "5 min ago", "2 h ago", "3 d ago", "2 mo ago" in the visitor's language; "" when the time is unknown. */
+export function timeAgo(playedAt: number, now: number, ago: Words["common"]["ago"]): string {
   if (!Number.isFinite(playedAt)) return "";
   const elapsed = now - playedAt;
-  if (elapsed < MINUTE) return "just now";
-  if (elapsed < HOUR) return `${Math.floor(elapsed / MINUTE)} min ago`;
-  if (elapsed < DAY) return `${Math.floor(elapsed / HOUR)} h ago`;
-  if (elapsed < MONTH) return `${Math.floor(elapsed / DAY)} d ago`;
-  return `${Math.floor(elapsed / MONTH)} mo ago`;
+  if (elapsed < MINUTE) return ago.justNow;
+  if (elapsed < HOUR) return ago.minutes(Math.floor(elapsed / MINUTE));
+  if (elapsed < DAY) return ago.hours(Math.floor(elapsed / HOUR));
+  if (elapsed < MONTH) return ago.days(Math.floor(elapsed / DAY));
+  return ago.months(Math.floor(elapsed / MONTH));
 }

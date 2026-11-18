@@ -3,8 +3,8 @@
  * Authenticated by the token in the player's setup file. Never calls the AI; the Live Coach page does that.
  */
 
-import { parseGsiPayload, shouldWrite, toLiveSnapshot } from "@/lib/gsi";
-import { findGsiOwner, getLiveRow, touchLiveRow, writeLiveRow } from "@/lib/live-store";
+import { parseGsiPayload, shouldWrite, toLiveSnapshot } from "./_utils/gsi";
+import { findGsiOwner, getLiveRow, touchLiveRow, writeLiveRow } from "@/lib/live/live-store";
 
 const MAX_BODY_BYTES = 64 * 1024;
 

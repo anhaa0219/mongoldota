@@ -1,6 +1,6 @@
 # AI cost control — design
 
-Date: 2026-11-17 · Status: draft for approval
+Date: 2026-11-17 · Status: approved 2026-11-18
 
 ## Intent
 

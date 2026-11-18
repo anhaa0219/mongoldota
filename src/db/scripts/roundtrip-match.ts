@@ -7,7 +7,7 @@
 import { count, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { playerMatches } from "@/db/schema";
-import { getMatch, loadMatch } from "@/lib/match-store";
+import { getMatch, loadMatch } from "@/lib/matches/match-store";
 
 const out = (line: string) => process.stdout.write(`${line}\n`);
 

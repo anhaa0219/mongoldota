@@ -1,6 +1,6 @@
 import type { NavItem } from "@/types/game";
 
-/** All the words on the site live here. Change them freely. */
+/** The site name and section routes. Visible wording lives in src/lib/i18n; `tagline` here is the English page description. */
 export const site = {
   logoText: "MD",
   gameTitle: "MongolDota",
@@ -8,9 +8,9 @@ export const site = {
 };
 
 export const navItems: NavItem[] = [
-  { label: "Stats", href: "/" },
-  { label: "Draft", href: "/draft" },
-  { label: "Live Coach", href: "/live" },
-  { label: "Trending Heroes", href: "/heroes" },
-  { label: "History", href: "/history" },
+  { id: "stats", href: "/" },
+  { id: "draft", href: "/draft" },
+  { id: "live", href: "/live" },
+  { id: "heroes", href: "/heroes" },
+  { id: "history", href: "/history" },
 ];
