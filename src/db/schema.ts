@@ -106,6 +106,19 @@ export const liveCoachSlots = pgTable(
   (table) => [primaryKey({ columns: [table.clerkUserId, table.slot] })],
 ).enableRLS();
 
+/** Live Coach: one row per finished match whose memory went to Pinecone, claimed atomically so Dota's repeated post-game updates write it once. */
+export const matchMemories = pgTable(
+  "match_memories",
+  {
+    clerkUserId: text("clerk_user_id")
+      .notNull()
+      .references(() => gsiTokens.clerkUserId, { onDelete: "cascade" }),
+    matchId: text("match_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.clerkUserId, table.matchId] })],
+).enableRLS();
+
 /** Every AI call that reached the provider, per player: kind, tokens when reported, and whether it worked. Read by the limits and the usage script. */
 export const aiCalls = pgTable(
   "ai_calls",

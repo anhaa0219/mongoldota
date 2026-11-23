@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { parseBuildings } from "@/lib/live/gsi-buildings";
+import type { Side } from "@/types/game";
 import type { LiveSnapshot } from "@/types/live";
 
 const HERO_PREFIX = "npc_dota_hero_";
@@ -22,7 +23,7 @@ const num = z.number().optional();
 const gsiSchema = z.object({
   auth: z.object({ token: z.string().min(1) }).passthrough(),
   map: z
-    .object({ matchid: z.string().optional(), clock_time: num, game_state: z.string().optional(), radiant_score: num, dire_score: num })
+    .object({ matchid: z.string().optional(), clock_time: num, game_state: z.string().optional(), radiant_score: num, dire_score: num, win_team: z.string().optional() })
     .passthrough()
     .optional(),
   player: z
@@ -98,6 +99,15 @@ export function toLiveSnapshot(payload: GsiPayload, steamId: string): LiveSnapsh
     buybackCooldown: hero.buyback_cooldown,
     score: map.radiant_score !== undefined && map.dire_score !== undefined ? { radiant: map.radiant_score, dire: map.dire_score } : undefined,
   };
+}
+
+/** The player's own match has reached post-game (Dota repeats this every second); null otherwise. */
+export function matchEnd(payload: GsiPayload, steamId: string): { matchId: string; winTeam: Side | null } | null {
+  const { map, player } = payload;
+  if (map?.game_state !== "DOTA_GAMERULES_STATE_POST_GAME" || !map.matchid) return null;
+  if (player?.steamid !== steamId) return null;
+  const winTeam = map.win_team === "radiant" || map.win_team === "dire" ? map.win_team : null;
+  return { matchId: map.matchid, winTeam };
 }
 
 /** At most one write per second; an unchanged state only refreshes its timestamp every 20 seconds. */

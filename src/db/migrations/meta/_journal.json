@@ -57,6 +57,13 @@
       "when": 1794968869677,
       "tag": "0007_first_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795413694448,
+      "tag": "0008_outgoing_bloodstorm",
+      "breakpoints": true
     }
   ]
 }
