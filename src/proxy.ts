@@ -4,8 +4,12 @@ import { clerkMiddleware } from "@clerk/nextjs/server";
  * Makes the Clerk session available to pages and API routes.
  * The actual login gate lives in RequireSignIn (used by the (site) layout),
  * as Clerk recommends checking auth where the data is, not by URL pattern.
+ *
+ * clockSkewInMs: accept session tokens from machines whose clock is up to a minute off.
+ * Clerk's 5s default made a slow PC/Mac clock loop forever between "/" and "/sign-in"
+ * (server rejects the token, browser still thinks it is signed in).
  */
-export default clerkMiddleware();
+export default clerkMiddleware({ clockSkewInMs: 60_000 });
 
 export const config = {
   matcher: [
