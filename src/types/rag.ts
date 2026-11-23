@@ -1,6 +1,7 @@
 /** RAG shapes: records stored in Pinecone and the filters used to search them. */
 
-export type RagSource = "ability" | "talent" | "facet" | "aghs" | "item" | "patch" | "mechanic" | "memory";
+/** "general": game-wide patch notes (map, neutral items, hero stats); "mechanic": the owner-checked mechanics list. */
+export type RagSource = "ability" | "talent" | "facet" | "aghs" | "item" | "patch" | "general" | "mechanic" | "memory";
 
 /** One Pinecone record. `text` is what Pinecone embeds; every other field is metadata (undefined fields are left out). */
 export interface RagRecord {
