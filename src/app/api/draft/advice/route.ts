@@ -42,9 +42,9 @@ export async function POST(request: Request) {
   const [facts, heroes] = await Promise.all([gatherAdviceFacts({ ...input.data, accountId: await getLinkedAccountId() }), getDraftHeroes()]);
   if (!facts) return reply({ error: say.heroDataFailed }, 502);
 
-  // Knowledge search: the player's hero first, then the enemies, then the allies.
-  const { myHeroId, allies, enemies } = input.data;
-  const heroIds = [myHeroId, ...enemies.map((enemy) => enemy.heroId), ...allies.map((ally) => ally.heroId)];
+  // Knowledge search: the player's hero first, then the enemies (allies would share the enemies' few hits).
+  const { myHeroId, enemies } = input.data;
+  const heroIds = [myHeroId, ...enemies.map((enemy) => enemy.heroId)];
   const heroKeys = [...new Set(heroIds.flatMap((heroId) => heroes.find((hero) => hero.id === heroId)?.slug ?? []))];
   const reference = referenceLines(await searchGameKnowledge({ query: adviceQuery(facts), heroKeys, itemKeys: [] }, SEARCH_MS));
 

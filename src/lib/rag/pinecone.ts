@@ -16,20 +16,38 @@ export function playerNamespace(clerkUserId: string): string {
   return `player-${clerkUserId}`;
 }
 
-/** Kept for the life of the server: the first search looks up the index host (~2 s), later ones take ~0.3 s. */
+/** Kept for the life of the server (env does not change at runtime): searches after the first take ~0.3 s. */
 let cached: { pinecone: Pinecone; indexName: string } | null = null;
 
 function client(): { pinecone: Pinecone; indexName: string } | null {
   const apiKey = process.env.PINECONE_API_KEY;
   const indexName = process.env.PINECONE_INDEX;
   if (!apiKey || !indexName) return null;
-  if (!cached || cached.indexName !== indexName) cached = { pinecone: new Pinecone({ apiKey }), indexName };
+  cached ??= { pinecone: new Pinecone({ apiKey }), indexName };
   return cached;
 }
 
+/**
+ * Without PINECONE_INDEX_HOST the SDK looks the host up on the first call (~2 s, longer than the live
+ * coach's search budget), so every fresh server's first tip would go without REFERENCE.
+ */
 function namespaceIndex(namespace: string) {
   const connection = client();
-  return connection ? connection.pinecone.index({ name: connection.indexName, namespace }) : null;
+  if (!connection) return null;
+  const host = process.env.PINECONE_INDEX_HOST || undefined;
+  return connection.pinecone.index({ name: connection.indexName, host, namespace });
+}
+
+/** How many records the namespace holds; 0 when it does not exist, null when Pinecone cannot be asked. */
+export async function namespaceCount(namespace: string): Promise<number | null> {
+  const index = namespaceIndex(namespace);
+  if (!index) return null;
+  try {
+    const stats = await index.describeIndexStats();
+    return stats.namespaces?.[namespace]?.recordCount ?? 0;
+  } catch {
+    return null;
+  }
 }
 
 /** Resolves to `fallback` once `timeoutMs` passes; the slower call is no longer waited for. */
@@ -87,18 +105,20 @@ export async function clearNamespace(namespace: string): Promise<boolean> {
   }
 }
 
-/** Scripts only: creates the index from PINECONE_INDEX when it is missing. Throws with a plain message. */
-export async function ensureIndex(): Promise<void> {
+/** Scripts only: creates the index from PINECONE_INDEX when it is missing and returns its host. Throws with a plain message. */
+export async function ensureIndex(): Promise<string> {
   const connection = client();
   if (!connection) throw new Error("Set PINECONE_API_KEY and PINECONE_INDEX in .env.local first.");
   const { pinecone, indexName } = connection;
   const list = await pinecone.indexes.list();
-  if (list.indexes?.some((index) => index.name === indexName)) return;
-  await pinecone.indexes.createForModel({
-    name: indexName,
-    cloud: "aws",
-    region: "us-east-1",
-    embed: { model: EMBED_MODEL, fieldMap: { text: "text" } },
-    waitUntilReady: true,
-  });
+  if (!list.indexes?.some((index) => index.name === indexName)) {
+    await pinecone.indexes.createForModel({
+      name: indexName,
+      cloud: "aws",
+      region: "us-east-1",
+      embed: { model: EMBED_MODEL, fieldMap: { text: "text" } },
+      waitUntilReady: true,
+    });
+  }
+  return (await pinecone.indexes.describe(indexName)).host;
 }

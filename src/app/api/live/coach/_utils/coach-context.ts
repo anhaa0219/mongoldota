@@ -32,10 +32,11 @@ export async function gameContext(userId: string, snapshot: LiveSnapshot, picked
   const heroName = heroes.find((hero) => hero.id === snapshot.heroId)?.name ?? snapshot.heroKey;
   const itemName = (key: string) => items.byKey.get(key)?.name ?? key;
   const lane = laneInfo({ team: snapshot.team, facts, ...picked });
-  // Knowledge search: the player's hero first, then the draft's heroes when the draft is this game's.
+  // Knowledge search: the player's hero first, then the enemies when the draft is this game's. Allies are left
+  // out: they would share the enemies' few search hits, and what the enemy can do matters most.
   const slugOf = (heroId: number) => heroes.find((hero) => hero.id === heroId)?.slug ?? [];
-  const draftKeys = facts && draft ? [...draft.allies, ...draft.enemies].flatMap(({ heroId }) => slugOf(heroId)) : [];
-  const heroKeys = [...new Set([snapshot.heroKey, ...draftKeys])];
+  const enemyKeys = facts && draft ? draft.enemies.flatMap(({ heroId }) => slugOf(heroId)) : [];
+  const heroKeys = [...new Set([snapshot.heroKey, ...enemyKeys])];
   const enemyNames = facts?.enemies.map((enemy) => enemy.name) ?? [];
   return { items, facts, heroName, itemName, lane, heroKeys, enemyNames };
 }

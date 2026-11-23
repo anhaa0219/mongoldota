@@ -57,7 +57,8 @@ export async function saveMatchMemory(clerkUserId: string, lastSnapshot: LiveSna
   }
 }
 
-/** Removes every match memory of the player (when they unlink Steam). */
+/** Removes every match memory of the player (when they unlink Steam); tries a second time if Pinecone fails. */
 export async function deletePlayerMemory(clerkUserId: string): Promise<void> {
+  if (await clearNamespace(playerNamespace(clerkUserId))) return;
   await clearNamespace(playerNamespace(clerkUserId));
 }
