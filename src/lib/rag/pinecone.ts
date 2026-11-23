@@ -16,11 +16,15 @@ export function playerNamespace(clerkUserId: string): string {
   return `player-${clerkUserId}`;
 }
 
+/** Kept for the life of the server: the first search looks up the index host (~2 s), later ones take ~0.3 s. */
+let cached: { pinecone: Pinecone; indexName: string } | null = null;
+
 function client(): { pinecone: Pinecone; indexName: string } | null {
   const apiKey = process.env.PINECONE_API_KEY;
   const indexName = process.env.PINECONE_INDEX;
   if (!apiKey || !indexName) return null;
-  return { pinecone: new Pinecone({ apiKey }), indexName };
+  if (!cached || cached.indexName !== indexName) cached = { pinecone: new Pinecone({ apiKey }), indexName };
+  return cached;
 }
 
 function namespaceIndex(namespace: string) {
