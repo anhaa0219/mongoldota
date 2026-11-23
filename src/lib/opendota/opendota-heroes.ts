@@ -50,6 +50,8 @@ interface RawItem {
   dname?: string;
   img: string;
   cost: number | null;
+  /** The parts it is built from; null for shop items without a recipe (Ogre Axe, Blink Dagger). */
+  components?: string[] | null;
 }
 
 /** Items by id (final inventory) and by key (purchase log). Empty when OpenDota is unavailable. */
@@ -61,6 +63,7 @@ export async function getItemIndex(): Promise<ItemIndex> {
     name: item.dname ?? key,
     image: `${STEAM_CDN}${item.img.split("?")[0]}`,
     cost: item.cost ?? 0,
+    parts: item.components ?? [],
   }));
   return {
     byId: new Map(items.map((item) => [item.id, item])),

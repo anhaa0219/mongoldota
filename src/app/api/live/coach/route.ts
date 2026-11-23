@@ -20,7 +20,9 @@ import { referenceLines, searchGameKnowledge } from "@/lib/rag/knowledge-search"
 import { searchPastGames } from "@/lib/rag/match-memory";
 import { LIVE_EVENT_KINDS, type LiveEventKind } from "@/types/live";
 import { gameContext, planCandidates } from "./_utils/coach-context";
-import { buildItemPlanPrompt, buildLiveTipPrompt, parseItemPlan, parseLiveTip } from "./_utils/live-coach-prompt";
+import { buildLiveTipPrompt, parseLiveTip } from "./_utils/live-coach-prompt";
+import { buildItemPlanPrompt, parseItemPlan } from "./_utils/live-plan-prompt";
+import { splitPlan } from "./_utils/plan-slots";
 import { planQuery, tipItemKeys, tipQuery } from "./_utils/live-coach-reference";
 import { reserveSlot } from "./_utils/live-slots-store";
 
@@ -84,9 +86,11 @@ export async function POST(request: Request) {
     const reference = referenceLines(await searchGameKnowledge({ query, heroKeys, itemKeys: candidates.map((item) => item.key) }, SEARCH_MS));
     const result = await gatedAiCall({ ...caller, kind: "live-plan" }, () => askPlanModel(buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane, reference, myAbilities })));
     if (!result.ok) return refusal(result, userId, matchId, modelFailure);
-    const plan = parseItemPlan(result.text, new Set(candidates.map((item) => item.key)));
+    const plan = parseItemPlan(result.text, candidates);
     if (plan.length === 0) return modelFailure("failed");
-    const tip = await addTip(userId, { matchId, clockSeconds, kind: "plan", text: (await getWords()).live.itemPlan(plan.map(itemName).join(" → ")), plan });
+    const { core, late } = splitPlan(plan);
+    const text = (await getWords()).live.itemPlan(core.map(itemName).join(" → "), late.length > 0 ? late.map(itemName).join(", ") : null);
+    const tip = await addTip(userId, { matchId, clockSeconds, kind: "plan", text, plan });
     return tip ? reply({ tip, usage: await getAiUsage(userId, matchId) }) : modelFailure("failed");
   }
 

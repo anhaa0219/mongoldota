@@ -5,7 +5,7 @@ export const live: Words["live"] = {
   connected: "✓ Холбогдлоо. Шууд зөвлөгөө авахын тулд тоглолт эхлүүлнэ үү.",
   setupReset: "Тохиргоо ба холболтыг шинэчлэх",
   disclaimer: "Тоонууд таны тоглолт болон OpenDota-аас ирдэг. Зөвлөгөөг AI (Qwen) бичдэг тул жижиг нарийн зүйлд алдаж болно.",
-  itemPlan: (items) => `Item төлөвлөгөө: ${items}`,
+  itemPlan: (core, late) => `Item төлөвлөгөө: ${core}${late ? `. Late game-д, тоглолтын байдлаас хамаарч: ${late}` : ""}`,
   coach: {
     title: "Дасгалжуулагч",
     ask: "Одоо асуух",

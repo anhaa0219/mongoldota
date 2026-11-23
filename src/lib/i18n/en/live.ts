@@ -4,7 +4,8 @@ export const live = {
   setupReset: "Setup and reset connection",
   disclaimer: "Numbers come from your game and OpenDota. Tips are written by AI (Qwen) and can get small details wrong.",
   /** Written by the coach route into the stored tip, in the player's language at that moment. */
-  itemPlan: (items: string) => `Item plan: ${items}`,
+  /** `late`: the optional late-game items, or null when the plan has none. */
+  itemPlan: (core: string, late: string | null) => `Item plan: ${core}${late ? `. Late game, depending on the game: ${late}` : ""}`,
   coach: {
     title: "Coach",
     ask: "Ask coach now",

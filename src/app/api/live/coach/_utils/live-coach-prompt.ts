@@ -1,19 +1,19 @@
-/** Prompts for the live coach (one short tip, or an item plan) from real numbers only, and parsing the replies. Pure. */
+/** The live coach's tip prompt from real numbers only, and parsing the reply (the item plan is in live-plan-prompt). Pure. */
 
 import { POSITION_NAMES } from "@/app/api/_utils/draft-advice";
 import { eventLine, gameLine, type ItemName } from "./live-coach-lines";
 import { laneLines, type LaneInfo } from "./live-lane";
+import { splitPlan } from "./plan-slots";
 import { languageLines } from "@/lib/ai/answer-language";
 import type { Language } from "@/lib/i18n/language";
 import type { AdviceFacts } from "@/types/draft";
 import type { LiveEvent, LiveSnapshot } from "@/types/live";
 
 const MAX_TIP_LENGTH = 300;
-const MAX_PLAN_ITEMS = 6;
 
 const pct = (value: number) => `${Math.round(value)}%`;
 
-function teamLines(facts: AdviceFacts): string[] {
+export function teamLines(facts: AdviceFacts): string[] {
   const enemies = facts.enemies.map((enemy) => {
     const record = enemy.myWinRate === null ? "" : `, ${facts.myHero.name} wins ${pct(enemy.myWinRate)} vs them`;
     return `${enemy.name} (pos ${enemy.position}${record})`;
@@ -50,13 +50,20 @@ interface TipInput {
 }
 
 /** The player's own abilities, so the model never guesses what their hero can do. */
-function myAbilityLines(heroName: string, myAbilities: string[]): string[] {
+export function myAbilityLines(heroName: string, myAbilities: string[]): string[] {
   if (myAbilities.length === 0) return [];
   return [
     "",
     `${heroName}'s abilities (name only these; never invent an ability, its range or what it does):`,
     ...myAbilities.map((ability) => `- ${ability}`),
   ];
+}
+
+/** The plan for a tip: the core in buy order, then the late-game options to choose by how the game goes. */
+function planLine(plan: string[], itemName: ItemName): string {
+  const { core, late } = splitPlan(plan);
+  const options = late.length > 0 ? ` Optional late-game items, to pick by the situation (winning, losing, what the enemies build): ${late.map(itemName).join(", ")}.` : "";
+  return `Their core item plan: ${core.map(itemName).join(" → ")}.${options}`;
 }
 
 function pastGameLines(pastGames: string[]): string[] {
@@ -74,7 +81,7 @@ export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName
     ...myAbilityLines(heroName, myAbilities),
     ...(facts ? ["", ...teamLines(facts)] : []),
     ...(lane ? ["", ...laneLines(lane, heroName, snapshot.clockSeconds)] : []),
-    plan ? `Their item plan: ${plan.map(itemName).join(" → ")}.` : "",
+    ...(plan ? [planLine(plan, itemName)] : []),
     ...(reference.length > 0 ? ["", ...reference] : []),
     ...pastGameLines(pastGames),
     "",
@@ -84,35 +91,6 @@ export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName
     "",
     ...languageLines(language),
     "Answer with the tip only: no heading, no list.",
-  ].join("\n");
-}
-
-interface PlanInput {
-  snapshot: LiveSnapshot;
-  heroName: string;
-  facts: AdviceFacts | null;
-  candidates: { key: string; name: string }[];
-  lane: LaneInfo | null;
-  reference: string[];
-  myAbilities: string[];
-}
-
-export function buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane, reference, myAbilities }: PlanInput): string {
-  return [
-    `You are an expert Dota 2 coach. The player's match just started; they play ${heroName}.`,
-    `Choose the 4-${MAX_PLAN_ITEMS} core items they should build next, in buy order, from the candidates below.`,
-    "",
-    `Items they own now: ${snapshot.owned.join(", ") || "none"}.`,
-    ...myAbilityLines(heroName, myAbilities),
-    "Pick items that fit what these abilities do and the hero's role, not items for a different kind of hero.",
-    ...(facts ? teamLines(facts) : []),
-    ...(lane ? laneLines(lane, heroName, snapshot.clockSeconds) : []),
-    ...(reference.length > 0 ? ["", ...reference] : []),
-    "",
-    "Candidates (key: name):",
-    ...candidates.map(({ key, name }) => `- ${key}: ${name}`),
-    "",
-    'Answer with a JSON array of candidate keys only, e.g. ["power_treads","dragon_lance"].',
   ].join("\n");
 }
 
@@ -126,29 +104,4 @@ export function parseLiveTip(text: string): string | null {
   if (!paragraph) return null;
   if (paragraph.length <= MAX_TIP_LENGTH) return paragraph;
   return `${paragraph.slice(0, MAX_TIP_LENGTH - 1).replace(/\s\S*$/, "")}…`;
-}
-
-/** Known item keys of one "[...]" list, once each, in order; empty when it is not a JSON list. */
-function knownKeys(list: string, known: Set<string>): string[] {
-  try {
-    const parsed: unknown = JSON.parse(list);
-    if (!Array.isArray(parsed)) return [];
-    const keys = parsed.filter((key): key is string => typeof key === "string" && known.has(key));
-    return [...new Set(keys)].slice(0, MAX_PLAN_ITEMS);
-  } catch {
-    return [];
-  }
-}
-
-/**
- * The plan from the reply's last list with known item keys. The model sometimes writes a list, then
- * "Wait, let me correct the key" and a second one; reading from the first "[" to the last "]" broke on that.
- */
-export function parseItemPlan(text: string, known: Set<string>): string[] {
-  const lists = text.match(/\[[^[\]]*\]/g) ?? [];
-  for (const list of lists.reverse()) {
-    const keys = knownKeys(list, known);
-    if (keys.length > 0) return keys;
-  }
-  return [];
 }

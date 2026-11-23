@@ -16,6 +16,8 @@ export interface ItemInfo {
   name: string;
   image: string;
   cost: number;
+  /** Keys of the items it is built from; empty for basic shop items and recipe parts (Ogre Axe, Broadsword). */
+  parts: string[];
 }
 
 /** One row of /players/{id}/matches with project= fields. */
