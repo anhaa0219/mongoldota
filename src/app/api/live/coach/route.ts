@@ -10,7 +10,7 @@ import { z } from "zod";
 import { getAiUsage } from "@/lib/ai/ai-calls-store";
 import { gatedAiCall, type GatedResult } from "@/lib/ai/ai-gate";
 import { answerLanguage } from "@/lib/ai/answer-language";
-import { askQuickModel } from "@/lib/ai/hf";
+import { askPlanModel, askQuickModel } from "@/lib/ai/hf";
 import { getLanguage, getWords } from "@/lib/i18n/server";
 import { coachSlot } from "@/lib/live/live-coach-timing";
 import { isBigKind } from "@/lib/live/live-moments";
@@ -75,14 +75,14 @@ export async function POST(request: Request) {
   const { slot, cutoff } = coachSlot(kinds, matchId, Date.now());
   if (!(await reserveSlot(userId, slot, cutoff))) return reply({ skipped: true }, 429);
 
-  const { items, facts, heroName, itemName, lane, heroKeys, enemyNames } = await gameContext(userId, snapshot, { position: position ?? null, isGuess: positionIsGuess ?? false });
+  const { items, facts, heroName, itemName, lane, heroKeys, enemyNames, myAbilities } = await gameContext(userId, snapshot, { position: position ?? null, isGuess: positionIsGuess ?? false });
   const caller = { clerkUserId: userId, matchId };
 
   if (kinds.includes("plan")) {
     const candidates = await planCandidates(snapshot.heroId, items);
     const query = planQuery(heroName, lane?.opponents?.map((opponent) => opponent.name) ?? []);
     const reference = referenceLines(await searchGameKnowledge({ query, heroKeys, itemKeys: candidates.map((item) => item.key) }, SEARCH_MS));
-    const result = await gatedAiCall({ ...caller, kind: "live-plan" }, () => askQuickModel(buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane, reference })));
+    const result = await gatedAiCall({ ...caller, kind: "live-plan" }, () => askPlanModel(buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane, reference, myAbilities })));
     if (!result.ok) return refusal(result, userId, matchId, modelFailure);
     const plan = parseItemPlan(result.text, new Set(candidates.map((item) => item.key)));
     if (plan.length === 0) return modelFailure("failed");
@@ -107,6 +107,7 @@ export async function POST(request: Request) {
     lane,
     reference: referenceLines(hits),
     pastGames,
+    myAbilities,
     plan: planTip?.plan ?? null,
     recentTips: recent.map((tip) => tip.text),
     language: answerLanguage(await getLanguage()),

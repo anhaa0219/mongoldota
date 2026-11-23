@@ -5,7 +5,7 @@ import { MIN_ITEM_COST } from "@/lib/live/live-events";
 import { freshDraft } from "@/lib/live/live-freshness";
 import { getGsiSteamId } from "@/lib/live/live-store";
 import { getLockedDraft } from "@/lib/live/live-tips-store";
-import { getItemPopularity } from "@/lib/opendota/opendota-draft";
+import { getAbilityIndex, getItemPopularity } from "@/lib/opendota/opendota-draft";
 import { getDraftHeroes, getItemIndex } from "@/lib/opendota/opendota-heroes";
 import { dotaAccountId } from "@/lib/steam/steam-auth";
 import type { Position } from "@/types/draft";
@@ -24,7 +24,7 @@ export async function planCandidates(heroId: number, items: ItemIndex) {
 }
 
 export async function gameContext(userId: string, snapshot: LiveSnapshot, picked: { position: Position | null; isGuess: boolean }) {
-  const [heroes, items, locked, steamId] = await Promise.all([getDraftHeroes(), getItemIndex(), getLockedDraft(userId), getGsiSteamId(userId)]);
+  const [heroes, items, locked, steamId, abilities] = await Promise.all([getDraftHeroes(), getItemIndex(), getLockedDraft(userId), getGsiSteamId(userId), getAbilityIndex()]);
   const draft = freshDraft(locked, Date.now());
   const accountId = steamId ? dotaAccountId(steamId) : null;
   // The draft only counts when it is recent and for the hero the player is actually playing.
@@ -38,5 +38,7 @@ export async function gameContext(userId: string, snapshot: LiveSnapshot, picked
   const enemyKeys = facts && draft ? draft.enemies.flatMap(({ heroId }) => slugOf(heroId)) : [];
   const heroKeys = [...new Set([snapshot.heroKey, ...enemyKeys])];
   const enemyNames = facts?.enemies.map((enemy) => enemy.name) ?? [];
-  return { items, facts, heroName, itemName, lane, heroKeys, enemyNames };
+  // The player's own abilities, with or without a draft: without them the model guesses (Skewer to farm).
+  const myAbilities = abilities?.[snapshot.heroKey] ?? [];
+  return { items, facts, heroName, itemName, lane, heroKeys, enemyNames, myAbilities };
 }

@@ -12,12 +12,22 @@ export type ItemName = (key: string) => string;
 const gold = (value: number) => value.toLocaleString("en-US");
 const plural = (count: number | string, word: string) => `${count} ${word}${String(count) === "1" ? "" : "s"}`;
 
-/** Whether the player can buy back right now; null when Dota does not send the buyback cost. */
+/** Before this, buyback gold is worth more as items and respawns are short. */
+const BUYBACK_FROM_SECONDS = 20 * 60;
+
+/**
+ * Whether the player can buy back right now; null when Dota does not send the buyback cost.
+ * Early in the game it says not to suggest buyback at all: "Buyback ready" alone made the model
+ * suggest buying back at minute 9 for an 18 s respawn.
+ */
 export function buybackLine(snapshot: LiveSnapshot): string | null {
   const { buybackCost, buybackCooldown } = snapshot;
   if (buybackCost === undefined) return null;
+  if (snapshot.clockSeconds < BUYBACK_FROM_SECONDS) return "Too early in the game for buyback: never suggest buying back; the gold is worth more as items.";
   if (buybackCooldown !== undefined && buybackCooldown > 0) return `Buyback on cooldown ${formatDuration(Math.round(buybackCooldown))}.`;
-  if (snapshot.gold >= buybackCost) return `Buyback ready, costs ${gold(buybackCost)}.`;
+  if (snapshot.gold >= buybackCost) {
+    return `Buyback ready, costs ${gold(buybackCost)}. Suggest it only when the next fight decides a lot (defending their high ground or barracks, Roshan, a fight their team can win) and the respawn is long.`;
+  }
   return `Buyback: cannot afford (costs ${gold(buybackCost)}, has ${gold(snapshot.gold)}).`;
 }
 

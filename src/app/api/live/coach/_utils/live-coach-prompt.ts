@@ -45,6 +45,18 @@ interface TipInput {
   reference: string[];
   /** Memories of the player's own earlier matches (see lib/rag/match-memory); empty when none. */
   pastGames: string[];
+  /** The player's own hero's abilities ("Shockwave: ..."); empty when OpenDota is unavailable. */
+  myAbilities: string[];
+}
+
+/** The player's own abilities, so the model never guesses what their hero can do. */
+function myAbilityLines(heroName: string, myAbilities: string[]): string[] {
+  if (myAbilities.length === 0) return [];
+  return [
+    "",
+    `${heroName}'s abilities (name only these; never invent an ability, its range or what it does):`,
+    ...myAbilities.map((ability) => `- ${ability}`),
+  ];
 }
 
 function pastGameLines(pastGames: string[]): string[] {
@@ -52,13 +64,14 @@ function pastGameLines(pastGames: string[]): string[] {
   return ["", "PAST GAMES OF THIS PLAYER (patterns from earlier matches, not facts about this one):", ...pastGames.map((game) => `- ${game}`)];
 }
 
-export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan, recentTips, lane, language, reference, pastGames }: TipInput): string {
+export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan, recentTips, lane, language, reference, pastGames, myAbilities }: TipInput): string {
   return [
     "You are an expert Dota 2 coach talking to a player DURING their match.",
     "Give ONE short, specific tip (at most 2 sentences) for what just happened. Use only the numbers below; never invent statistics.",
     "If they just got a kill, are on a kill streak, or their team won a teamfight, start with a few words of praise, then give the next move.",
     "",
     gameLine(snapshot, heroName, itemName),
+    ...myAbilityLines(heroName, myAbilities),
     ...(facts ? ["", ...teamLines(facts)] : []),
     ...(lane ? ["", ...laneLines(lane, heroName, snapshot.clockSeconds)] : []),
     plan ? `Their item plan: ${plan.map(itemName).join(" → ")}.` : "",
@@ -81,14 +94,17 @@ interface PlanInput {
   candidates: { key: string; name: string }[];
   lane: LaneInfo | null;
   reference: string[];
+  myAbilities: string[];
 }
 
-export function buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane, reference }: PlanInput): string {
+export function buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane, reference, myAbilities }: PlanInput): string {
   return [
     `You are an expert Dota 2 coach. The player's match just started; they play ${heroName}.`,
     `Choose the 4-${MAX_PLAN_ITEMS} core items they should build next, in buy order, from the candidates below.`,
     "",
     `Items they own now: ${snapshot.owned.join(", ") || "none"}.`,
+    ...myAbilityLines(heroName, myAbilities),
+    "Pick items that fit what these abilities do and the hero's role, not items for a different kind of hero.",
     ...(facts ? teamLines(facts) : []),
     ...(lane ? laneLines(lane, heroName, snapshot.clockSeconds) : []),
     ...(reference.length > 0 ? ["", ...reference] : []),
@@ -112,17 +128,27 @@ export function parseLiveTip(text: string): string | null {
   return `${paragraph.slice(0, MAX_TIP_LENGTH - 1).replace(/\s\S*$/, "")}…`;
 }
 
-/** Known item keys from the outermost [...] of the reply, once each, in order. */
-export function parseItemPlan(text: string, known: Set<string>): string[] {
-  const start = text.indexOf("[");
-  const end = text.lastIndexOf("]");
-  if (start === -1 || end <= start) return [];
+/** Known item keys of one "[...]" list, once each, in order; empty when it is not a JSON list. */
+function knownKeys(list: string, known: Set<string>): string[] {
   try {
-    const parsed: unknown = JSON.parse(text.slice(start, end + 1));
+    const parsed: unknown = JSON.parse(list);
     if (!Array.isArray(parsed)) return [];
     const keys = parsed.filter((key): key is string => typeof key === "string" && known.has(key));
     return [...new Set(keys)].slice(0, MAX_PLAN_ITEMS);
   } catch {
     return [];
   }
+}
+
+/**
+ * The plan from the reply's last list with known item keys. The model sometimes writes a list, then
+ * "Wait, let me correct the key" and a second one; reading from the first "[" to the last "]" broke on that.
+ */
+export function parseItemPlan(text: string, known: Set<string>): string[] {
+  const lists = text.match(/\[[^[\]]*\]/g) ?? [];
+  for (const list of lists.reverse()) {
+    const keys = knownKeys(list, known);
+    if (keys.length > 0) return keys;
+  }
+  return [];
 }

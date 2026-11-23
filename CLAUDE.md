@@ -103,7 +103,7 @@ Calls to outside services (OpenDota, Hugging Face, the database, Steam, Supabase
 
 Every visible string (text, `aria-label`, `title`, `placeholder`, non-empty `alt`) comes from the word files in `src/lib/i18n/en/` and `src/lib/i18n/mn/`, one file per area; add every new line to both (a missing Mongolian line fails the typecheck). Server components read words with `await getWords()` (from `@/lib/i18n/server`, inside `<Suspense>`), client components with `useWords()`. Sentences with numbers or names are functions in the word files. Translations live together in `src/lib/i18n/` (the one exception to page colocation) so the owner can proofread one folder. Hero, item and ability names, OpenDota data and Dota terms (mid, safe lane, carry, GPM, BKB, Roshan, …) stay English.
 
-Every AI call goes through `gatedAiCall` in `src/lib/ai/ai-gate.ts`, which checks the player's limits first and records the call in `ai_calls`. Never call `askTextModel`, `askQuickModel` or `askVisionModel` on their own. The limits are named constants in `src/lib/ai/ai-limits.ts`; the owner's report is `npx tsx --env-file=.env.local src/db/scripts/ai-usage.ts`.
+Every AI call goes through `gatedAiCall` in `src/lib/ai/ai-gate.ts`, which checks the player's limits first and records the call in `ai_calls`. Never call `askTextModel`, `askQuickModel`, `askPlanModel` or `askVisionModel` on their own. The limits are named constants in `src/lib/ai/ai-limits.ts`; the owner's report is `npx tsx --env-file=.env.local src/db/scripts/ai-usage.ts`.
 
 Imports:
 - From your own route folder's `_` folders: relative paths (`./_features/DraftBoard`, `../_utils/draft-storage`).

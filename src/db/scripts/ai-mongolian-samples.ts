@@ -85,7 +85,7 @@ async function sample(title: string, answer: Promise<ModelResult>) {
 
 async function main() {
   for (const [index, events] of tipEvents.entries()) {
-    const prompt = buildLiveTipPrompt({ snapshot, heroName: "Phantom Assassin", events, facts: null, itemName: (key) => key, plan: null, recentTips: [], lane: null, language: "mn", reference: [], pastGames: [] });
+    const prompt = buildLiveTipPrompt({ snapshot, heroName: "Phantom Assassin", events, facts: null, itemName: (key) => key, plan: null, recentTips: [], lane: null, language: "mn", reference: [], pastGames: [], myAbilities: [] });
     await sample(`Live tip ${index + 1} (${events.map((event) => event.kind).join(", ")})`, askQuickModel(prompt));
   }
   await sample("Draft advice: Lion pos 5", askTextModel(buildAdvicePrompt(lionFacts, "mn", [])));

@@ -80,6 +80,14 @@ export function askTextModel(prompt: string): Promise<ModelResult> {
   return chat({ model: process.env.HF_ADVICE_MODEL || DEFAULT_MODEL, content: prompt, maxTokens: 8000, effort: "medium", timeoutMs: 120_000 });
 }
 
+/**
+ * The live coach's item plan: not urgent like a tip, so it gets room to think. With askQuickModel's 1,500 tokens
+ * the thinking alone (often 700-1,100 tokens) could use them up and leave no answer.
+ */
+export function askPlanModel(prompt: string): Promise<ModelResult> {
+  return chat({ model: process.env.HF_ADVICE_MODEL || DEFAULT_MODEL, content: prompt, maxTokens: 4000, effort: "low", timeoutMs: 60_000 });
+}
+
 /** Short live-coach answers: low effort and a 30 s limit so tips arrive while they still matter. Model: HF_ADVICE_MODEL or the default. */
 export function askQuickModel(prompt: string): Promise<ModelResult> {
   return chat({ model: process.env.HF_ADVICE_MODEL || DEFAULT_MODEL, content: prompt, maxTokens: 1500, effort: "low", timeoutMs: 30_000 });

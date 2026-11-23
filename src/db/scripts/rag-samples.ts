@@ -57,7 +57,7 @@ const SAMPLE_PAST_GAME =
   'Past match on 2026-11-20: Phantom Assassin (pos 1) vs Lion, Mars, Pudge, lost. Final K/D/A 5/11/4 at 41:02, level 20, GPM 455, XPM 510. Items: Power Treads, Battle Fury, Desolator. Coach moments: death 7, teamfight 3. Coach tips: "Mars has Arena of Blood up; do not jump in before it is used." "Buy Black King Bar before your next big item; Lion keeps catching you."';
 
 async function tip(events: LiveEvent[], reference: string[], pastGames: string[] = []): Promise<string> {
-  const prompt = buildLiveTipPrompt({ snapshot, heroName: HERO.name, events, facts: null, itemName, plan: null, recentTips: [], lane: null, language: "en", reference, pastGames });
+  const prompt = buildLiveTipPrompt({ snapshot, heroName: HERO.name, events, facts: null, itemName, plan: null, recentTips: [], lane: null, language: "en", reference, pastGames, myAbilities: [] });
   const result = await askQuickModel(prompt);
   return result.ok ? result.text : `(no answer: ${result.reason})`;
 }
