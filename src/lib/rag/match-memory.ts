@@ -10,7 +10,14 @@ import type { Side } from "@/types/game";
 import type { LiveSnapshot } from "@/types/live";
 import { claimMatchMemory, releaseMatchMemory } from "./match-memory-store";
 import { memoryText } from "./match-memory-text";
-import { clearNamespace, playerNamespace, upsertTexts } from "./pinecone";
+import { clearNamespace, playerNamespace, searchText, upsertTexts } from "./pinecone";
+
+const PAST_GAMES = 2;
+
+/** The player's own past matches most like this one (never the current match). */
+export function searchPastGames(clerkUserId: string, query: string, currentMatchId: string, timeoutMs: number): Promise<string[]> {
+  return searchText(playerNamespace(clerkUserId), query, { topK: PAST_GAMES, filter: { matchId: { $ne: currentMatchId } }, timeoutMs });
+}
 
 /** Saves the memory of the match `lastSnapshot` belongs to, once per match. */
 export async function saveMatchMemory(clerkUserId: string, lastSnapshot: LiveSnapshot, winTeam: Side | null): Promise<void> {

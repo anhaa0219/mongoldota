@@ -43,9 +43,16 @@ interface TipInput {
   lane: LaneInfo | null;
   /** REFERENCE block from the knowledge base (see lib/rag/knowledge-search); empty when nothing was found. */
   reference: string[];
+  /** Memories of the player's own earlier matches (see lib/rag/match-memory); empty when none. */
+  pastGames: string[];
 }
 
-export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan, recentTips, lane, language, reference }: TipInput): string {
+function pastGameLines(pastGames: string[]): string[] {
+  if (pastGames.length === 0) return [];
+  return ["", "PAST GAMES OF THIS PLAYER (patterns from earlier matches, not facts about this one):", ...pastGames.map((game) => `- ${game}`)];
+}
+
+export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan, recentTips, lane, language, reference, pastGames }: TipInput): string {
   return [
     "You are an expert Dota 2 coach talking to a player DURING their match.",
     "Give ONE short, specific tip (at most 2 sentences) for what just happened. Use only the numbers below; never invent statistics.",
@@ -56,6 +63,7 @@ export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName
     ...(lane ? ["", ...laneLines(lane, heroName, snapshot.clockSeconds)] : []),
     plan ? `Their item plan: ${plan.map(itemName).join(" → ")}.` : "",
     ...(reference.length > 0 ? ["", ...reference] : []),
+    ...pastGameLines(pastGames),
     "",
     "What just happened:",
     ...events.map((event) => eventLine(event, itemName, snapshot.team, lane?.lane ?? null)),

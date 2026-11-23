@@ -17,6 +17,7 @@ import { isBigKind } from "@/lib/live/live-moments";
 import { getLiveRow } from "@/lib/live/live-store";
 import { addTip, getPlanTip, getTips } from "@/lib/live/live-tips-store";
 import { referenceLines, searchGameKnowledge } from "@/lib/rag/knowledge-search";
+import { searchPastGames } from "@/lib/rag/match-memory";
 import { LIVE_EVENT_KINDS, type LiveEventKind } from "@/types/live";
 import { gameContext, planCandidates } from "./_utils/coach-context";
 import { buildItemPlanPrompt, buildLiveTipPrompt, parseItemPlan, parseLiveTip } from "./_utils/live-coach-prompt";
@@ -92,7 +93,11 @@ export async function POST(request: Request) {
   const events = kinds.map((kind, index) => ({ kind, detail: details?.[index] ?? "" }));
   const recent = (await getTips(userId, matchId, RECENT_TIPS + 1)).filter((tip) => tip.kind !== "plan").slice(0, RECENT_TIPS);
   const itemKeys = tipItemKeys(snapshot, events);
-  const hits = await searchGameKnowledge({ query: tipQuery(heroName, events, enemyNames, itemKeys, itemName), heroKeys, itemKeys }, SEARCH_MS);
+  // Both searches share the one budget: they run side by side.
+  const [hits, pastGames] = await Promise.all([
+    searchGameKnowledge({ query: tipQuery(heroName, events, enemyNames, itemKeys, itemName), heroKeys, itemKeys }, SEARCH_MS),
+    searchPastGames(userId, `${heroName} vs ${enemyNames.join(", ") || "unknown enemies"}`, matchId, SEARCH_MS),
+  ]);
   const prompt = buildLiveTipPrompt({
     snapshot,
     heroName,
@@ -101,6 +106,7 @@ export async function POST(request: Request) {
     itemName,
     lane,
     reference: referenceLines(hits),
+    pastGames,
     plan: planTip?.plan ?? null,
     recentTips: recent.map((tip) => tip.text),
     language: answerLanguage(await getLanguage()),

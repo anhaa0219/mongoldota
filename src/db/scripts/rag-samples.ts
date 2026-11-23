@@ -1,6 +1,7 @@
 /**
  * Owner tool (and project demo): for a few sample game moments, prints what the coach finds in Pinecone,
- * then the live tip written without and with that REFERENCE block. Spends 6 calls of Hugging Face credit.
+ * then the live tip written without and with that REFERENCE block, and once more with a sample past game.
+ * Spends 7 calls of Hugging Face credit.
  * Calls the model directly (not through gatedAiCall): it is the owner's check, not a player's request.
  * Run: npx tsx --env-file=.env.local src/db/scripts/rag-samples.ts
  */
@@ -51,8 +52,12 @@ const moments: LiveEvent[][] = [
   [{ kind: "gold", detail: "black_king_bar" }],
 ];
 
-async function tip(events: LiveEvent[], reference: string[]): Promise<string> {
-  const prompt = buildLiveTipPrompt({ snapshot, heroName: HERO.name, events, facts: null, itemName, plan: null, recentTips: [], lane: null, language: "en", reference });
+/** A made-up memory, so the PAST GAMES part of the prompt can be seen working without finishing a real match. */
+const SAMPLE_PAST_GAME =
+  'Past match on 2026-11-20: Phantom Assassin (pos 1) vs Lion, Mars, Pudge, lost. Final K/D/A 5/11/4 at 41:02, level 20, GPM 455, XPM 510. Items: Power Treads, Battle Fury, Desolator. Coach moments: death 7, teamfight 3. Coach tips: "Mars has Arena of Blood up; do not jump in before it is used." "Buy Black King Bar before your next big item; Lion keeps catching you."';
+
+async function tip(events: LiveEvent[], reference: string[], pastGames: string[] = []): Promise<string> {
+  const prompt = buildLiveTipPrompt({ snapshot, heroName: HERO.name, events, facts: null, itemName, plan: null, recentTips: [], lane: null, language: "en", reference, pastGames });
   const result = await askQuickModel(prompt);
   return result.ok ? result.text : `(no answer: ${result.reason})`;
 }
@@ -70,6 +75,11 @@ async function main() {
     out(`\nTip WITHOUT RAG:\n${await tip(events, [])}`);
     out(`\nTip WITH RAG:\n${await tip(events, referenceLines(hits))}`);
   }
+
+  const death = moments[0];
+  const deathHits = await searchGameKnowledge({ query: tipQuery(HERO.name, death, ENEMIES.map((enemy) => enemy.name), [], itemName), heroKeys: [HERO.key], itemKeys: [] }, 5000);
+  out(`\n=== Moment: death, with a past game in memory\nPast game: ${SAMPLE_PAST_GAME}`);
+  out(`\nTip WITH RAG and past game:\n${await tip(death, referenceLines(deathHits), [SAMPLE_PAST_GAME])}`);
 }
 
 main().catch((error: unknown) => {
