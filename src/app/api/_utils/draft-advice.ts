@@ -51,7 +51,14 @@ function laneLine({ myHero, position, lane }: AdviceFacts) {
   return `${team} vs ${opponents.join(" + ")}.`;
 }
 
-export function buildAdvicePrompt(facts: AdviceFacts, language: Language): string {
+/** The knowledge base search for a locked draft: the player's hero, its lane opponents and the enemy team. */
+export function adviceQuery(facts: AdviceFacts): string {
+  const opponents = facts.lane.opponents.map((opponent) => opponent.name).join(", ") || "unknown";
+  return `${facts.myHero.name} as ${POSITION_NAMES[facts.position]} vs ${opponents}; enemies: ${facts.enemies.map((enemy) => enemy.name).join(", ")}.`;
+}
+
+/** `reference`: REFERENCE block from the knowledge base (see lib/rag/knowledge-search); empty when nothing was found. */
+export function buildAdvicePrompt(facts: AdviceFacts, language: Language, reference: string[]): string {
   const { myHero, enemies, allies, items, personal } = facts;
   const enemyLines = enemies.map((enemy) => {
     const record = enemy.myWinRate === null ? "no matchup data" : `${myHero.name} wins ${pct(enemy.myWinRate)} vs them (${enemy.games} games)`;
@@ -83,6 +90,7 @@ export function buildAdvicePrompt(facts: AdviceFacts, language: Language): strin
     "ABILITIES — ENEMY TEAM:",
     ...abilityLines(facts, "enemy"),
     "",
+    ...(reference.length > 0 ? [...reference, ""] : []),
     ...languageLines(language),
     'Answer with JSON only: {"advice": [{"category": "Laning|Items|Timing|Enemies|Teamfight|Map", "title": "max 8 words", "detail": "1-2 sentences"}]}',
   ].join("\n");

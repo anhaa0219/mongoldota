@@ -88,8 +88,8 @@ async function main() {
     const prompt = buildLiveTipPrompt({ snapshot, heroName: "Phantom Assassin", events, facts: null, itemName: (key) => key, plan: null, recentTips: [], lane: null, language: "mn", reference: [], pastGames: [] });
     await sample(`Live tip ${index + 1} (${events.map((event) => event.kind).join(", ")})`, askQuickModel(prompt));
   }
-  await sample("Draft advice: Lion pos 5", askTextModel(buildAdvicePrompt(lionFacts, "mn")));
-  await sample("Draft advice: Lion pos 5, again", askTextModel(buildAdvicePrompt({ ...lionFacts, personal: null }, "mn")));
+  await sample("Draft advice: Lion pos 5", askTextModel(buildAdvicePrompt(lionFacts, "mn", [])));
+  await sample("Draft advice: Lion pos 5, again", askTextModel(buildAdvicePrompt({ ...lionFacts, personal: null }, "mn", [])));
   await sample("Hero picks: Legend, safe lane", askTextModel(buildHeroPicksPrompt(candidates, "5", 1, "mn")));
   await sample("Hero picks: Archon, no lane", askTextModel(buildHeroPicksPrompt(candidates, "4", null, "mn")));
 }
