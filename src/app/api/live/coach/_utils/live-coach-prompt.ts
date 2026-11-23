@@ -41,9 +41,11 @@ interface TipInput {
   recentTips: string[];
   /** The player's lane; null when there is neither a usable draft nor a picked position. */
   lane: LaneInfo | null;
+  /** REFERENCE block from the knowledge base (see lib/rag/knowledge-search); empty when nothing was found. */
+  reference: string[];
 }
 
-export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan, recentTips, lane, language }: TipInput): string {
+export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan, recentTips, lane, language, reference }: TipInput): string {
   return [
     "You are an expert Dota 2 coach talking to a player DURING their match.",
     "Give ONE short, specific tip (at most 2 sentences) for what just happened. Use only the numbers below; never invent statistics.",
@@ -53,6 +55,7 @@ export function buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName
     ...(facts ? ["", ...teamLines(facts)] : []),
     ...(lane ? ["", ...laneLines(lane, heroName, snapshot.clockSeconds)] : []),
     plan ? `Their item plan: ${plan.map(itemName).join(" → ")}.` : "",
+    ...(reference.length > 0 ? ["", ...reference] : []),
     "",
     "What just happened:",
     ...events.map((event) => eventLine(event, itemName, snapshot.team, lane?.lane ?? null)),
@@ -69,9 +72,10 @@ interface PlanInput {
   facts: AdviceFacts | null;
   candidates: { key: string; name: string }[];
   lane: LaneInfo | null;
+  reference: string[];
 }
 
-export function buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane }: PlanInput): string {
+export function buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane, reference }: PlanInput): string {
   return [
     `You are an expert Dota 2 coach. The player's match just started; they play ${heroName}.`,
     `Choose the 4-${MAX_PLAN_ITEMS} core items they should build next, in buy order, from the candidates below.`,
@@ -79,6 +83,7 @@ export function buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lan
     `Items they own now: ${snapshot.owned.join(", ") || "none"}.`,
     ...(facts ? teamLines(facts) : []),
     ...(lane ? laneLines(lane, heroName, snapshot.clockSeconds) : []),
+    ...(reference.length > 0 ? ["", ...reference] : []),
     "",
     "Candidates (key: name):",
     ...candidates.map(({ key, name }) => `- ${key}: ${name}`),

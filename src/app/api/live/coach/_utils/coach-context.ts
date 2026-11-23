@@ -32,5 +32,10 @@ export async function gameContext(userId: string, snapshot: LiveSnapshot, picked
   const heroName = heroes.find((hero) => hero.id === snapshot.heroId)?.name ?? snapshot.heroKey;
   const itemName = (key: string) => items.byKey.get(key)?.name ?? key;
   const lane = laneInfo({ team: snapshot.team, facts, ...picked });
-  return { items, facts, heroName, itemName, lane };
+  // Knowledge search: the player's hero first, then the draft's heroes when the draft is this game's.
+  const slugOf = (heroId: number) => heroes.find((hero) => hero.id === heroId)?.slug ?? [];
+  const draftKeys = facts && draft ? [...draft.allies, ...draft.enemies].flatMap(({ heroId }) => slugOf(heroId)) : [];
+  const heroKeys = [...new Set([snapshot.heroKey, ...draftKeys])];
+  const enemyNames = facts?.enemies.map((enemy) => enemy.name) ?? [];
+  return { items, facts, heroName, itemName, lane, heroKeys, enemyNames };
 }

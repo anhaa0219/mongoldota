@@ -16,13 +16,17 @@ import { coachSlot } from "@/lib/live/live-coach-timing";
 import { isBigKind } from "@/lib/live/live-moments";
 import { getLiveRow } from "@/lib/live/live-store";
 import { addTip, getPlanTip, getTips } from "@/lib/live/live-tips-store";
+import { referenceLines, searchGameKnowledge } from "@/lib/rag/knowledge-search";
 import { LIVE_EVENT_KINDS, type LiveEventKind } from "@/types/live";
 import { gameContext, planCandidates } from "./_utils/coach-context";
 import { buildItemPlanPrompt, buildLiveTipPrompt, parseItemPlan, parseLiveTip } from "./_utils/live-coach-prompt";
+import { planQuery, tipItemKeys, tipQuery } from "./_utils/live-coach-reference";
 import { reserveSlot } from "./_utils/live-slots-store";
 
 const STALE_MS = 2 * 60_000;
 const RECENT_TIPS = 3;
+/** Knowledge search budget: tips must arrive while they still matter, so a slow search is skipped. */
+const SEARCH_MS = 1500;
 /** A long fight can gather this many different moments into one request. */
 const MAX_KINDS = 12;
 
@@ -70,12 +74,14 @@ export async function POST(request: Request) {
   const { slot, cutoff } = coachSlot(kinds, matchId, Date.now());
   if (!(await reserveSlot(userId, slot, cutoff))) return reply({ skipped: true }, 429);
 
-  const { items, facts, heroName, itemName, lane } = await gameContext(userId, snapshot, { position: position ?? null, isGuess: positionIsGuess ?? false });
+  const { items, facts, heroName, itemName, lane, heroKeys, enemyNames } = await gameContext(userId, snapshot, { position: position ?? null, isGuess: positionIsGuess ?? false });
   const caller = { clerkUserId: userId, matchId };
 
   if (kinds.includes("plan")) {
     const candidates = await planCandidates(snapshot.heroId, items);
-    const result = await gatedAiCall({ ...caller, kind: "live-plan" }, () => askQuickModel(buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane })));
+    const query = planQuery(heroName, lane?.opponents?.map((opponent) => opponent.name) ?? []);
+    const reference = referenceLines(await searchGameKnowledge({ query, heroKeys, itemKeys: candidates.map((item) => item.key) }, SEARCH_MS));
+    const result = await gatedAiCall({ ...caller, kind: "live-plan" }, () => askQuickModel(buildItemPlanPrompt({ snapshot, heroName, facts, candidates, lane, reference })));
     if (!result.ok) return refusal(result, userId, matchId, modelFailure);
     const plan = parseItemPlan(result.text, new Set(candidates.map((item) => item.key)));
     if (plan.length === 0) return modelFailure("failed");
@@ -85,7 +91,20 @@ export async function POST(request: Request) {
 
   const events = kinds.map((kind, index) => ({ kind, detail: details?.[index] ?? "" }));
   const recent = (await getTips(userId, matchId, RECENT_TIPS + 1)).filter((tip) => tip.kind !== "plan").slice(0, RECENT_TIPS);
-  const prompt = buildLiveTipPrompt({ snapshot, heroName, events, facts, itemName, plan: planTip?.plan ?? null, recentTips: recent.map((tip) => tip.text), lane, language: answerLanguage(await getLanguage()) });
+  const itemKeys = tipItemKeys(snapshot, events);
+  const hits = await searchGameKnowledge({ query: tipQuery(heroName, events, enemyNames, itemKeys, itemName), heroKeys, itemKeys }, SEARCH_MS);
+  const prompt = buildLiveTipPrompt({
+    snapshot,
+    heroName,
+    events,
+    facts,
+    itemName,
+    lane,
+    reference: referenceLines(hits),
+    plan: planTip?.plan ?? null,
+    recentTips: recent.map((tip) => tip.text),
+    language: answerLanguage(await getLanguage()),
+  });
   const result = await gatedAiCall({ ...caller, kind: "live-tip" }, () => askQuickModel(prompt));
   if (!result.ok) return refusal(result, userId, matchId, modelFailure);
   const text = parseLiveTip(result.text);
