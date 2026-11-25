@@ -7,6 +7,8 @@ import { sharedSentryOptions } from "@/lib/sentry/sentry-options";
  */
 Sentry.init({
   ...sharedSentryOptions,
+  // Sends events through this site (a path the server's tunnel answers), so ad blockers don't drop them.
+  tunnel: true,
   integrations: [Sentry.replayIntegration()],
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
