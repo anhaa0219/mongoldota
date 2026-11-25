@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { connection } from "next/server";
 import type { z } from "zod";
 import type { Language } from "@/lib/i18n/language";
-import { db } from "@/db";
+import { db, withQueryTimeout } from "@/db";
 import { aiAdvice } from "@/db/schema";
 import { isFresh } from "./advice-refresh";
 
@@ -24,24 +24,28 @@ export interface TimedAdvice<T> {
 async function readStored(accountId: string, kind: string) {
   if (!db) return null;
   try {
-    const [row] = await db
-      .select({ payload: aiAdvice.payload, createdAt: aiAdvice.createdAt })
-      .from(aiAdvice)
-      .where(and(eq(aiAdvice.accountId, Number(accountId)), eq(aiAdvice.kind, kind)))
-      .limit(1);
+    const [row] = await withQueryTimeout(
+      db
+        .select({ payload: aiAdvice.payload, createdAt: aiAdvice.createdAt })
+        .from(aiAdvice)
+        .where(and(eq(aiAdvice.accountId, Number(accountId)), eq(aiAdvice.kind, kind)))
+        .limit(1),
+    );
     return row ?? null;
   } catch {
-    return null; // Database down, or the ai_advice migration not applied yet.
+    return null; // Database down or over 4 s, or the ai_advice migration not applied yet.
   }
 }
 
 async function writeStored(accountId: string, kind: string, payload: unknown, createdAt: Date) {
   if (!db) return;
   try {
-    await db
-      .insert(aiAdvice)
-      .values({ accountId: Number(accountId), kind, payload, createdAt })
-      .onConflictDoUpdate({ target: [aiAdvice.accountId, aiAdvice.kind], set: { payload, createdAt } });
+    await withQueryTimeout(
+      db
+        .insert(aiAdvice)
+        .values({ accountId: Number(accountId), kind, payload, createdAt })
+        .onConflictDoUpdate({ target: [aiAdvice.accountId, aiAdvice.kind], set: { payload, createdAt } }),
+    );
   } catch {
     // Not saved: the next visit asks again.
   }

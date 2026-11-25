@@ -4,14 +4,14 @@
  */
 
 import { and, eq } from "drizzle-orm";
-import { db } from "@/db";
+import { db, withQueryTimeout } from "@/db";
 import { matchMemories } from "@/db/schema";
 
 /** True only for the first caller per player and match: Dota sends post-game every second. */
 export async function claimMatchMemory(clerkUserId: string, matchId: string): Promise<boolean> {
   if (!db) return false;
   try {
-    const rows = await db.insert(matchMemories).values({ clerkUserId, matchId }).onConflictDoNothing().returning({ matchId: matchMemories.matchId });
+    const rows = await withQueryTimeout(db.insert(matchMemories).values({ clerkUserId, matchId }).onConflictDoNothing().returning({ matchId: matchMemories.matchId }));
     return rows.length > 0;
   } catch {
     return false;
@@ -22,7 +22,7 @@ export async function claimMatchMemory(clerkUserId: string, matchId: string): Pr
 export async function releaseMatchMemory(clerkUserId: string, matchId: string): Promise<void> {
   if (!db) return;
   try {
-    await db.delete(matchMemories).where(and(eq(matchMemories.clerkUserId, clerkUserId), eq(matchMemories.matchId, matchId)));
+    await withQueryTimeout(db.delete(matchMemories).where(and(eq(matchMemories.clerkUserId, clerkUserId), eq(matchMemories.matchId, matchId))));
   } catch {
     // Not released: this match stays without a memory.
   }

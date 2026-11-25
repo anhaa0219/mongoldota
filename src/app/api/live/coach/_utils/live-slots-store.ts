@@ -1,7 +1,7 @@
 /** Live Coach: atomic "who may ask the AI now" slots per player (server only). */
 
 import { lt } from "drizzle-orm";
-import { db } from "@/db";
+import { db, withQueryTimeout } from "@/db";
 import { liveCoachSlots } from "@/db/schema";
 
 /**
@@ -13,11 +13,13 @@ export async function reserveSlot(clerkUserId: string, slot: string, cutoff: Dat
   if (!db) return true;
   const reservedAt = new Date();
   try {
-    const rows = await db
-      .insert(liveCoachSlots)
-      .values({ clerkUserId, slot, reservedAt })
-      .onConflictDoUpdate({ target: [liveCoachSlots.clerkUserId, liveCoachSlots.slot], set: { reservedAt }, setWhere: lt(liveCoachSlots.reservedAt, cutoff) })
-      .returning({ slot: liveCoachSlots.slot });
+    const rows = await withQueryTimeout(
+      db
+        .insert(liveCoachSlots)
+        .values({ clerkUserId, slot, reservedAt })
+        .onConflictDoUpdate({ target: [liveCoachSlots.clerkUserId, liveCoachSlots.slot], set: { reservedAt }, setWhere: lt(liveCoachSlots.reservedAt, cutoff) })
+        .returning({ slot: liveCoachSlots.slot }),
+    );
     return rows.length > 0;
   } catch {
     return false;

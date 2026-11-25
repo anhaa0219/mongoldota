@@ -1,11 +1,11 @@
 /**
  * Live Coach database access: GSI tokens and the latest live state per player (server only).
- * Every function does nothing without a database, and database errors read as "nothing stored".
+ * Every function does nothing without a database, and database errors (or a query over 4 s) read as "nothing stored".
  */
 
 import { createHash, randomBytes } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { db } from "@/db";
+import { db, withQueryTimeout } from "@/db";
 import { gsiTokens, liveStates } from "@/db/schema";
 import type { LiveSnapshot } from "@/types/live";
 
@@ -19,7 +19,7 @@ export async function createGsiToken(clerkUserId: string, steamId: string): Prom
   const token = randomBytes(32).toString("base64url");
   const values = { clerkUserId, steamId, tokenHash: hashToken(token), createdAt: new Date() };
   try {
-    await db.insert(gsiTokens).values(values).onConflictDoUpdate({ target: gsiTokens.clerkUserId, set: values });
+    await withQueryTimeout(db.insert(gsiTokens).values(values).onConflictDoUpdate({ target: gsiTokens.clerkUserId, set: values }));
     return token;
   } catch {
     return null;
@@ -29,11 +29,13 @@ export async function createGsiToken(clerkUserId: string, steamId: string): Prom
 export async function findGsiOwner(token: string): Promise<{ clerkUserId: string; steamId: string } | null> {
   if (!db) return null;
   try {
-    const [row] = await db
-      .select({ clerkUserId: gsiTokens.clerkUserId, steamId: gsiTokens.steamId })
-      .from(gsiTokens)
-      .where(eq(gsiTokens.tokenHash, hashToken(token)))
-      .limit(1);
+    const [row] = await withQueryTimeout(
+      db
+        .select({ clerkUserId: gsiTokens.clerkUserId, steamId: gsiTokens.steamId })
+        .from(gsiTokens)
+        .where(eq(gsiTokens.tokenHash, hashToken(token)))
+        .limit(1),
+    );
     return row ?? null;
   } catch {
     return null;
@@ -44,7 +46,7 @@ export async function findGsiOwner(token: string): Promise<{ clerkUserId: string
 export async function getGsiSteamId(clerkUserId: string): Promise<string | null> {
   if (!db) return null;
   try {
-    const [row] = await db.select({ steamId: gsiTokens.steamId }).from(gsiTokens).where(eq(gsiTokens.clerkUserId, clerkUserId)).limit(1);
+    const [row] = await withQueryTimeout(db.select({ steamId: gsiTokens.steamId }).from(gsiTokens).where(eq(gsiTokens.clerkUserId, clerkUserId)).limit(1));
     return row?.steamId ?? null;
   } catch {
     return null;
@@ -59,11 +61,13 @@ export async function hasGsiToken(clerkUserId: string): Promise<boolean> {
 export async function getLiveRow(clerkUserId: string): Promise<{ snapshot: LiveSnapshot | null; matchId: string | null; updatedAt: Date } | null> {
   if (!db) return null;
   try {
-    const [row] = await db
-      .select({ snapshot: liveStates.snapshot, matchId: liveStates.matchId, updatedAt: liveStates.updatedAt })
-      .from(liveStates)
-      .where(eq(liveStates.clerkUserId, clerkUserId))
-      .limit(1);
+    const [row] = await withQueryTimeout(
+      db
+        .select({ snapshot: liveStates.snapshot, matchId: liveStates.matchId, updatedAt: liveStates.updatedAt })
+        .from(liveStates)
+        .where(eq(liveStates.clerkUserId, clerkUserId))
+        .limit(1),
+    );
     return row ?? null;
   } catch {
     return null;
@@ -76,7 +80,7 @@ export async function writeLiveRow(clerkUserId: string, snapshot: LiveSnapshot |
   // Back in the menu the last match id is kept, so the page can still show that game's tips.
   const set = snapshot ? values : { snapshot: null, updatedAt: values.updatedAt };
   try {
-    await db.insert(liveStates).values(values).onConflictDoUpdate({ target: liveStates.clerkUserId, set });
+    await withQueryTimeout(db.insert(liveStates).values(values).onConflictDoUpdate({ target: liveStates.clerkUserId, set }));
   } catch {
     // Not saved: the next update from Dota tries again.
   }
@@ -86,7 +90,7 @@ export async function writeLiveRow(clerkUserId: string, snapshot: LiveSnapshot |
 export async function touchLiveRow(clerkUserId: string): Promise<void> {
   if (!db) return;
   try {
-    await db.update(liveStates).set({ updatedAt: new Date() }).where(eq(liveStates.clerkUserId, clerkUserId));
+    await withQueryTimeout(db.update(liveStates).set({ updatedAt: new Date() }).where(eq(liveStates.clerkUserId, clerkUserId)));
   } catch {
     // Not saved: the next heartbeat tries again.
   }

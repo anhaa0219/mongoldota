@@ -1,10 +1,10 @@
 /**
  * Live Coach database access: coach tips and the locked draft per player (server only).
- * Every function does nothing without a database, and database errors read as "nothing stored".
+ * Every function does nothing without a database, and database errors (or a query over 4 s) read as "nothing stored".
  */
 
 import { and, desc, eq, isNotNull } from "drizzle-orm";
-import { db } from "@/db";
+import { db, withQueryTimeout } from "@/db";
 import { liveTips, lockedDrafts } from "@/db/schema";
 import { isLiveEventKind } from "@/lib/live/live-rows";
 import type { LiveTip, LockedDraft } from "@/types/live";
@@ -13,7 +13,7 @@ export async function saveLockedDraft(clerkUserId: string, draft: LockedDraft): 
   if (!db) return;
   const values = { clerkUserId, draft, updatedAt: new Date() };
   try {
-    await db.insert(lockedDrafts).values(values).onConflictDoUpdate({ target: lockedDrafts.clerkUserId, set: values });
+    await withQueryTimeout(db.insert(lockedDrafts).values(values).onConflictDoUpdate({ target: lockedDrafts.clerkUserId, set: values }));
   } catch {
     // Not saved: the Draft page sends it again on the next change.
   }
@@ -23,11 +23,13 @@ export async function saveLockedDraft(clerkUserId: string, draft: LockedDraft): 
 export async function getLockedDraft(clerkUserId: string): Promise<{ draft: LockedDraft; updatedAt: number } | null> {
   if (!db) return null;
   try {
-    const [row] = await db
-      .select({ draft: lockedDrafts.draft, updatedAt: lockedDrafts.updatedAt })
-      .from(lockedDrafts)
-      .where(eq(lockedDrafts.clerkUserId, clerkUserId))
-      .limit(1);
+    const [row] = await withQueryTimeout(
+      db
+        .select({ draft: lockedDrafts.draft, updatedAt: lockedDrafts.updatedAt })
+        .from(lockedDrafts)
+        .where(eq(lockedDrafts.clerkUserId, clerkUserId))
+        .limit(1),
+    );
     return row ? { draft: row.draft, updatedAt: row.updatedAt.getTime() } : null;
   } catch {
     return null;
@@ -52,10 +54,12 @@ function toTip(row: TipRow): LiveTip | null {
 export async function addTip(clerkUserId: string, tip: Omit<LiveTip, "id" | "createdAt">): Promise<LiveTip | null> {
   if (!db) return null;
   try {
-    const [row] = await db
-      .insert(liveTips)
-      .values({ clerkUserId, ...tip })
-      .returning();
+    const [row] = await withQueryTimeout(
+      db
+        .insert(liveTips)
+        .values({ clerkUserId, ...tip })
+        .returning(),
+    );
     return row ? toTip(row) : null;
   } catch {
     return null;
@@ -66,12 +70,14 @@ export async function addTip(clerkUserId: string, tip: Omit<LiveTip, "id" | "cre
 export async function getTips(clerkUserId: string, matchId: string, limit = 30): Promise<LiveTip[]> {
   if (!db) return [];
   try {
-    const rows = await db
-      .select()
-      .from(liveTips)
-      .where(and(eq(liveTips.clerkUserId, clerkUserId), eq(liveTips.matchId, matchId)))
-      .orderBy(desc(liveTips.createdAt))
-      .limit(limit);
+    const rows = await withQueryTimeout(
+      db
+        .select()
+        .from(liveTips)
+        .where(and(eq(liveTips.clerkUserId, clerkUserId), eq(liveTips.matchId, matchId)))
+        .orderBy(desc(liveTips.createdAt))
+        .limit(limit),
+    );
     return rows.flatMap((row) => toTip(row) ?? []);
   } catch {
     return [];
@@ -82,12 +88,14 @@ export async function getTips(clerkUserId: string, matchId: string, limit = 30):
 export async function getPlanTip(clerkUserId: string, matchId: string): Promise<LiveTip | null> {
   if (!db) return null;
   try {
-    const [row] = await db
-      .select()
-      .from(liveTips)
-      .where(and(eq(liveTips.clerkUserId, clerkUserId), eq(liveTips.matchId, matchId), isNotNull(liveTips.plan)))
-      .orderBy(desc(liveTips.createdAt))
-      .limit(1);
+    const [row] = await withQueryTimeout(
+      db
+        .select()
+        .from(liveTips)
+        .where(and(eq(liveTips.clerkUserId, clerkUserId), eq(liveTips.matchId, matchId), isNotNull(liveTips.plan)))
+        .orderBy(desc(liveTips.createdAt))
+        .limit(1),
+    );
     return row ? toTip(row) : null;
   } catch {
     return null;
