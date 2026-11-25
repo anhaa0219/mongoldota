@@ -1,4 +1,4 @@
-import { languages, type LanguageCode } from "../_hooks/use-language";
+import { languages, type LanguageCode } from "@/lib/i18n/use-language";
 
 interface LanguageOptionsProps {
   language: LanguageCode;

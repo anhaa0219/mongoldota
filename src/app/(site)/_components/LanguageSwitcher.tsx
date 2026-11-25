@@ -4,7 +4,7 @@ import { Languages } from "lucide-react";
 import { useRef, useState } from "react";
 import { useWords } from "@/lib/i18n/use-words";
 import { useDismiss } from "../_hooks/use-dismiss";
-import { useLanguage, type LanguageCode } from "../_hooks/use-language";
+import { useLanguage, type LanguageCode } from "@/lib/i18n/use-language";
 import { LanguageOptions } from "./LanguageOptions";
 
 /** Sidebar language picker (desktop). The phone header has the same choices in its "More" menu. */

@@ -5,7 +5,7 @@ import { Ellipsis, LogOut } from "lucide-react";
 import { useRef, useState } from "react";
 import { useWords } from "@/lib/i18n/use-words";
 import { useDismiss } from "../_hooks/use-dismiss";
-import { useLanguage, type LanguageCode } from "../_hooks/use-language";
+import { useLanguage, type LanguageCode } from "@/lib/i18n/use-language";
 import { LanguageOptions } from "./LanguageOptions";
 
 /** Phones only: the "⋯" button in the header row, holding what the hidden sidebar has (Language, Log out). */

@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 const nextConfig: NextConfig = {
   images: {
@@ -38,4 +39,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "kenshi-hh",
+  project: "mongoldota",
+  // Uploads source maps at build time so production stack traces stay readable. Without the token, uploads are skipped.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  // Only print source map upload logs in CI.
+  silent: !process.env.CI,
+});

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ChartColumn, Map, Swords } from "lucide-react";
 import { useWords } from "@/lib/i18n/use-words";
 import { site } from "@/lib/site-content";
+import { AuthLanguageToggle } from "./AuthLanguageToggle";
 
 /** Official dota2.com homepage montage, streamed from Valve's CDN (no extension). */
 const LIVE_WALLPAPER = "https://cdn.cloudflare.steamstatic.com/apps/dota2/videos/dota_react/homepage/dota_montage_02";
@@ -34,6 +35,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         <source src={`${LIVE_WALLPAPER}.mp4`} type="video/mp4" />
       </video>
       {/* Dark on both sides so copy and card read; lighter in the middle */}
+      <AuthLanguageToggle className="absolute right-4 top-4 z-10 sm:right-8 lg:right-[3rem] lg:top-[2.4rem]" />
       <div className="absolute inset-0 -z-10 bg-ink/75 lg:bg-transparent lg:bg-[linear-gradient(90deg,rgb(6_14_24/0.94)_0%,rgb(6_14_24/0.72)_30%,rgb(6_14_24/0.3)_50%,rgb(6_14_24/0.72)_70%,rgb(6_14_24/0.94)_100%)]" />
 
       <div className="flex w-full flex-col items-center justify-center gap-10 px-4 py-12 sm:px-8 lg:flex-row lg:justify-between lg:gap-12 lg:px-[6rem] lg:py-[4rem]">

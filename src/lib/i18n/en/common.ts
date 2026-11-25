@@ -10,4 +10,10 @@ export const common = {
     days: (count: number) => `${count} d ago`,
     months: (count: number) => `${count} mo ago`,
   },
+  /** The page shown when the whole site crashes (global-error). */
+  crash: {
+    title: "Something went wrong",
+    text: "The page could not load. We have been told about it.",
+    retry: "Try again",
+  },
 };

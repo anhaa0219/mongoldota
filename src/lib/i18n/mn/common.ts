@@ -12,4 +12,9 @@ export const common: Words["common"] = {
     days: (count) => `${count} өдрийн өмнө`,
     months: (count) => `${count} сарын өмнө`,
   },
+  crash: {
+    title: "Алдаа гарлаа",
+    text: "Хуудсыг ачаалж чадсангүй. Энэ талаар бидэнд мэдэгдсэн.",
+    retry: "Дахин оролдох",
+  },
 };

@@ -1,6 +1,7 @@
 /** Hugging Face client (server only): chat through the Inference Providers router. */
 
 import { z } from "zod";
+import { withChatSpan } from "@/lib/ai/ai-span";
 
 const ROUTER_URL = "https://router.huggingface.co/v1/chat/completions";
 /** Verified on this account's providers (Nov 2026). Qwen3-VL-8B had no enabled provider. */
@@ -34,11 +35,14 @@ interface ChatOptions {
   timeoutMs: number;
 }
 
-/** One chat request; never throws. */
-async function chat({ model, content, maxTokens, effort, timeoutMs }: ChatOptions): Promise<ModelResult> {
+/** One chat request, timed in Sentry; never throws. */
+function chat(options: ChatOptions): Promise<ModelResult> {
   const apiKey = process.env.HF_API_KEY;
-  if (!apiKey) return { ok: false, reason: "no-key", sent: false };
+  if (!apiKey) return Promise.resolve({ ok: false, reason: "no-key", sent: false });
+  return withChatSpan(options, () => send(options, apiKey));
+}
 
+async function send({ model, content, maxTokens, effort, timeoutMs }: ChatOptions, apiKey: string): Promise<ModelResult> {
   try {
     const response = await fetch(ROUTER_URL, {
       method: "POST",
