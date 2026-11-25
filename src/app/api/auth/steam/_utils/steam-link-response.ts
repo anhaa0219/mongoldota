@@ -1,12 +1,12 @@
 /** Saves a verified Steam ID to the signed-in Clerk account and sends the player home (server only). */
 
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE } from "@/lib/steam/steam-auth";
 import { saveSteamLink } from "@/lib/steam/steam-link-store";
 
 export async function linkSteamResponse(origin: string, steamId: string): Promise<NextResponse> {
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) return NextResponse.redirect(`${origin}/sign-in`);
   if (!(await saveSteamLink(userId, steamId))) return NextResponse.redirect(`${origin}/?login=failed`);
 

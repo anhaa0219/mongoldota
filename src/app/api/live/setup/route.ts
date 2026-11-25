@@ -1,6 +1,6 @@
 /** Live Coach "Download setup folder": a new GSI token, written into a zip the player drags into Dota's cfg folder. */
 
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { buildGsiConfig, SETUP_ZIP_NAME, setupZip } from "./_utils/gsi-config";
 import { getLinkedSteamId } from "@/lib/steam/linked-account";
 import { createGsiToken } from "@/lib/live/live-store";
@@ -11,7 +11,7 @@ const error = (message: string, status: number) => Response.json({ error: messag
 
 export async function POST(request: Request) {
   const say = (await getWords()).errors;
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) return error(say.signIn, 401);
 
   const steamId = await getLinkedSteamId();

@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { z } from "zod";
 import { adviceQuery, buildAdvicePrompt, parseAdvice } from "@/app/api/_utils/draft-advice";
 import { gatherAdviceFacts } from "@/app/api/_utils/draft-advice-facts";
@@ -32,7 +32,7 @@ function reply(body: AdviceResponse, status = 200) {
 export async function POST(request: Request) {
   const say = (await getWords()).errors;
   const failures = { "no-key": say.ai.noKey, "no-credits": say.ai.noCredits, failed: say.ai.failed };
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) return reply({ error: say.signIn }, 401);
 
   const input = requestSchema.safeParse(await request.json().catch(() => null));

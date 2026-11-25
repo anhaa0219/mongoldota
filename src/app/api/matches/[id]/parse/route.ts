@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { getLinkedAccountId } from "@/lib/steam/linked-account";
 import { parseMatchId } from "@/lib/matches/match-id";
 import { getMatchDetail, requestParse } from "@/lib/opendota/opendota-matches";
@@ -11,7 +11,7 @@ function error(message: string, status: number) {
 /** "Analyse with OpenDota": asks OpenDota to parse one of the linked player's own matches. */
 export async function POST(_request: Request, ctx: RouteContext<"/api/matches/[id]/parse">) {
   const say = (await getWords()).errors;
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) return error(say.signIn, 401);
 
   const matchId = parseMatchId((await ctx.params).id);

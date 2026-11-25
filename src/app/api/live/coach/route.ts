@@ -5,7 +5,7 @@
  * Every AI call goes through the player's limits first (see lib/ai/ai-gate).
  */
 
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { z } from "zod";
 import { getAiUsage } from "@/lib/ai/ai-calls-store";
 import { gatedAiCall, type GatedResult } from "@/lib/ai/ai-gate";
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   const say = (await getWords()).errors;
   const failures = { "no-key": say.ai.noKey, "no-credits": say.ai.noCredits, failed: say.ai.failed };
   const modelFailure: ModelFailure = (reason) => reply({ error: failures[reason] }, reason === "failed" ? 502 : 503);
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) return reply({ error: say.signIn }, 401);
 
   const input = requestSchema.safeParse(await request.json().catch(() => null));

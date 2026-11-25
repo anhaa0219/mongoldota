@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { z } from "zod";
 import { getHeroMatchups } from "@/lib/opendota/opendota-draft";
 import { getWords } from "@/lib/i18n/server";
@@ -12,7 +12,7 @@ function error(message: string, status: number) {
 /** Draft page: one enemy hero's matchups against every other hero (cached a day). */
 export async function GET(request: Request) {
   const say = (await getWords()).errors;
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) return error(say.signIn, 401);
 
   const heroId = heroIdSchema.safeParse(new URL(request.url).searchParams.get("hero"));

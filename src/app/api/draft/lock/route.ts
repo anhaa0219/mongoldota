@@ -1,6 +1,6 @@
 /** Draft page: saves the locked draft (side, hero, positions) so Live Coach can use it on any device. */
 
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { z } from "zod";
 import { saveLockedDraft } from "@/lib/live/live-tips-store";
 import { getWords } from "@/lib/i18n/server";
@@ -18,7 +18,7 @@ const reply = (body: object, status = 200) => Response.json(body, { status });
 
 export async function POST(request: Request) {
   const say = (await getWords()).errors;
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) return reply({ error: say.signIn }, 401);
 
   const input = lockedDraftSchema.safeParse(await request.json().catch(() => null));

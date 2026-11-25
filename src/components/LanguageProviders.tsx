@@ -1,5 +1,6 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { mnMN } from "@clerk/localizations";
+import { SentryUser } from "@/components/SentryUser";
 import { WordsProvider } from "@/components/WordsProvider";
 import { clerkAppearance } from "@/lib/clerk-appearance";
 import type { Language } from "@/lib/i18n/language";
@@ -17,6 +18,7 @@ export function LanguageProviders({ language, children }: { language: Language; 
       signUpUrl="/sign-up"
       afterSignOutUrl="/sign-in"
     >
+      <SentryUser />
       <WordsProvider language={language}>{children}</WordsProvider>
     </ClerkProvider>
   );

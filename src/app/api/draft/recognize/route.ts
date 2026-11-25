@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { buildDraftPrompt, parseDraftReply } from "./_utils/draft-recognition";
 import { countPicked } from "@/lib/draft/draft";
 import { gatedAiCall } from "@/lib/ai/ai-gate";
@@ -19,7 +19,7 @@ function reply(body: RecognizeResponse, status = 200) {
 export async function POST(request: Request) {
   const say = (await getWords()).errors;
   const failures = { "no-key": say.screenshotAi.noKey, "no-credits": say.screenshotAi.noCredits, failed: say.screenshotAi.failed };
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) return reply({ error: say.signIn }, 401);
 
   const form = await request.formData().catch(() => null);

@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getSignedInUserId } from "@/lib/sentry/sentry-user";
 import { redirect } from "next/navigation";
 
 /**
@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
  * component that calls OpenDota or writes to the database checks here first.
  */
 export async function requireUserId(): Promise<string> {
-  const { userId } = await auth();
+  const userId = await getSignedInUserId();
   if (!userId) redirect("/sign-in");
   return userId;
 }
