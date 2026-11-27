@@ -19,7 +19,6 @@ export const errors = {
   notInMatch: "You are not in this match.",
   openDotaUnreachable: "Could not reach OpenDota. Try again later.",
   parseFailed: "OpenDota could not start the analysis. Try again later.",
-  demoFailed: "Could not run the demo replay. Try again.",
   ai: {
     noKey: "Advice is not set up yet (HF_API_KEY is missing).",
     noCredits: "Hugging Face has no credits left for advice.",

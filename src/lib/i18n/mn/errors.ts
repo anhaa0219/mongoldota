@@ -21,7 +21,6 @@ export const errors: Words["errors"] = {
   notInMatch: "Та энэ тоглолтод оролцоогүй байна.",
   openDotaUnreachable: "OpenDota-д холбогдож чадсангүй. Дараа дахин оролдоно уу.",
   parseFailed: "OpenDota шинжилгээг эхлүүлж чадсангүй. Дараа дахин оролдоно уу.",
-  demoFailed: "Демо давталтыг ажиллуулж чадсангүй. Дахин оролдоно уу.",
   ai: {
     noKey: "Зөвлөгөө хараахан тохируулагдаагүй байна (HF_API_KEY алга).",
     noCredits: "Hugging Face-д зөвлөгөө өгөх кредит үлдсэнгүй.",

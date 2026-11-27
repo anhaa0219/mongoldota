@@ -6,16 +6,6 @@ export const live = {
   /** Written by the coach route into the stored tip, in the player's language at that moment. */
   /** `late`: the optional late-game items, or null when the plan has none. */
   itemPlan: (core: string, late: string | null) => `Item plan: ${core}${late ? `. Late game, depending on the game: ${late}` : ""}`,
-  demo: {
-    label: "Demo replay",
-    notStarted: "Not started",
-    play: "Play",
-    fast: "2× to 32:00",
-    pause: "Pause",
-    stop: "Stop",
-    reset: "Reset to 0:00",
-    failed: "Could not update the demo replay. Try again.",
-  },
   coach: {
     title: "Coach",
     ask: "Ask coach now",

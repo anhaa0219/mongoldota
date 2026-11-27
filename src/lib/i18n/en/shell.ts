@@ -37,10 +37,5 @@ export const shell = {
     welcome: "Welcome to",
     tagline: "Dota 2 match analysis: your stats, hero picks and lane predictions.",
     features: ["Your stats from every match", "Hero picks that fit your role", "Lane predictions before the horn"],
-    demo: {
-      button: "Demo login",
-      busy: "Signing in…",
-      failed: "Could not sign in to the demo account. Try again.",
-    },
   },
 };

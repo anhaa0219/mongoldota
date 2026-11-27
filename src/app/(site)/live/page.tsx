@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { DemoControls } from "./_features/DemoControls";
 import { LiveCoach } from "./_features/LiveCoach";
 import { PageBackdrop } from "@/app/(site)/_components/PageBackdrop";
 import { PlayerDataNotice } from "@/app/(site)/_components/PlayerDataNotice";
 import { getAiUsage } from "@/lib/ai/ai-calls-store";
-import { getDemoState } from "@/lib/live/demo-replay";
-import { getLinkedAccountId, getLinkedSteamId } from "@/lib/steam/linked-account";
+import { getLinkedSteamId } from "@/lib/steam/linked-account";
 import { freshDraft } from "@/lib/live/live-freshness";
 import { getLiveRow, hasGsiToken } from "@/lib/live/live-store";
 import { getLockedDraft, getPlanTip, getTips } from "@/lib/live/live-tips-store";
@@ -35,11 +33,8 @@ async function LiveLoader() {
   // eslint-disable-next-line react-hooks/purity -- request-time Server Component (after connection())
   const now = Date.now();
   const draft = freshDraft(locked, now);
-  // Demo day: the player of the demo match gets replay buttons above the coach.
-  const accountId = await getLinkedAccountId();
-  const demo = accountId ? await getDemoState(Number(accountId), row?.snapshot) : null;
 
-  const coach = (
+  return (
     <LiveCoach
       clerkUserId={userId}
       initialFeed={{ snapshot: row?.snapshot ?? null, updatedAt: row ? row.updatedAt.getTime() : null }}
@@ -52,13 +47,6 @@ async function LiveLoader() {
       heroes={heroes.map(({ id, name, slug, roles }) => ({ id, name, slug, roles }))}
       items={items}
     />
-  );
-  if (!demo) return coach;
-  return (
-    <>
-      <DemoControls duration={demo.duration} initialClock={demo.clockSeconds} />
-      {coach}
-    </>
   );
 }
 
