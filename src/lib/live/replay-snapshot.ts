@@ -80,7 +80,8 @@ export function replaySnapshot(replay: Replay, second: number): LiveSnapshot {
     assists: countUntil(player.assists_log, second),
     lastHits: Math.floor(at(player.lh_t)),
     denies: Math.floor(at(player.dn_t)),
-    gold: Math.max(0, Math.round(goldBeforeOffset(player, replay.purchases, items, second) + replay.goldOffset)),
+    // The missing gold builds up over the game, so early gold stays close to the real amount.
+    gold: Math.max(0, Math.round(goldBeforeOffset(player, replay.purchases, items, second) + replay.goldOffset * Math.max(0, second / match.duration))),
     gpm: Math.round(at(player.gold_t) / minutes),
     xpm: Math.round(at(player.xp_t) / minutes),
     inventory: inventoryOf(owned, items),
